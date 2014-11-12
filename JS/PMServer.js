@@ -70,6 +70,8 @@ var PMServer = (function (_CONSTS, _PMError, _PMData) {
         continue;
       }
 
+      // TODO FIX THIS ERROR SHOULD BE USING ROUTES INSTEAD OF POSTMESSAGE
+      //_fnRoutes(_PMData.create(_CONSTS.REQUEST.POST_MESSAGE_CLIENT, __oPMData.sender, sRecipient, __oPMData.message, __oPMData.receipt));
       _fnPostMessageToClient(_PMData.create(__oPMData.request, __oPMData.sender, sRecipient, __oPMData.message, __oPMData.receipt));
     }
 

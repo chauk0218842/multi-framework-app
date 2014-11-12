@@ -30,12 +30,12 @@
 
         if (_oPMData.request === PMConstants.REQUEST.POST_MESSAGE_CLIENTS ||
                 _oPMData.request === PMConstants.REQUEST.POST_MESSAGE_CLIENT) {
-            $("#messages").val(("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, _oPMData.sender).replace (/%REQUEST%/g, _oPMData.request).replace(/%MESSAGE%/g, _oPMData.message) + "\n--\n" + $("#messages").val());
+            $("#response").val(("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, _oPMData.sender).replace (/%REQUEST%/g, _oPMData.request).replace(/%MESSAGE%/g, _oPMData.message) + "\n--\n" + $("#response").val());
         }
 
         else if (_oPMData.request === PMConstants.REQUEST.GET_CLIENTS) {
 
-            $("#messages").val(("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, _oPMData.sender).replace (/%REQUEST%/g, _oPMData.request).replace(/%MESSAGE%/g, _oPMData.message) + "\n--\n" + $("#messages").val());
+            $("#response").val(("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, _oPMData.sender).replace (/%REQUEST%/g, _oPMData.request).replace(/%MESSAGE%/g, _oPMData.message) + "\n--\n" + $("#response").val());
             var oRecipients = _oPMData.message;
             $("#recipient").empty();
             $("#recipient").append("<option value = \"" + PMConstants.RECIPIENT.ALL + "\">ALL</option>");
@@ -66,11 +66,14 @@
 
 <h3 id="iframeName"></h3>
 
-<textarea id="messages"></textarea>
+<textarea id="response"></textarea>
 
 <p>Recipient <select id="recipient"></select>
     <button id="refresh">Refresh</button>
-    <br/>Message <input id="message" value="Your message here" size="30"/>
+</p>
+<p>
+    Message
+    <br/><textarea id = "message">Your message here</textarea>
     <button id="sendMessage">Send</button>
 </p>
 

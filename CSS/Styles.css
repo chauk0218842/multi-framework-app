@@ -6,8 +6,9 @@ body {
 iframe {
     border: 1px solid #AAA;
     margin: 5px;
+    padding: 5px;
     width: 300px;
-    height: 250px;
+    height: 370px;
     overflow-x: hidden;
     overflow-y: hidden;
 }
@@ -15,6 +16,11 @@ iframe {
 textarea {
     border: 1px solid #AAA;
     width: 275px;
-    height: 150px;
+}
 
+#response {
+    height: 150px;
+}
+#message {
+    height: 100px;
 }
