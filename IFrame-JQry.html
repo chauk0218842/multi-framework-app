@@ -7,68 +7,72 @@
 </head>
 <body>
 
-    <script src="bower_components/jquery/dist/jquery.js"></script>
-    <script src="JS/PMConstants.js"></script>
-    <script src="JS/PMError.js"></script>
-    <script src="JS/PMData.js"></script>
-    <script src="JS/PMClient.js"></script>
-    <script>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="JS/PMConstants.js"></script>
+<script src="JS/PMError.js"></script>
+<script src="JS/PMData.js"></script>
+<script src="JS/PMClient.js"></script>
+<script>
 
-        function fnDocumentOnReady () {
+    function fnDocumentOnReady() {
 
-            PMClient.connect ();
+        PMClient.connect();
 
-            $("#refresh").bind ("click", fnRefresh);
-            $("#iframeName").text (PMClient.getClientID());
-            $("#sendMessage").bind ("click", fnSendMessage);
+        $("#refresh").bind("click", fnRefresh);
+        $("#iframeName").text(PMClient.getClientID());
+        $("#sendMessage").bind("click", fnSendMessage);
 
-        }
+    }
 
-        function fnDocumentOnMessage (_oEvent) {
+    function fnDocumentOnMessage(_oEvent) {
 
-            var _oPMData = PMClient.listen (_oEvent);
+        var _oPMData = PMClient.listen(_oEvent);
 
-            if (_oPMData.request === PMConstants.REQUEST.POST_MESSAGE_CLIENTS ||
+        if (_oPMData.request === PMConstants.REQUEST.POST_MESSAGE_CLIENTS ||
                 _oPMData.request === PMConstants.REQUEST.POST_MESSAGE_CLIENT) {
-                $("#messages").val (("%CLIENT%: Received message from server - %MESSAGE%").replace (/%CLIENT%/g, PMClient.getClientID ()).replace (/%MESSAGE%/g, _oPMData.message) + "\n\n" + $("#messages").val ());
+            $("#messages").val(("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, _oPMData.sender).replace (/%REQUEST%/g, _oPMData.request).replace(/%MESSAGE%/g, _oPMData.message) + "\n--\n" + $("#messages").val());
+        }
+
+        else if (_oPMData.request === PMConstants.REQUEST.GET_CLIENTS) {
+
+            $("#messages").val(("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, _oPMData.sender).replace (/%REQUEST%/g, _oPMData.request).replace(/%MESSAGE%/g, _oPMData.message) + "\n--\n" + $("#messages").val());
+            var oRecipients = _oPMData.message;
+            $("#recipient").empty();
+            $("#recipient").append("<option value = \"" + PMConstants.RECIPIENT.ALL + "\">ALL</option>");
+
+            for (var n in oRecipients) {
+                $("#recipient").append("<option value = \"" + oRecipients [n] + "\">" + oRecipients [n] + "</option>");
             }
 
-            else if (_oPMData.request === PMConstants.REQUEST.GET_CLIENTS) {
-
-                var oRecipients = _oPMData.message;
-                $("#recipient").empty ();
-                $("#recipient").append ("<option value = \"" + PMConstants.RECIPIENT.ALL + "\">ALL</option>");
-
-                for (var n in oRecipients) {
-                    $("#recipient").append ("<option value = \"" + oRecipients [n] + "\">" + oRecipients [n] + "</option>");
-                }
-
-            }
         }
+    }
 
-        function fnRefresh () {
-            PMClient.send (PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
-        }
+    function fnRefresh() {
+        PMClient.send(PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
+    }
 
-        function fnSendMessage () {
-            var _sRecipient = $("#recipient").val ();
-            var _sMessage = $("#message").val ();
-            PMClient.send (_sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, _sRecipient, _sMessage, false);
-        }
+    function fnSendMessage() {
+        var _sRecipient = $("#recipient").val();
+        var _sMessage = $("#message").val();
+        PMClient.send(_sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, _sRecipient, _sMessage, false);
+    }
 
-        window.addEventListener("message", fnDocumentOnMessage, false);
-        window.addEventListener("onunload", PMClient.disconnect, false);
+    window.addEventListener("message", fnDocumentOnMessage, false);
+    window.addEventListener("onunload", PMClient.disconnect, false);
 
-        $("document").ready (fnDocumentOnReady);
+    $("document").ready(fnDocumentOnReady);
 
-    </script>
+</script>
 
-    <h3 id = "iframeName"></h3>
+<h3 id="iframeName"></h3>
 
-    <textarea id = "messages"></textarea>
-    <p>Recipient <select id = "recipient"></select> <button id = "refresh">Refresh</button>
-        <br />Message <input id = "message" value = "Your message here" size = "30"/><button id = "sendMessage">Send</button>
-    </p>
+<textarea id="messages"></textarea>
+
+<p>Recipient <select id="recipient"></select>
+    <button id="refresh">Refresh</button>
+    <br/>Message <input id="message" value="Your message here" size="30"/>
+    <button id="sendMessage">Send</button>
+</p>
 
 
 </body>

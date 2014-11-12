@@ -5,40 +5,40 @@ var PMServer = (function (_CONSTS, _PMError, _PMData) {
   var _oClientHASH = {};
   var _aClientCollection = [];
 
-  function _fnGetClientsAsCollection () {
+  function _fnGetClientsAsCollection() {
     var __aCollection = [];
     for (var sHASH in _oClientHASH) {
-      __aCollection.push (_oClientHASH[sHASH]);
+      __aCollection.push(_oClientHASH[sHASH]);
     }
 
     return __aCollection;
   }
 
-  function _fnCreateHASH (__oVal) {
-    return window.btoa (__oVal);
+  function _fnCreateHASH(__oVal) {
+    return window.btoa(__oVal);
   }
 
-  function _fnConnectClient (__oPMData) {
-    var sHASH = _fnCreateHASH (__oPMData.sender);
+  function _fnConnectClient(__oPMData) {
+    var sHASH = _fnCreateHASH(__oPMData.sender);
     _oClientHASH [sHASH] = __oPMData.sender;
-    _aClientCollection.push (_oClientHASH [sHASH]);
+    _aClientCollection.push(_oClientHASH [sHASH]);
   }
 
-  function _fnDisconnectClient (__oPMData) {
-    var sHASH = _fnCreateHASH (__oPMData.sender);
+  function _fnDisconnectClient(__oPMData) {
+    var sHASH = _fnCreateHASH(__oPMData.sender);
     _oClientHASH [sHASH] = null;
   }
 
-  function _fnPostMessageToClient (__oPMData) {
+  function _fnPostMessageToClient(__oPMData) {
     var __oIFrame = document.getElementById(__oPMData.recipient);
     if (!__oIFrame) {
-      throw PMError ("IFrame does not exist");
+      throw PMError("IFrame does not exist");
     }
     __oIFrame.contentWindow.postMessage(_PMData.serialize(__oPMData), _CONSTS.DOMAIN);
 
   }
 
-  function _fnGetClients (__sExcludeClient) {
+  function _fnGetClients(__sExcludeClient) {
 
     var __aCollection = [];
 
@@ -51,15 +51,15 @@ var PMServer = (function (_CONSTS, _PMError, _PMData) {
         continue;
       }
 
-      __aCollection.push (_oClientHASH[sHASH]);
+      __aCollection.push(_oClientHASH[sHASH]);
     }
 
     return __aCollection;
   }
 
-  function _fnPostMessageToClients (__oPMData) {
+  function _fnPostMessageToClients(__oPMData) {
 
-    var __aClientCollection = _fnGetClientsAsCollection ();
+    var __aClientCollection = _fnGetClientsAsCollection();
     for (var n = 0, nLen = __aClientCollection.length; n < nLen; n++) {
 
       var sRecipient = _aClientCollection [n];
@@ -70,55 +70,64 @@ var PMServer = (function (_CONSTS, _PMError, _PMData) {
         continue;
       }
 
-      _fnPostMessageToClient (_PMData.create (__oPMData.request, __oPMData.sender, sRecipient, __oPMData.message, __oPMData.receipt));
+      _fnPostMessageToClient(_PMData.create(__oPMData.request, __oPMData.sender, sRecipient, __oPMData.message, __oPMData.receipt));
     }
 
   }
 
-  function _fnRoutes (__oPMData) {
+  function _fnRoutes(__oPMData) {
 
     if (__oPMData.request === _CONSTS.REQUEST.GET_CONNECT_CLIENT) {
+
       _fnConnectClient(__oPMData);
-      console.log (("SERVER: Client connected to server '%SENDER%'").replace (/%SENDER%/g, __oPMData.sender));
+      console.log(("SERVER: Client connected to server '%SENDER%'").replace(/%SENDER%/g, __oPMData.sender));
+
+      _fnRoutes (_PMData.create (_CONSTS.REQUEST.POST_MESSAGE_CLIENT, _CONSTS.RECIPIENT.SERVER, __oPMData.sender, "Connected to server", false));
 
       /**
        * Update clients with a new client list
        */
-      _fnPostMessageToClients (_PMData.create (_CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, _CONSTS.RECIPIENT.ALL, _fnGetClients (), false));
+      _fnPostMessageToClients(_PMData.create(_CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, _CONSTS.RECIPIENT.ALL, _fnGetClients(), false));
 
     }
 
     else if (__oPMData.request === _CONSTS.REQUEST.GET_DISCONNECT_CLIENT) {
       _fnDisconnectClient(__oPMData);
-      console.log (("SERVER: Client disconnected from server '%SENDER%'").replace (/%SENDER%/g, __oPMData.sender));
+      console.log(("SERVER: Client disconnected from server '%SENDER%'").replace(/%SENDER%/g, __oPMData.sender));
+
+      /**
+       * Update clients with a new client list
+       */
+      _fnPostMessageToClients(_PMData.create(_CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, _CONSTS.RECIPIENT.ALL, _fnGetClients(), false));
+
     }
 
     else if (__oPMData.request === _CONSTS.REQUEST.GET_CLIENTS) {
-      _fnPostMessageToClient (_PMData.create (_CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, __oPMData.sender, _fnGetClients (__oPMData.sender), false));
-      console.log (("SERVER: Responding with list of clients to '%SENDER%'").replace (/%SENDER%/g, __oPMData.sender));
+      _fnPostMessageToClient(_PMData.create(_CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, __oPMData.sender, _fnGetClients(__oPMData.sender), false));
+      console.log(("SERVER: Responding with list of clients to '%SENDER%'").replace(/%SENDER%/g, __oPMData.sender));
     }
 
     else if (__oPMData.request === _CONSTS.REQUEST.POST_MESSAGE_CLIENT) {
       _fnPostMessageToClient(__oPMData);
-      console.log (("SERVER: Forwarded message from '%SENDER%' to '%RECIPIENT%'").replace (/%SENDER%/g, __oPMData.sender).replace (/%RECIPIENT%/g, __oPMData.recipient));
+      console.log(("SERVER: Forwarded message from '%SENDER%' to '%RECIPIENT%'").replace(/%SENDER%/g, __oPMData.sender).replace(/%RECIPIENT%/g, __oPMData.recipient));
     }
     else if (__oPMData.request === _CONSTS.REQUEST.POST_MESSAGE_CLIENTS) {
       _fnPostMessageToClients(__oPMData);
-      console.log (("SERVER: Forwarded message from '%SENDER%' to all clients").replace (/%SENDER%/g, __oPMData.sender));
+      console.log(("SERVER: Forwarded message from '%SENDER%' to all clients").replace(/%SENDER%/g, __oPMData.sender));
     }
   }
 
-  function _fnListen (__oEvent) {
+  function _fnListen(__oEvent) {
     var __oOrigin = __oEvent.origin;
     var __oPMData = _PMData.deserialize(__oEvent.data);
 
-    _fnRoutes (__oPMData);
+    _fnRoutes(__oPMData);
 
   }
 
   return {
-    listen : _fnListen
+    listen: _fnListen
   };
 
-}) (PMConstants, PMError, PMData);
+})(PMConstants, PMError, PMData);
 

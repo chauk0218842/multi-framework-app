@@ -40,7 +40,7 @@ var PMClient = (function (_CONSTS, _PMError, _PMData) {
 
   function _fnSendMessageToServer (__sRequest, __sRecipientID, __oMessage, __bReceipt) {
     if (!_bIsConnectedToServer) {
-      throw _PMError ("Not connected to server")
+      throw _PMError ("Not connected to server");
     }
     _fnPostMessageToServer(_PMData.create (__sRequest, _fnGetClientID (), __sRecipientID, __oMessage, __bReceipt));
   }
