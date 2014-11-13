@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>IFrame JQuery 2.1.1 Client</title>
+    <link rel="stylesheet" href="CSS/Styles.css">
+</head>
+<body>
+
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="JS/PMConstants.js"></script>
+<script src="JS/PMError.js"></script>
+<script src="JS/PMData.js"></script>
+<script src="JS/PMClient.js"></script>
+<script>
+
+    function DeferHandler (_$) {
+
+        var _oHASH = {};
+
+        return {
+            get : function (__sKey) {
+                return _oHASH [__sKey];
+            },
+
+            set : function (__sKey) {
+                _oHASH [__sKey] = _$.Deferred ();
+                return _oHASH [__sKey];
+            },
+
+            remove : function (__sKey) {
+                _oHASH [__sKey] = null;
+            }
+        };
+
+    }
+
+    function PMCLib (_WINDOW, _$, _DeferHandler) {
+
+        var _oMessages = [];
+
+        /**
+         *  Append a listener first before connecting
+         */
+        window.addEventListener ("message", function (__oEvent) {
+
+            var __oPMData = PMClient.listen(__oEvent);
+
+            _oMessages.push (__oPMData.message);
+
+            var __sResponse = ("%SENDER% (%REQUEST%) > %MESSAGE%")
+                .replace(/%SENDER%/g, __oPMData.sender)
+                .replace (/%REQUEST%/g, __oPMData.request)
+                .replace(/%MESSAGE%/g, __oPMData.message);
+
+            _$ ("#response").val (__sResponse + "\n--\n" + _$("#response").val ());
+
+            /**
+             * Response made from this client only
+             */
+            if (_DeferHandler.get (__oPMData.id)) {
+                _DeferHandler.get (__oPMData.id).resolve (__oPMData);
+            }
+
+        });
+
+        window.addEventListener ("unload", function () {
+            window.removeEventListener ("message");
+        });
+
+        function _fnConnect () {
+            var __sMessageID = PMClient.connect ();
+            return _DeferHandler.set (__sMessageID).then (function (__oPMData) {
+                return __oPMData.message;
+            });
+        }
+
+        function _fnSendMessage (__sRecipient, __oMessage) {
+            var __sMessageID = PMClient.send(__sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, __sRecipient, __oMessage, false);
+            return _DeferHandler.set (__sMessageID).then (function (__oPMData) {
+                return __oPMData.message;
+            });
+        }
+
+        function _fnGetContacts () {
+
+            var __sMessageID = PMClient.send(PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
+            return _DeferHandler.set (__sMessageID).then (function (__oPMData) {
+                return __oPMData.message;
+            });
+        }
+
+        function _fnGetMessages () {
+            return _oMessages;
+        }
+
+        /**
+         * Connect to the PMServer
+         */
+        _DeferHandler.set (PMClient.connect());
+
+        return {
+
+            connect : _fnConnect,
+
+            getClientName: PMClient.getClientID,
+
+            getContacts : _fnGetContacts,
+
+            getMessages : _oMessages,
+
+            status : PMClient.status,
+
+            send : _fnSendMessage
+
+        };
+
+    }
+
+    $("document").ready(function () {
+
+        var _DeferHandler  = DeferHandler ($);
+        var _PMCLib = PMCLib (window, $, _DeferHandler);
+
+        $("#clientName").text(_PMCLib.getClientName());
+
+        $("#response").val ();
+
+
+        _PMCLib.getContacts().then(function (_oContacts) {
+
+            $("#contacts").empty();
+            for (var n in _oContacts) {
+                $("#contacts").append("<option value = \"" + _oContacts [n] + "\">" + _oContacts [n] + "</option>");
+            }
+
+            $("#contacts").index (0);
+        });
+
+        $("#refresh").bind("click", function () {
+
+            _PMCLib.getContacts().then(function (_oContacts) {
+
+                $("#contacts").empty();
+                for (var n in _oContacts) {
+                    $("#contacts").append("<option value = \"" + _oContacts [n] + "\">" + _oContacts [n] + "</option>");
+                }
+            });
+
+        });
+
+        $("#send").bind("click", function () {
+            _PMCLib.send ($("#contacts").val (), $("#message").val());
+        });
+
+    });
+
+</script>
+
+<h3><span id="clientName"></span> (Powered by JQuery 2.1.1)</h3>
+
+<textarea id="response" class = "response"></textarea>
+
+<p>
+    Contacts <select id="contacts"></select>
+    <button id="refresh">Refresh</button>
+</p>
+<p>
+    Message
+    <br/><textarea id = "message" class = "message">Your message here</textarea>
+    <button id="send">Send</button>
+</p>
+
+
+</body>
+</html>

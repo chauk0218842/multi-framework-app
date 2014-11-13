@@ -15,62 +15,93 @@
 <script>
 
     angular.module ("PMClient", [])
-        .factory ("PMCLib", function ($window) {
-        
-            var _oContacts = [];
-            var _oLastMessage = "";
-            var _oHistory = [];
+        .factory ("DeferHandler", function ($q) {
+            var _oHASH = {};
+
+            return {
+                get : function (__sKey) {
+                    return _oHASH [__sKey];
+                },
+
+                set : function (__sKey) {
+                    _oHASH [__sKey] = $q.defer ();
+                    return _oHASH [__sKey];
+                },
+
+                remove : function (__sKey) {
+                    _oHASH [__sKey] = null;
+                }
+            };
+        })
+        .factory ("PMCLib", function ($window, DeferHandler) {
+
+            var _oMessages = [];
 
             /**
              *  Append a listener first before connecting
              */
             angular.element($window).on ("message", function (__oEvent) {
-
-                debugger;
                 var __oPMData = PMClient.listen(__oEvent);
 
-                if (__oPMData.request === PMConstants.REQUEST.GET_CLIENTS) {
-                    _oContacts = __oPMData.message;
-                }
+                _oMessages.push (__oPMData.message);
 
-                else {
-                    _oLastMessage = ("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, __oPMData.sender).replace (/%REQUEST%/g, __oPMData.request).replace(/%MESSAGE%/g, __oPMData.message);
+                /**
+                 * Response made from this client only
+                 */
+                if (DeferHandler.get (__oPMData.id)) {
+                    DeferHandler.get (__oPMData.id).resolve (__oPMData);
                 }
-                _oHistory.push ({ time : new Date (), message : __oPMData.message });
-
             });
 
-            /**
-             * Remove the message listener on close of this window
-             * //$window.removeEventListener ("message");
-             */
+            angular.element ($window).on ("unload", function () {
+                $window.removeEventListener ("message");
+            })
+
+            function _fnConnect () {
+                var __sMessageID = PMClient.connect ();
+                return DeferHandler.set (__sMessageID).promise.then (function (__oPMData) {
+                    return __oPMData.message;
+                });
+            }
+
+            function _fnSendMessage (__sRecipient, __oMessage) {
+                var __sMessageID = PMClient.send(__sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, __sRecipient, __oMessage, false);
+                return DeferHandler.set (__sMessageID).promise.then (function (__oPMData) {
+                    return __oPMData.message;
+                });
+            }
+
+            function _fnGetContacts () {
+
+                var __sMessageID = PMClient.send(PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
+                return DeferHandler.set (__sMessageID).promise.then (function (__oPMData) {
+                    return __oPMData.message;
+                });
+            }
+
+            function _fnGetMessages () {
+                return _oMessages;
+            }
 
             /**
              * Connect to the PMServer
              */
-            PMClient.connect();
+            DeferHandler.set (PMClient.connect());
 
             return {
 
-                getClientName: function () {
-                    return PMClient.getClientID ();
-                },
+                connect : _fnConnect,
 
-                getContacts : function () {
-                    return _oContacts;
-                },
+                getClientName: PMClient.getClientID,
 
-                status : function () {
-                    return PMClient.status ();
-                },
+                getContacts : _fnGetContacts,
 
-                sendMessage : function (_sRecipient, _oMessage) {
-                    PMClient.send(_sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, _sRecipient, _oMessage, false);
-                },
+                getMessages : _oMessages,
 
-                getMessage : function () {
-                    return _oLastMessage;
-                }
+                status : PMClient.status,
+
+                send : _fnSendMessage
+
             };
         })
 
@@ -86,27 +117,40 @@
                 controller : function ($scope) {
 
                     var _VM = $scope;
-                    _VM.response = PMCLib.getMessage ()
+                    _VM.response = "";
+
+
+
+                    $scope.$watch (function () { return PMCLib.getMessages }, function (_oMessages) {
+                        _VM.response = _oMessages;
+                    });
+
                 },
                 template : '<textarea ng-model = "response" class = "response"></textarea>'
             };
         })
-        .directive ("pmcRecipients", function (PMCLib) {
+        .directive ("pmcContacts", function (PMCLib) {
             return {
                 restrict :  "E",
                 controller : function ($scope) {
 
                     var _VM = $scope;
+                    _VM.contacts = "";
+                    _VM.recipient = "";
 
-                    _VM.contacts = PMCLib.getContacts ();
-                    _VM.recipient = _VM.contacts [0];
+                    PMCLib.getContacts ().then (function (_oContacts) {
+                        _VM.contacts = _oContacts;
+                        _VM.recipient = _VM.contacts [0];
+                    })
+
                     _VM.refreshContacts = function () {
-                        debugger;
-                        _VM.contacts = PMCLib.getContacts ();
+                        PMCLib.getContacts ().then (function (_oContacts) {
+                            _VM.contacts = _oContacts;
+                        });
                     };
 
                 },
-                template : "Recipients " +
+                template : "Contacts " +
                     '<select ng-model = "recipient"><option ng-repeat="contact in contacts" value="{{contact}}">{{contact}}</option></select>' + ' ' +
                     '<button ng-click = "refreshContacts()">Refresh</button>'
             };
@@ -117,14 +161,15 @@
                 controller : function ($scope) {
 
                     var _VM = $scope;
+                    _VM.message = "Your message here...";
                     _VM.sendMessage = function () {
-                        _VM.sendMessage ($scope.recipient, $scope.message);
+                        PMCLib.send ($scope.recipient, $scope.message)
                     };
 
                 },
                 template : 'Message' +
                     '<br/><textarea ng-model = "message" class = "message">Your message here</textarea>' +
-                    '<button ng-click = "sendMessage">Send</button>'
+                    '<button ng-click = "sendMessage ()">Send</button>'
             };
         })
 
@@ -132,9 +177,11 @@
 
 <h3>{{clientName}} (Powered by Angular 1.3)</h3>
 
+<pmc-connect></pmc-connect>
+
 <pmc-response></pmc-response>
 <p>
-    <pmc-recipients></pmc-recipients>
+    <pmc-contacts></pmc-contacts>
 </p>
 <p>
     <pmc-message></pmc-message>

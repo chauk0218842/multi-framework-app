@@ -84,28 +84,17 @@ var PMServer = (function (_CONSTS, _PMError, _PMData) {
       _fnConnectClient(__oPMData);
       console.log(("SERVER: Client connected to server '%SENDER%'").replace(/%SENDER%/g, __oPMData.sender));
 
-      _fnRoutes (_PMData.create (_CONSTS.REQUEST.POST_MESSAGE_CLIENT, _CONSTS.RECIPIENT.SERVER, __oPMData.sender, "Connected to server", false));
-
-      /**
-       * Update clients with a new client list
-       */
-      _fnPostMessageToClients(_PMData.create(_CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, _CONSTS.RECIPIENT.ALL, _fnGetClients(), false));
+      _fnRoutes (_PMData.convert (__oPMData.id, _CONSTS.REQUEST.POST_MESSAGE_CLIENT, _CONSTS.RECIPIENT.SERVER, __oPMData.sender, "Connected to server", false));
 
     }
 
     else if (__oPMData.request === _CONSTS.REQUEST.GET_DISCONNECT_CLIENT) {
       _fnDisconnectClient(__oPMData);
       console.log(("SERVER: Client disconnected from server '%SENDER%'").replace(/%SENDER%/g, __oPMData.sender));
-
-      /**
-       * Update clients with a new client list
-       */
-      _fnPostMessageToClients(_PMData.create(_CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, _CONSTS.RECIPIENT.ALL, _fnGetClients(), false));
-
     }
 
     else if (__oPMData.request === _CONSTS.REQUEST.GET_CLIENTS) {
-      _fnPostMessageToClient(_PMData.create(_CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, __oPMData.sender, _fnGetClients(__oPMData.sender), false));
+      _fnPostMessageToClient(_PMData.convert (__oPMData.id, _CONSTS.REQUEST.GET_CLIENTS, _CONSTS.RECIPIENT.SERVER, __oPMData.sender, _fnGetClients(__oPMData.sender), false));
       console.log(("SERVER: Responding with list of clients to '%SENDER%'").replace(/%SENDER%/g, __oPMData.sender));
     }
 

@@ -6,6 +6,8 @@ var PMClient = (function (_CONSTS, _PMError, _PMData) {
   var _aParams = _sParams.split("&");
   var _sClientID = _aParams [0].replace(/^id=/g, "");
   var _bIsConnectedToServer = false;
+  var _nMessageID = 0;
+
 
   function _fnGetClientID () {
     return _sClientID;
@@ -16,17 +18,22 @@ var PMClient = (function (_CONSTS, _PMError, _PMData) {
   }
 
   function _fnConnectToServer () {
-    _fnPostMessageToServer(_PMData.create (_CONSTS.REQUEST.GET_CONNECT_CLIENT, _fnGetClientID (), _CONSTS.RECIPIENT.SERVER, null, false));
+    var __oPMData = _PMData.create (_CONSTS.REQUEST.GET_CONNECT_CLIENT, _fnGetClientID (), _CONSTS.RECIPIENT.SERVER, null, false);
+    _fnPostMessageToServer(__oPMData);
     _bIsConnectedToServer = true;
+
+    return __oPMData.id;
   }
 
   function _fnDisconnectFromServer () {
-    _fnPostMessageToServer(_PMData.create (_CONSTS.REQUEST.GET_DISCONNECT_CLIENT, _fnGetClientID (), _CONSTS.RECIPIENT.SERVER, null, false));
+    var __oPMData = _PMData.create (_CONSTS.REQUEST.GET_DISCONNECT_CLIENT, _fnGetClientID (), _CONSTS.RECIPIENT.SERVER, null, false);
+    _fnPostMessageToServer(__oPMData);
     _bIsConnectedToServer = false;
+
+    return __oPMData.id;
   }
 
   function _fnConnectionStatus () {
-    debugger;
     return _bIsConnectedToServer ? _CONSTS.STATUS.CONNECTED_TO_SERVER : _CONSTS.STATUS.DISCONNECTED_FROM_SERVER;
   }
 
@@ -47,20 +54,11 @@ var PMClient = (function (_CONSTS, _PMError, _PMData) {
     if (!_bIsConnectedToServer) {
       throw _PMError ("Not connected to server");
     }
-    _fnPostMessageToServer(_PMData.create (__sRequest, _fnGetClientID (), __sRecipientID, __oMessage, __bReceipt));
-  }
 
-  var _oHistory = [];
+    var __oPMData = _PMData.create (__sRequest, _fnGetClientID (), __sRecipientID, __oMessage, __bReceipt)
+    _fnPostMessageToServer(__oPMData);
 
-  function _fnConnect2 () {
-    window.addEventListener("message", function (__oEvent) {
-      _oHistory.push (_fnListenToServer (__oEvent));
-    });
-    _fnConnectToServer();
-  }
-
-  function _fnGetHistory () {
-    return _oHistory;
+    return __oPMData.id;
   }
 
   return {
