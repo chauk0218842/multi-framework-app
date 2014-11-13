@@ -2,80 +2,144 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>IFrame JQuery Client</title>
+    <title>IFrame Angular 1.3 Client</title>
     <link rel="stylesheet" href="CSS/Styles.css">
 </head>
-<body>
+<body ng-app = "PMClient" ng-controller = "PMCCtrl">
 
-<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/angular/angular.js"></script>
 <script src="JS/PMConstants.js"></script>
 <script src="JS/PMError.js"></script>
 <script src="JS/PMData.js"></script>
 <script src="JS/PMClient.js"></script>
 <script>
 
-    function fnDocumentOnReady() {
+    angular.module ("PMClient", [])
+        .factory ("PMCLib", function ($window) {
+        
+            var _oContacts = [];
+            var _oLastMessage = "";
+            var _oHistory = [];
 
-        PMClient.connect();
+            /**
+             *  Append a listener first before connecting
+             */
+            angular.element($window).on ("message", function (__oEvent) {
 
-        $("#refresh").bind("click", fnRefresh);
-        $("#iframeName").text(PMClient.getClientID());
-        $("#sendMessage").bind("click", fnSendMessage);
+                debugger;
+                var __oPMData = PMClient.listen(__oEvent);
 
-    }
+                if (__oPMData.request === PMConstants.REQUEST.GET_CLIENTS) {
+                    _oContacts = __oPMData.message;
+                }
 
-    function fnDocumentOnMessage(_oEvent) {
+                else {
+                    _oLastMessage = ("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, __oPMData.sender).replace (/%REQUEST%/g, __oPMData.request).replace(/%MESSAGE%/g, __oPMData.message);
+                }
+                _oHistory.push ({ time : new Date (), message : __oPMData.message });
 
-        var _oPMData = PMClient.listen(_oEvent);
+            });
 
-        if (_oPMData.request === PMConstants.REQUEST.POST_MESSAGE_CLIENTS ||
-                _oPMData.request === PMConstants.REQUEST.POST_MESSAGE_CLIENT) {
-            $("#response").val(("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, _oPMData.sender).replace (/%REQUEST%/g, _oPMData.request).replace(/%MESSAGE%/g, _oPMData.message) + "\n--\n" + $("#response").val());
-        }
+            /**
+             * Remove the message listener on close of this window
+             * //$window.removeEventListener ("message");
+             */
 
-        else if (_oPMData.request === PMConstants.REQUEST.GET_CLIENTS) {
+            /**
+             * Connect to the PMServer
+             */
+            PMClient.connect();
 
-            $("#response").val(("%SENDER% (%REQUEST%) > %MESSAGE%").replace(/%SENDER%/g, _oPMData.sender).replace (/%REQUEST%/g, _oPMData.request).replace(/%MESSAGE%/g, _oPMData.message) + "\n--\n" + $("#response").val());
-            var oRecipients = _oPMData.message;
-            $("#recipient").empty();
-            $("#recipient").append("<option value = \"" + PMConstants.RECIPIENT.ALL + "\">ALL</option>");
+            return {
 
-            for (var n in oRecipients) {
-                $("#recipient").append("<option value = \"" + oRecipients [n] + "\">" + oRecipients [n] + "</option>");
-            }
+                getClientName: function () {
+                    return PMClient.getClientID ();
+                },
 
-        }
-    }
+                getContacts : function () {
+                    return _oContacts;
+                },
 
-    function fnRefresh() {
-        PMClient.send(PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
-    }
+                status : function () {
+                    return PMClient.status ();
+                },
 
-    function fnSendMessage() {
-        var _sRecipient = $("#recipient").val();
-        var _sMessage = $("#message").val();
-        PMClient.send(_sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, _sRecipient, _sMessage, false);
-    }
+                sendMessage : function (_sRecipient, _oMessage) {
+                    PMClient.send(_sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, _sRecipient, _oMessage, false);
+                },
 
-    window.addEventListener("message", fnDocumentOnMessage, false);
-    window.addEventListener("onunload", PMClient.disconnect, false);
+                getMessage : function () {
+                    return _oLastMessage;
+                }
+            };
+        })
 
-    $("document").ready(fnDocumentOnReady);
+        .controller ("PMCCtrl", function ($scope, PMCLib) {
+            var _VM = $scope;
+            _VM.clientName = PMCLib.getClientName();
+
+        })
+
+        .directive ("pmcResponse", function (PMCLib) {
+            return {
+                restrict : "E",
+                controller : function ($scope) {
+
+                    var _VM = $scope;
+                    _VM.response = PMCLib.getMessage ()
+                },
+                template : '<textarea ng-model = "response" class = "response"></textarea>'
+            };
+        })
+        .directive ("pmcRecipients", function (PMCLib) {
+            return {
+                restrict :  "E",
+                controller : function ($scope) {
+
+                    var _VM = $scope;
+
+                    _VM.contacts = PMCLib.getContacts ();
+                    _VM.recipient = _VM.contacts [0];
+                    _VM.refreshContacts = function () {
+                        debugger;
+                        _VM.contacts = PMCLib.getContacts ();
+                    };
+
+                },
+                template : "Recipients " +
+                    '<select ng-model = "recipient"><option ng-repeat="contact in contacts" value="{{contact}}">{{contact}}</option></select>' + ' ' +
+                    '<button ng-click = "refreshContacts()">Refresh</button>'
+            };
+        })
+        .directive ("pmcMessage", function (PMCLib) {
+            return {
+                restrict :  "E",
+                controller : function ($scope) {
+
+                    var _VM = $scope;
+                    _VM.sendMessage = function () {
+                        _VM.sendMessage ($scope.recipient, $scope.message);
+                    };
+
+                },
+                template : 'Message' +
+                    '<br/><textarea ng-model = "message" class = "message">Your message here</textarea>' +
+                    '<button ng-click = "sendMessage">Send</button>'
+            };
+        })
 
 </script>
 
-<h3><span id="iframeName"></span> (Powered by Angular 1.3)</h3>
+<h3>{{clientName}} (Powered by Angular 1.3)</h3>
 
-<textarea id="response"></textarea>
-
-<p>Recipient <select id="recipient"></select>
-    <button id="refresh">Refresh</button>
+<pmc-response></pmc-response>
+<p>
+    <pmc-recipients></pmc-recipients>
 </p>
 <p>
-    Message
-    <br/><textarea id = "message">Your message here</textarea>
-    <button id="sendMessage">Send</button>
+    <pmc-message></pmc-message>
 </p>
+
 
 
 </body>

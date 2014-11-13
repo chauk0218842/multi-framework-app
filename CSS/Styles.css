@@ -18,9 +18,9 @@ textarea {
     width: 275px;
 }
 
-#response {
+.response {
     height: 150px;
 }
-#message {
+.message {
     height: 100px;
 }

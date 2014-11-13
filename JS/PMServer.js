@@ -40,7 +40,7 @@ var PMServer = (function (_CONSTS, _PMError, _PMData) {
 
   function _fnGetClients(__sExcludeClient) {
 
-    var __aCollection = [];
+    var __aCollection = [PMConstants.RECIPIENT.ALL];
 
     for (var sHASH in _oClientHASH) {
 

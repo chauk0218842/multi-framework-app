@@ -25,6 +25,11 @@ var PMClient = (function (_CONSTS, _PMError, _PMData) {
     _bIsConnectedToServer = false;
   }
 
+  function _fnConnectionStatus () {
+    debugger;
+    return _bIsConnectedToServer ? _CONSTS.STATUS.CONNECTED_TO_SERVER : _CONSTS.STATUS.DISCONNECTED_FROM_SERVER;
+  }
+
   function _fnListenToServer (__oEvent) {
 
     if (!_bIsConnectedToServer) {
@@ -45,10 +50,24 @@ var PMClient = (function (_CONSTS, _PMError, _PMData) {
     _fnPostMessageToServer(_PMData.create (__sRequest, _fnGetClientID (), __sRecipientID, __oMessage, __bReceipt));
   }
 
+  var _oHistory = [];
+
+  function _fnConnect2 () {
+    window.addEventListener("message", function (__oEvent) {
+      _oHistory.push (_fnListenToServer (__oEvent));
+    });
+    _fnConnectToServer();
+  }
+
+  function _fnGetHistory () {
+    return _oHistory;
+  }
+
   return {
     getClientID : _fnGetClientID,
     connect : _fnConnectToServer,
     disconnect : _fnDisconnectFromServer,
+    status : _fnConnectionStatus,
     listen : _fnListenToServer,
     send : _fnSendMessageToServer
   };

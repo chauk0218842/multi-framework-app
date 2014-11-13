@@ -4,7 +4,7 @@ var PMConstants = {
   DOMAIN : "*",
   RECIPIENT : {
     SERVER : "SERVER",
-    ALL : "*"
+    ALL : "All"
   },
   IFRAME_PREFIX : "PMIFRAME_%ID%",
   REQUEST : {
@@ -13,5 +13,9 @@ var PMConstants = {
     GET_CLIENTS : "GET/GET-CLIENTS",
     POST_MESSAGE_CLIENT: "POST/SEND-MESSAGE-CLIENT",
     POST_MESSAGE_CLIENTS: "POST/SEND-MESSAGE-CLIENTS"
+  },
+  STATUS : {
+    CONNECTED_TO_SERVER : "Connected to server",
+    DISCONNECTED_FROM_SERVER : "Disconnected from server"
   }
 };
