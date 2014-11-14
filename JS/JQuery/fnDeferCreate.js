@@ -1,14 +1,17 @@
-function fnDeferCreate_Angular (_$q) {
+/**
+ * JQuery Component
+ */
+'use strict';
+
+function fnDeferCreate_JQuery (_$) {
 
   return function fnDeferCreate() {
-    var __oDefer = _$q.defer ();
+    var __oDefer = _$.Deferred();
     return {
       reject: __oDefer.reject,
       resolve: __oDefer.resolve,
       promise: __oDefer.promise,
-      then: function (__fn) {
-          return __oDefer.promise.then (__fn);
-      }
+      then: __oDefer.then
     }
   }
 }

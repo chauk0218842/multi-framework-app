@@ -1,4 +1,4 @@
-function PMCLibrary (_PMCClient, _DeferHASH) {
+function PMClient (_PMCLibrary, _DeferHASH) {
 
   function _fnConvertPMDataToString (__oPMData) {
     return ("%SENDER% (%REQUEST%) > %MESSAGE%")
@@ -10,7 +10,7 @@ function PMCLibrary (_PMCClient, _DeferHASH) {
   var _oMessages = [];
 
   function _fnConnect () {
-    var __sMessageID = _PMCClient.connect ();
+    var __sMessageID = _PMCLibrary.connect ();
     return _DeferHASH.set (__sMessageID).then (function (__oPMData) {
       return __oPMData.message;
     });
@@ -18,7 +18,7 @@ function PMCLibrary (_PMCClient, _DeferHASH) {
 
   function _fnReceive (__oEvent) {
 
-    var __oPMData = _PMCClient.listen(__oEvent);
+    var __oPMData = _PMCLibrary.listen(__oEvent);
 
     /**
      * Response made from this client only
@@ -33,7 +33,7 @@ function PMCLibrary (_PMCClient, _DeferHASH) {
 
   function _fnGetContacts () {
 
-    var __sMessageID = _PMCClient.send(PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
+    var __sMessageID = _PMCLibrary.send(PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
     return _DeferHASH.set (__sMessageID).then (function (__oPMData) {
       return __oPMData.message;
     });
@@ -44,7 +44,7 @@ function PMCLibrary (_PMCClient, _DeferHASH) {
   }
 
   function _fnSendMessage (__sRecipient, __oMessage) {
-    var __sMessageID = _PMCClient.send(__sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, __sRecipient, __oMessage, false);
+    var __sMessageID = _PMCLibrary.send(__sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, __sRecipient, __oMessage, false);
     return _DeferHASH.set (__sMessageID).then (function (__oPMData) {
       return __oPMData.message;
     });
@@ -56,13 +56,13 @@ function PMCLibrary (_PMCClient, _DeferHASH) {
 
     receive : _fnReceive,
 
-    getClientName: _PMCClient.getClientID,
+    getClientName: _PMCLibrary.getClientID,
 
     getContacts : _fnGetContacts,
 
     getMessages : _fnGetMessages,
 
-    status : _PMCClient.status,
+    status : _PMCLibrary.status,
 
     send : _fnSendMessage
 
