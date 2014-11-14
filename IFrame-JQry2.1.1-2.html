@@ -37,7 +37,15 @@
 
     function PMCLib (_WINDOW, _$, _DeferHandler) {
 
+        function _fnConvertPMDataToString (__oPMData) {
+            return ("%SENDER% (%REQUEST%) > %MESSAGE%")
+                    .replace(/%SENDER%/g, __oPMData.sender)
+                    .replace (/%REQUEST%/g, __oPMData.request)
+                    .replace(/%MESSAGE%/g, __oPMData.message);
+        }
+
         var _oMessages = [];
+        var _sMessages = "";
 
         /**
          *  Append a listener first before connecting
@@ -46,21 +54,17 @@
 
             var __oPMData = PMClient.listen(__oEvent);
 
-            _oMessages.push (__oPMData.message);
-
-            var __sResponse = ("%SENDER% (%REQUEST%) > %MESSAGE%")
-                .replace(/%SENDER%/g, __oPMData.sender)
-                .replace (/%REQUEST%/g, __oPMData.request)
-                .replace(/%MESSAGE%/g, __oPMData.message);
-
-            _$ ("#response").val (__sResponse + "\n--\n" + _$("#response").val ());
-
             /**
              * Response made from this client only
              */
             if (_DeferHandler.get (__oPMData.id)) {
                 _DeferHandler.get (__oPMData.id).resolve (__oPMData);
             }
+
+            _oMessages.push (_fnConvertPMDataToString (__oPMData));
+            _sMessages = _fnConvertPMDataToString (__oPMData) + "\n--\n" + _sMessages;
+
+            _$ ("#response").val (_sMessages);
 
         });
 
@@ -91,7 +95,7 @@
         }
 
         function _fnGetMessages () {
-            return _oMessages;
+            return _sMessages;
         }
 
         /**
@@ -107,7 +111,7 @@
 
             getContacts : _fnGetContacts,
 
-            getMessages : _oMessages,
+            getMessages : _fnGetMessages,
 
             status : PMClient.status,
 
@@ -167,7 +171,7 @@
 </p>
 <p>
     Message
-    <br/><textarea id = "message" class = "message">Your message here</textarea>
+    <br/><textarea id = "message" class = "message">Your message here...</textarea>
     <button id="send">Send</button>
 </p>
 

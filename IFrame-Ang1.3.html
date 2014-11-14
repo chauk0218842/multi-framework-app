@@ -35,15 +35,22 @@
         })
         .factory ("PMCLib", function ($window, DeferHandler) {
 
+            function _fnConvertPMDataToString (__oPMData) {
+                return ("%SENDER% (%REQUEST%) > %MESSAGE%")
+                        .replace(/%SENDER%/g, __oPMData.sender)
+                        .replace (/%REQUEST%/g, __oPMData.request)
+                        .replace(/%MESSAGE%/g, __oPMData.message);
+            }
+
             var _oMessages = [];
+            var _sMessages = "";
 
             /**
              *  Append a listener first before connecting
              */
             angular.element($window).on ("message", function (__oEvent) {
-                var __oPMData = PMClient.listen(__oEvent);
 
-                _oMessages.push (__oPMData.message);
+                var __oPMData = PMClient.listen(__oEvent);
 
                 /**
                  * Response made from this client only
@@ -51,6 +58,10 @@
                 if (DeferHandler.get (__oPMData.id)) {
                     DeferHandler.get (__oPMData.id).resolve (__oPMData);
                 }
+
+                _oMessages.push (_fnConvertPMDataToString (__oPMData));
+                _sMessages = _fnConvertPMDataToString (__oPMData) + "\n--\n" + _sMessages;
+
             });
 
             angular.element ($window).on ("unload", function () {
@@ -80,7 +91,7 @@
             }
 
             function _fnGetMessages () {
-                return _oMessages;
+                return _sMessages;
             }
 
             /**
@@ -96,7 +107,7 @@
 
                 getContacts : _fnGetContacts,
 
-                getMessages : _oMessages,
+                getMessages : _fnGetMessages,
 
                 status : PMClient.status,
 
@@ -117,16 +128,10 @@
                 controller : function ($scope) {
 
                     var _VM = $scope;
-                    _VM.response = "";
-
-
-
-                    $scope.$watch (function () { return PMCLib.getMessages }, function (_oMessages) {
-                        _VM.response = _oMessages;
-                    });
+                    _VM.getResponse = PMCLib.getMessages;
 
                 },
-                template : '<textarea ng-model = "response" class = "response"></textarea>'
+                template : '<textarea class = "response">{{getResponse()}}</textarea>'
             };
         })
         .directive ("pmcContacts", function (PMCLib) {
