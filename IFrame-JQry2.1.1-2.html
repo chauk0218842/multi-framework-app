@@ -8,128 +8,47 @@
 <body>
 
 <script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="JS/fnDeferCreate_JQuery.js"></script>
+<script src="JS/DeferHASH.js"></script>
 <script src="JS/PMConstants.js"></script>
 <script src="JS/PMError.js"></script>
 <script src="JS/PMData.js"></script>
 <script src="JS/PMClient.js"></script>
+<script src="JS/PMCLibrary.js"></script>
 <script>
-
-    function DeferHandler (_$) {
-
-        var _oHASH = {};
-
-        return {
-            get : function (__sKey) {
-                return _oHASH [__sKey];
-            },
-
-            set : function (__sKey) {
-                _oHASH [__sKey] = _$.Deferred ();
-                return _oHASH [__sKey];
-            },
-
-            remove : function (__sKey) {
-                _oHASH [__sKey] = null;
-            }
-        };
-
-    }
-
-    function PMCLib (_WINDOW, _$, _DeferHandler) {
-
-        function _fnConvertPMDataToString (__oPMData) {
-            return ("%SENDER% (%REQUEST%) > %MESSAGE%")
-                    .replace(/%SENDER%/g, __oPMData.sender)
-                    .replace (/%REQUEST%/g, __oPMData.request)
-                    .replace(/%MESSAGE%/g, __oPMData.message);
-        }
-
-        var _oMessages = [];
-        var _sMessages = "";
-
-        /**
-         *  Append a listener first before connecting
-         */
-        window.addEventListener ("message", function (__oEvent) {
-
-            var __oPMData = PMClient.listen(__oEvent);
-
-            /**
-             * Response made from this client only
-             */
-            if (_DeferHandler.get (__oPMData.id)) {
-                _DeferHandler.get (__oPMData.id).resolve (__oPMData);
-            }
-
-            _oMessages.push (_fnConvertPMDataToString (__oPMData));
-            _sMessages = _fnConvertPMDataToString (__oPMData) + "\n--\n" + _sMessages;
-
-            _$ ("#response").val (_sMessages);
-
-        });
-
-        window.addEventListener ("unload", function () {
-            window.removeEventListener ("message");
-        });
-
-        function _fnConnect () {
-            var __sMessageID = PMClient.connect ();
-            return _DeferHandler.set (__sMessageID).then (function (__oPMData) {
-                return __oPMData.message;
-            });
-        }
-
-        function _fnSendMessage (__sRecipient, __oMessage) {
-            var __sMessageID = PMClient.send(__sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, __sRecipient, __oMessage, false);
-            return _DeferHandler.set (__sMessageID).then (function (__oPMData) {
-                return __oPMData.message;
-            });
-        }
-
-        function _fnGetContacts () {
-
-            var __sMessageID = PMClient.send(PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
-            return _DeferHandler.set (__sMessageID).then (function (__oPMData) {
-                return __oPMData.message;
-            });
-        }
-
-        function _fnGetMessages () {
-            return _sMessages;
-        }
-
-        /**
-         * Connect to the PMServer
-         */
-        _DeferHandler.set (PMClient.connect());
-
-        return {
-
-            connect : _fnConnect,
-
-            getClientName: PMClient.getClientID,
-
-            getContacts : _fnGetContacts,
-
-            getMessages : _fnGetMessages,
-
-            status : PMClient.status,
-
-            send : _fnSendMessage
-
-        };
-
-    }
 
     $("document").ready(function () {
 
-        var _DeferHandler  = DeferHandler ($);
-        var _PMCLib = PMCLib (window, $, _DeferHandler);
+        var _fnCreateDefer = fnDeferCreate_JQuery ($);
+        var _DeferHASH  = DeferHASH (_fnCreateDefer);
+        var _PMClient = PMClient (PMConstants, PMError, PMData);
+        var _PMCLib = PMCLibrary (_PMClient, _DeferHASH);
+
+        window.addEventListener("message", function (__oEvent) {
+
+            /**
+             * Listen for messages
+             */
+            _PMCLib.receive (__oEvent);
+
+            /**
+             * Update response
+             */
+            var ___oMessages = _PMCLib.getMessages ();
+            var ___o$Response = $("#response");
+            ___o$Response.val ((___oMessages.length ? ___oMessages [___oMessages.length - 1] + "\n--\n" : "") + ___o$Response.val ());
+
+        });
+
+        window.addEventListener("unload", function () {
+            window.removeEventListener ("message");
+        });
+
+        _PMCLib.connect ();
 
         $("#clientName").text(_PMCLib.getClientName());
 
         $("#response").val ();
-
 
         _PMCLib.getContacts().then(function (_oContacts) {
 

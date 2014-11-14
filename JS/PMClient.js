@@ -1,6 +1,6 @@
 'use strict';
 
-var PMClient = (function (_CONSTS, _PMError, _PMData) {
+function PMClient (_CONSTS, _PMError, _PMData) {
 
   var _sParams = location.toString().replace(/^[^\?]+\?/g, "");
   var _aParams = _sParams.split("&");
@@ -70,5 +70,4 @@ var PMClient = (function (_CONSTS, _PMError, _PMData) {
     send : _fnSendMessageToServer
   };
 
-}) (PMConstants, PMError, PMData);
-
+}

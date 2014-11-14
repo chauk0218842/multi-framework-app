@@ -8,59 +8,44 @@
 <body ng-app = "PMClient" ng-controller = "PMCCtrl">
 
 <script src="bower_components/angular/angular.js"></script>
+<script src="JS/fnDeferCreate_Angular.js"></script>
+<script src="JS/DeferHASH.js"></script>
 <script src="JS/PMConstants.js"></script>
 <script src="JS/PMError.js"></script>
 <script src="JS/PMData.js"></script>
 <script src="JS/PMClient.js"></script>
+<script src="JS/PMCLibrary.js"></script>
 <script>
 
     angular.module ("PMClient", [])
-        .factory ("DeferHandler", function ($q) {
-            var _oHASH = {};
+        .factory ("PMCLib", function ($q) {
 
-            return {
-                get : function (__sKey) {
-                    return _oHASH [__sKey];
-                },
-
-                set : function (__sKey) {
-                    _oHASH [__sKey] = $q.defer ();
-                    return _oHASH [__sKey];
-                },
-
-                remove : function (__sKey) {
-                    _oHASH [__sKey] = null;
-                }
-            };
+            var _fnCreateDefer = fnDeferCreate_Angular ($q);
+            var _DeferHASH  = DeferHASH (_fnCreateDefer);
+            var _PMClient = PMClient (PMConstants, PMError, PMData);
+            return PMCLibrary (_PMClient, _DeferHASH);
         })
-        .factory ("PMCLib", function ($window, DeferHandler) {
+        .controller ("PMCCtrl", function ($window, $scope, PMCLib) {
 
-            function _fnConvertPMDataToString (__oPMData) {
-                return ("%SENDER% (%REQUEST%) > %MESSAGE%")
-                        .replace(/%SENDER%/g, __oPMData.sender)
-                        .replace (/%REQUEST%/g, __oPMData.request)
-                        .replace(/%MESSAGE%/g, __oPMData.message);
-            }
+            var _VM = $scope;
+            _VM.clientName = PMCLib.getClientName();
+            _VM.response = "";
 
-            var _oMessages = [];
-            var _sMessages = "";
-
-            /**
-             *  Append a listener first before connecting
-             */
             angular.element($window).on ("message", function (__oEvent) {
 
-                var __oPMData = PMClient.listen(__oEvent);
+                _VM.$apply (function () {
 
-                /**
-                 * Response made from this client only
-                 */
-                if (DeferHandler.get (__oPMData.id)) {
-                    DeferHandler.get (__oPMData.id).resolve (__oPMData);
-                }
+                    /**
+                     * Listen for messages
+                     */
+                    PMCLib.receive (__oEvent);
 
-                _oMessages.push (_fnConvertPMDataToString (__oPMData));
-                _sMessages = _fnConvertPMDataToString (__oPMData) + "\n--\n" + _sMessages;
+                    /**
+                     * Update response
+                     */
+                    var ___oMessages = PMCLib.getMessages ();
+                    _VM.response = (___oMessages.length ? ___oMessages [___oMessages.length - 1] + "\n--\n" : "") + _VM.response;
+                });
 
             });
 
@@ -68,70 +53,14 @@
                 $window.removeEventListener ("message");
             })
 
-            function _fnConnect () {
-                var __sMessageID = PMClient.connect ();
-                return DeferHandler.set (__sMessageID).promise.then (function (__oPMData) {
-                    return __oPMData.message;
-                });
-            }
-
-            function _fnSendMessage (__sRecipient, __oMessage) {
-                var __sMessageID = PMClient.send(__sRecipient === PMConstants.RECIPIENT.ALL ? PMConstants.REQUEST.POST_MESSAGE_CLIENTS : PMConstants.REQUEST.POST_MESSAGE_CLIENT, __sRecipient, __oMessage, false);
-                return DeferHandler.set (__sMessageID).promise.then (function (__oPMData) {
-                    return __oPMData.message;
-                });
-            }
-
-            function _fnGetContacts () {
-
-                var __sMessageID = PMClient.send(PMConstants.REQUEST.GET_CLIENTS, PMConstants.RECIPIENT.SERVER, null, false);
-                return DeferHandler.set (__sMessageID).promise.then (function (__oPMData) {
-                    return __oPMData.message;
-                });
-            }
-
-            function _fnGetMessages () {
-                return _sMessages;
-            }
-
-            /**
-             * Connect to the PMServer
-             */
-            DeferHandler.set (PMClient.connect());
-
-            return {
-
-                connect : _fnConnect,
-
-                getClientName: PMClient.getClientID,
-
-                getContacts : _fnGetContacts,
-
-                getMessages : _fnGetMessages,
-
-                status : PMClient.status,
-
-                send : _fnSendMessage
-
-            };
-        })
-
-        .controller ("PMCCtrl", function ($scope, PMCLib) {
-            var _VM = $scope;
-            _VM.clientName = PMCLib.getClientName();
+            PMCLib.connect ();
 
         })
 
-        .directive ("pmcResponse", function (PMCLib) {
+        .directive ("pmcResponse", function () {
             return {
                 restrict : "E",
-                controller : function ($scope) {
-
-                    var _VM = $scope;
-                    _VM.getResponse = PMCLib.getMessages;
-
-                },
-                template : '<textarea class = "response">{{getResponse()}}</textarea>'
+                template : '<textarea ng-model = "response" class = "response"></textarea>'
             };
         })
         .directive ("pmcContacts", function (PMCLib) {
