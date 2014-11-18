@@ -5,30 +5,22 @@
     <title>IFrame Angular 1.3 Client</title>
     <link rel="stylesheet" href="CSS/Styles.css">
 </head>
-<body ng-app = "PMClientApp" ng-controller = "PMClientCtrl">
+<body ng-app = "IFClientApp" ng-controller = "IFClientCtrl">
 
+<script src="JS/CORE/Library/ClientLibrary.js"></script>
+
+<script src="JS/CORE/Library/HASHLibrary.js"></script>
+<script src="JS/CORE/Library/MessageLibrary.js"></script>
+<script src="JS/CORE/Library/RequestLibrary.js"></script>
+<script src="JS/CORE/Library/ServerConstants.js"></script>
+<script src="JS/CORE/Library/ServerLibrary.js"></script>
+<script src="JS/CORE/IFURIConstants.js"></script>
+<script src="JS/CORE/IFClientLibrary.js"></script>
 <script src="bower_components/angular/angular.js"></script>
-<script src="JS/Angular/fnDeferCreate.js"></script>
-<script src="JS/CORE/DeferHASH.js"></script>
-<script src="JS/CORE/PMConstants.js"></script>
-<script src="JS/CORE/PMError.js"></script>
-<script src="JS/CORE/PMData.js"></script>
-<script src="JS/CORE/PMCLibrary.js"></script>
-<script src="JS/CORE/PMClient.js"></script>
-<script src="JS/Angular/DeferHASHMod.js"></script>
-<script src="JS/Angular/PMConstantsMod.js"></script>
-<script src="JS/Angular/PMErrorMod.js"></script>
-<script src="JS/Angular/PMDataMod.js"></script>
-<script src="JS/Angular/PMCLibraryMod.js"></script>
-<script src="JS/Angular/PMClientMod.js"></script>
-<script src="JS/Angular/PMClientApp.js"></script>
-<script>
+<script src="JS/Angular/DeferredLibrary.js"></script>
+<script src="JS/Angular/IFClientApp.js"></script>
 
-
-
-</script>
-
-<h3>{{clientName}} (Powered by Angular 1.3)</h3>
+<h3>{{username}} (Powered by Angular 1.3)</h3>
 
 <pmc-connect></pmc-connect>
 
