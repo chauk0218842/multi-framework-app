@@ -4,58 +4,60 @@
 'use strict';
 
 function documentOnload(_$) {
+
   /**
-   * HASH Library object
-   * @type {{generate: _fnGenerateBucket, generateKey: _fnGenerateKey}}
+   * HASH Library
+    * @type {{create: createHASHBucket, createKey: createHASHKey}}
    */
   var hashLib = hashLibrary(window.atob);
 
   /**
-   * Deferred Library object
-   * @type {{generate: _fnGenerateDeferred, when: (*|jQuery.when|Function|$Q.when|deferredLibrary.when|when)}|{generate: createDefer, when: (*|deferredLibrary.when|jQuery.when|Function|$Q.when|when)}}
+   * Deferred Library
+   * @type {{generate: createDefer, when: (*|jQuery.when|Function|$Q.when|deferredLibrary.when|when)}|{generate: createDefer, when: (*|deferredLibrary.when|jQuery.when|Function|$Q.when|when)}}
    */
   var deferredLib = deferredLibrary(_$);
 
   /**
-   * Message Library object
-   * @type {{generate: createNewMessage, decode: decodeMessage}}
+   * Message Library
+    * @type {{create: createNewMessage, decode: decodeMessage}}
    */
   var messageLib = messageLibrary(hashLib.createKey, JSON.stringify, JSON.parse);
 
   /**
-   * Request Library object
-   * @type {{generate: createNewRequest, decode: decodeRequest}}
+   * Request Library
+   * @type {{create: createNewRequest, decode: decodeRequest}}
    */
   var requestLib = requestLibrary(hashLib.createKey, JSON.stringify, JSON.parse);
 
   /**
-   * Server Constants library
+   * Server Constant
    * @type {{SERVER_NAME: string, DOMAIN_NAME: string}}
    */
   var serverConst = serverConstants;
 
   /**
-   * Client Library object
+   * Client Library
    * @type {{send: sendRequestToServer, listen: listenToServer}}
    */
   var clientLib = clientLibrary(serverConst);
 
   /**
-   * IFURI Constants object
+   * IFURI Constant
    * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_MESSAGE: string}}
    */
   var ifuriConst = ifuriConstants;
 
   /**
-   * IFClient Library object
+   * IFClient Library
    * @type {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendMessageToClient: _fnSendMessageToClient}}
    */
   var ifClientLib = ifclientLibrary(ifuriConst, hashLib, requestLib, messageLib, clientLib, deferredLib);
 
   /**
-   * Add on message window listener
+   * Window Message Listener
+   * @param event
    */
-  window.addEventListener("message", function (event) {
+  function messageListener (event) {
 
     /**
      * Listen for messages
@@ -84,8 +86,9 @@ function documentOnload(_$) {
         var contacts = request.contents.contents.sort();
         $contacts.append('<option value = "ALL">ALL</option>');
 
+        var userName = ifClientLib.getUsername();
         for (var n in contacts) {
-          if (contacts [n] === ifClientLib.getUsername()) {
+          if (contacts [n] === userName) {
             continue;
           }
           $contacts.append("<option value = \"" + contacts [n] + "\">" + contacts [n] + "</option>");
@@ -96,13 +99,18 @@ function documentOnload(_$) {
 
     });
 
-  });
+  }
+
+  /**
+   * Add window listener
+   */
+  window.addEventListener("message", messageListener);
 
   /**
    * Remove "message" upon unload
    */
   window.addEventListener("unload", function () {
-    window.removeEventListener("message");
+    window.removeEventListener("message", messageListener);
   });
 
   /**

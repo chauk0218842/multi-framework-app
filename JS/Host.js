@@ -1,6 +1,6 @@
 'use strict';
 
-document.addEventListener("DOMContentLoaded", function (event) {
+document.addEventListener("DOMContentLoaded", function () {
 
   var hashLib = hashLibrary(window.atob);
   var serverLib = serverLibrary(serverConstants, hashLib);

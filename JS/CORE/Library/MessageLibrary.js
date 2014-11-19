@@ -47,8 +47,8 @@ function messageLibrary(createHASHKey, encoder, decoder) {
      * @param responseContents
      * @returns {{id: *, client: *, host: *, urn: *, contents: *, receipt: *}}
      */
-    function respondToMessage(senderID, responseContents) {
-      return createMessage(messageID, senderID, senderID, responseContents);
+    function respondToMessage(senderID, responseContents, useReceipt) {
+      return createMessage(messageID, senderID, senderID, responseContents, useReceipt);
     }
 
     /**

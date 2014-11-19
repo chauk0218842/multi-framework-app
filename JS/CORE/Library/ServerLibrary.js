@@ -3,9 +3,8 @@
 /**
  * Server Library
  * @param serverConst
- * @param hash
- * @returns {{Const: *, addClient: addClient, removeClient: removeClient, getClientList: getclientList, processRequest: processRequest}}
- * @constructor
+ * @param hashLib
+ * @returns {{const: *, addClient: addClient, removeClient: removeClient, getClientList: getclientList, processRequest: processRequest}}
  */
 function serverLibrary(serverConst, hashLib) {
 
@@ -17,7 +16,6 @@ function serverLibrary(serverConst, hashLib) {
 
   /**
    * List of IFrames stored in a HASH
-   * @type {{reject: Deferred.reject, resolve: Deferred.resolve, promise: (*|deferredLibrary.createDefer.promise|jQuery.promise|promise.promise|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise), then: then}|{reject: (*|deferredLibrary.createDefer.reject|jQuery.Deferred.reject|Deferred.reject|Function|$Q.reject), resolve: (*|deferredLibrary.createDefer.resolve|jQuery.Deferred.resolve|Deferred.resolve|fnDeferCreate_JQuery.resolve|Deferred.fnGenerateDefer.resolve), promise: (*|deferredLibrary.createDefer.promise|jQuery.promise|promise.promise|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise), then: (*|deferredLibrary.createDefer.then|promise.then|Promise.then|then|fnDeferCreate_JQuery.then)}|{set: setInBucket, remove: removeFromBucket}|{id: (string|*), host: (XML|string|void|*), urn: (XML|string|void|*), contents: *, receipt: *}|void|*}
    */
   var iframeHASH = hashLib.create();
 
@@ -48,13 +46,6 @@ function serverLibrary(serverConst, hashLib) {
    */
   function getclientList() {
     return clientList;
-  }
-
-  /**
-   * Refresh client list
-   * @private
-   */
-  function refreshclientList() {
   }
 
   /**

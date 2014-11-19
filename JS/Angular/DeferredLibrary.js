@@ -3,7 +3,7 @@
 /**
  * Deferred Library for Angular
  * @param _$q
- * @returns {{generate: createDefer, when: (*|jQuery.when|Function|$Q.when|deferredLibrary.when|when)}}
+ * @returns {{create: createDefer, when: createWhen}}
  */
 function deferredLibrary (_$q) {
 
@@ -27,11 +27,19 @@ function deferredLibrary (_$q) {
   }
 
   /**
+   * Create a Defer when
+   * @param object
+   * @returns {*|Promise}
+   */
+  function createWhen (object) {
+    return _$q.when (object);
+  }
+
+  /**
    * Public API
    */
   return {
     create : createDefer,
-    when : _$q.when
+    when : createWhen
   };
-
 }

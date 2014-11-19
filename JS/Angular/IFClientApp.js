@@ -52,7 +52,7 @@ serverConstMod.factory("serverConst", function () {
  * Client Library module
  * @type {module}
  */
-var clientLibMod = angular.module("ClientLibrary", ["serverConst"])
+var clientLibMod = angular.module("ClientLibrary", ["serverConst"]);
 clientLibMod.factory("clientLib", function (serverConst) {
   return clientLibrary(serverConst);
 });
@@ -141,7 +141,7 @@ ifclientApp.directive("pmcResponse", function () {
   };
 });
 
-ifclientApp.directive("pmcContacts", function (ifclientLib) {
+ifclientApp.directive("pmcContacts", function () {
   return {
     restrict: "E",
     controller: function ($scope) {
@@ -166,6 +166,11 @@ ifclientApp.directive("pmcMessage", function (ifclientLib) {
 
         if ($scope.recipient === "ALL") {
           for (var n in $scope.contacts) {
+
+            if (!$scope.contacts.hasOwnProperty(n)) {
+              continue;
+            }
+
             var oContact = $scope.contacts [n];
             if (oContact === "ALL") {
               continue;

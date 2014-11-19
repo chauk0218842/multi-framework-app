@@ -17,8 +17,8 @@ function clientLibrary(serverConst) {
   }
 
   /**
-   * Listen to request responded back from server
-   * @param request
+   * Listen to request responded back from Server
+   * @param event
    * @returns {*}
    */
   function listenToServer(event) {

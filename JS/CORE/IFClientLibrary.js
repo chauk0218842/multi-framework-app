@@ -28,7 +28,6 @@ function ifclientLibrary(uriConst, hashLib, requestLib, messageLib, clientLib, d
 
   /**
    * Defer HASH used to track all the promises that need to be resolved
-   * @type {{reject: Deferred.reject, resolve: Deferred.resolve, promise: (*|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise|Deferred.fnGenerateDefer.promise|jQuery.promise|promise.promise), then: _fnThen}|{reject: (*|fnDeferCreate_JQuery.reject|Deferred.fnGenerateDefer.reject|DeferredLibrary._fnGenerateDeferred.reject|jQuery.Deferred.reject|Deferred.reject), resolve: (*|fnDeferCreate_JQuery.resolve|Deferred.fnGenerateDefer.resolve|DeferredLibrary._fnGenerateDeferred.resolve|jQuery.Deferred.resolve|Deferred.resolve), promise: (*|fnDeferCreate_JQuery.promise|Deferred.fnGenerateDefer.promise|DeferredLibrary._fnGenerateDeferred.promise|jQuery.promise|promise.promise), then: (*|fnDeferCreate_JQuery.then|Deferred.fnGenerateDefer.then|DeferredLibrary._fnGenerateDeferred.then|promise.then|Promise.then)}|{set: setInBucket, remove: removeFromBucket}|{id: (string|*), host: (XML|string|void|*), urn: (XML|string|void|*), contents: *, receipt: *}|*}
    */
   var deferHASH = hashLib.create();
 

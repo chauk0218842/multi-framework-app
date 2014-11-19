@@ -1,15 +1,14 @@
 'use strict';
 
 /**
- * Deferred generate for JQuery
+ * Deferred Library for JQuery
  * @param _$
- * @returns {{generate: createDefer, when: (*|deferredLibrary.when|jQuery.when|Function|$Q.when|when)}}
- * @constructor
+ * @returns {{create: createDefer, when: createWhen}}
  */
 function deferredLibrary(_$) {
 
   /**
-   * Create a Defer object
+   * Create Defer object
    * @returns {{reject: (*|deferredLibrary.createDefer.reject|jQuery.Deferred.reject|Deferred.reject|Function|$Q.reject), resolve: (*|deferredLibrary.createDefer.resolve|jQuery.Deferred.resolve|Deferred.resolve|fnDeferCreate_JQuery.resolve|Deferred.fnGenerateDefer.resolve), promise: (*|deferredLibrary.createDefer.promise|jQuery.promise|promise.promise|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise), then: (*|deferredLibrary.createDefer.then|promise.then|Promise.then|then|fnDeferCreate_JQuery.then)}}
    */
   function createDefer() {
@@ -24,11 +23,20 @@ function deferredLibrary(_$) {
   }
 
   /**
+   * Create a Defer when
+   * @param object
+   * @returns {*|Promise}
+   */
+  function createWhen (object) {
+    return _$.when (object);
+  }
+
+  /**
    * Public API
    */
   return {
     create: createDefer,
-    when: _$.when
+    when: createWhen
   };
 
 }
