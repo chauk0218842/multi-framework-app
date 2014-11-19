@@ -1,35 +1,44 @@
 'use strict';
 
 /**
- * Server Object
- * @param _ServerConst
- * @param _HASH
+ * Server Library
+ * @param serverConst
+ * @param hash
+ * @returns {{Const: *, addClient: addClient, removeClient: removeClient, getClientList: getclientList, processRequest: processRequest}}
  * @constructor
  */
-function ServerLibrary(_ServerConst, _HASH) {
+function serverLibrary(serverConst, hashLib) {
 
-  var _oServerAPI = null;
-  var _oClientList = [];
-  var _oIFrameHASH = _HASH.generate();
+  /**
+   * List of connected clients
+   * @type {Array}
+   */
+  var clientList = [];
+
+  /**
+   * List of IFrames stored in a HASH
+   * @type {{reject: Deferred.reject, resolve: Deferred.resolve, promise: (*|deferredLibrary.createDefer.promise|jQuery.promise|promise.promise|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise), then: then}|{reject: (*|deferredLibrary.createDefer.reject|jQuery.Deferred.reject|Deferred.reject|Function|$Q.reject), resolve: (*|deferredLibrary.createDefer.resolve|jQuery.Deferred.resolve|Deferred.resolve|fnDeferCreate_JQuery.resolve|Deferred.fnGenerateDefer.resolve), promise: (*|deferredLibrary.createDefer.promise|jQuery.promise|promise.promise|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise), then: (*|deferredLibrary.createDefer.then|promise.then|Promise.then|then|fnDeferCreate_JQuery.then)}|{set: setInBucket, remove: removeFromBucket}|{id: (string|*), host: (XML|string|void|*), urn: (XML|string|void|*), contents: *, receipt: *}|void|*}
+   */
+  var iframeHASH = hashLib.create();
 
   /**
    * Add a new Client
-   * @param __sClientID
+   * @param clientID
    * @returns {Number}
    * @private
    */
-  function _fnAddClient(__sClientID) {
-    _oClientList.push (__sClientID);
-    _oIFrameHASH.set(__sClientID, _oClientList [_oClientList.length - 1]);
+  function addClient(clientID) {
+    clientList.push (clientID);
+    iframeHASH.set(clientID, clientList [clientList.length - 1]);
   }
 
   /**
    * Remove client
-   * @param __sClientID
+   * @param clientID
    * @private
    */
-  function _fnRemoveClient(__sClientID) {
-    _oIFrameHASH.set (__sClientID, null);
+  function removeClient(clientID) {
+    iframeHASH.remove (clientID);
   }
 
   /**
@@ -37,35 +46,35 @@ function ServerLibrary(_ServerConst, _HASH) {
    * @returns {Array}
    * @private
    */
-  function _fnGetClientList() {
-    return _oClientList;
+  function getclientList() {
+    return clientList;
   }
 
   /**
    * Refresh client list
    * @private
    */
-  function _fnRefreshClientList() {
+  function refreshclientList() {
   }
 
   /**
    * Send message to client
-   * @param __sClientID
-   * @param __oRequest
+   * @param clientID
+   * @param request
    * @private
    */
-  function _fnProcessRequest(__sClientID, __oRequest) {
-    document.getElementById (__sClientID).contentWindow.postMessage(__oRequest, _ServerConst.DOMAIN_NAME);
+  function processRequest(clientID, request) {
+    document.getElementById (clientID).contentWindow.postMessage(request, serverConst.DOMAIN_NAME);
   }
 
   /**
    * Public API
    */
   return {
-    Const: _ServerConst,
-    addClient: _fnAddClient,
-    removeClient: _fnRemoveClient,
-    getClientList: _fnGetClientList,
-    processRequest: _fnProcessRequest
+    const: serverConst,
+    addClient: addClient,
+    removeClient: removeClient,
+    getClientList: getclientList,
+    processRequest: processRequest
   };
 }

@@ -2,36 +2,34 @@
 
 /**
  * Client Library
- * @param _ServerConst
- * @returns {{send: _fnSendRequestToServer, listen: _fnListenToServer}}
+ * @param serverConst
+ * @returns {{send: sendRequestToServer, listen: listenToServer}}
  * @constructor
  */
-function ClientLibrary(_ServerConst) {
+function clientLibrary(serverConst) {
 
   /**
    * Send a request to server
-   * @param __oRequest
-   * @private
+   * @param request
    */
-  function _fnSendRequestToServer(__oRequest) {
-    parent.postMessage(__oRequest, _ServerConst.DOMAIN_NAME);
+  function sendRequestToServer(request) {
+    parent.postMessage(request, serverConst.DOMAIN_NAME);
   }
 
   /**
    * Listen to request responded back from server
-   * @param __oRequest
+   * @param request
    * @returns {*}
-   * @private
    */
-  function _fnListenToServer(__oWindowEvent) {
-    return __oWindowEvent.data;
+  function listenToServer(event) {
+    return event.data;
   }
 
   /**
    * Public API
    */
   return {
-    send : _fnSendRequestToServer,
-    listen: _fnListenToServer
+    send : sendRequestToServer,
+    listen: listenToServer
   };
 }

@@ -3,24 +3,23 @@
 /**
  * Deferred generate for JQuery
  * @param _$
- * @returns {{generate: _fnGenerateDeferred, when: (*|DeferredLibrary.when|jQuery.when|Function|$Q.when|when)}}
+ * @returns {{generate: createDefer, when: (*|deferredLibrary.when|jQuery.when|Function|$Q.when|when)}}
  * @constructor
  */
-function DeferredLibrary(_$) {
+function deferredLibrary(_$) {
 
   /**
-   * Deferred generator
-   * @returns {{reject: (*|fnDeferCreate_JQuery.reject|Deferred.fnGenerateDefer.reject|DeferredLibrary._fnGenerateDeferred.reject|jQuery.Deferred.reject|Deferred.reject), resolve: (*|fnDeferCreate_JQuery.resolve|Deferred.fnGenerateDefer.resolve|DeferredLibrary._fnGenerateDeferred.resolve|jQuery.Deferred.resolve|Deferred.resolve), promise: (*|fnDeferCreate_JQuery.promise|Deferred.fnGenerateDefer.promise|DeferredLibrary._fnGenerateDeferred.promise|jQuery.promise|promise.promise), then: (*|fnDeferCreate_JQuery.then|Deferred.fnGenerateDefer.then|DeferredLibrary._fnGenerateDeferred.then|promise.then|Promise.then)}}
-   * @private
+   * Create a Defer object
+   * @returns {{reject: (*|deferredLibrary.createDefer.reject|jQuery.Deferred.reject|Deferred.reject|Function|$Q.reject), resolve: (*|deferredLibrary.createDefer.resolve|jQuery.Deferred.resolve|Deferred.resolve|fnDeferCreate_JQuery.resolve|Deferred.fnGenerateDefer.resolve), promise: (*|deferredLibrary.createDefer.promise|jQuery.promise|promise.promise|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise), then: (*|deferredLibrary.createDefer.then|promise.then|Promise.then|then|fnDeferCreate_JQuery.then)}}
    */
-  function _fnGenerateDeferred() {
-    var __oDefer = _$.Deferred();
+  function createDefer() {
+    var defer = _$.Deferred();
 
     return {
-      reject: __oDefer.reject,
-      resolve: __oDefer.resolve,
-      promise: __oDefer.promise,
-      then: __oDefer.then
+      reject: defer.reject,
+      resolve: defer.resolve,
+      promise: defer.promise,
+      then: defer.then
     };
   }
 
@@ -28,7 +27,7 @@ function DeferredLibrary(_$) {
    * Public API
    */
   return {
-    generate: _fnGenerateDeferred,
+    create: createDefer,
     when: _$.when
   };
 

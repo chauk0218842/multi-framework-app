@@ -1,86 +1,79 @@
 'use strict';
 
 /**
- * HASH object
- * @param _fnBase64Encoder
- * @returns {{generate: _fnGenerateBucket, generateKey: _fnGenerateKey}}
- * @constructor
+ * HASH Library
+ * @param encodeToBase64
+ * @returns {{create: createHASHBucket, createKey: createHASHKey}}
  */
-function HASHLibrary (_fnBase64Encoder) {
+function hashLibrary (encodeToBase64) {
 
   /**
    * Generate Bucket
-   * @returns {{set: _fnSet, remove: _fnRemove}}
-   * @private
+   * @returns {{set: setInBucket, remove: removeFromBucket}}
    */
-  function _fnGenerateBucket() {
+  function createHASHBucket() {
 
     /**
      * HASH bucket
      * @type {{}}
-     * @private
      */
-    var _oBucket = {};
+    var bucket = {};
 
     /**
      * Get a value based on key
-     * @param _sKey
+     * @param key
      * @returns {*}
-     * @private
      */
-    function _fnGet (_sKey) {
-      return _oBucket [_sKey];
+    function getFromBucket (key) {
+      return bucket [key];
     }
 
     /**
      * Set value in HASH with given key
-     * @param _sKey
-     * @param _oVal
-     * @private
+     * @param key
+     * @param value
      */
-    function _fnSet(_sKey, _oVal) {
+    function setInBucket(key, value) {
 
-      if (!(typeof _sKey === "string" || typeof _sKey === "number")) {
+      if (!(typeof key === "string" || typeof key === "number")) {
         throw new Error(0, "invalid key type");
       }
-      _oBucket [_sKey] = _oVal;
+      bucket [key] = value;
 
-      return _oBucket [_sKey];
+      return bucket [key];
     }
 
     /**
      * Delete a value with given key
-     * @param _sKey
-     * @private
+     * @param key
      */
-    function _fnRemove(_sKey) {
-      delete _oBucket [_sKey];
+    function removeFromBucket(key) {
+      bucket [key] = null;
     }
 
     /**
      * Public API
      */
     return {
-      get : _fnGet,
-      set: _fnSet,
-      remove: _fnRemove
+      get : getFromBucket,
+      set: setInBucket,
+      remove: removeFromBucket
     };
   }
 
   /**
    * Generate a HASH key
    * @returns {string}
-   * @private
    */
-  function _fnGenerateKey (__sValue) {
-    return _fnBase64Encoder(__sValue);
+  function createHASHKey (__sValue) {
+    return encodeToBase64(__sValue);
   }
 
   /**
    * Public API
    */
   return {
-    generate: _fnGenerateBucket,
-    generateKey: _fnGenerateKey
+    create: createHASHBucket,
+    createKey: createHASHKey
   };
 }

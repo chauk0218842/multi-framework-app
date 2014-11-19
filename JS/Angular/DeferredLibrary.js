@@ -1,30 +1,28 @@
 'use strict';
 
 /**
- * Deferred generate for Angular
+ * Deferred Library for Angular
  * @param _$q
- * @returns {{generate: _fnGenerateDeferred, when: (*|jQuery.when|Function|$Q.when|DeferredLibrary.when|when)}}
- * @constructor
+ * @returns {{generate: createDefer, when: (*|jQuery.when|Function|$Q.when|deferredLibrary.when|when)}}
  */
-function DeferredLibrary (_$q) {
+function deferredLibrary (_$q) {
 
   /**
-   * Deferred wrapper
-   * @returns {{reject: Deferred.reject, resolve: Deferred.resolve, promise: (*|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise|Deferred.fnGenerateDefer.promise|jQuery.promise|promise.promise), then: _fnThen}}
-   * @private
+   * Create a Defer object
+   * @returns {{reject: Deferred.reject, resolve: Deferred.resolve, promise: (*|deferredLibrary.createDefer.promise|jQuery.promise|promise.promise|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise), then: then}}
    */
-  function _fnGenerateDeferred () {
-    var __oDefer = _$q.defer ();
+  function createDefer () {
+    var defer = _$q.defer ();
 
-    function _fnThen (__fnFunc) {
-      return __oDefer.promise.then (__fnFunc);
+    function then (func) {
+      return defer.promise.then (func);
     }
 
     return {
-      reject: __oDefer.reject,
-      resolve: __oDefer.resolve,
-      promise: __oDefer.promise,
-      then: _fnThen
+      reject: defer.reject,
+      resolve: defer.resolve,
+      promise: defer.promise,
+      then: then
     };
   }
 
@@ -32,8 +30,8 @@ function DeferredLibrary (_$q) {
    * Public API
    */
   return {
-    generate : _fnGenerateDeferred,
+    create : createDefer,
     when : _$q.when
   };
 
-};
+}

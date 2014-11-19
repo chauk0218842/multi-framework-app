@@ -1,153 +1,169 @@
 'use strict';
 
 /**
- * IFrame Client
- * @param _URIConst
- * @param _HASH
- * @param _Request
- * @param _Client
- * @param _Deferred
- * @returns {{listen: _fnListenToHost, connect: _fnConnectToHost, disconnect: _fnDisconnectFromHost, getUsername: _fnGetUsername, getClients: _fnGetClientListFromHost, getMessages: _fnGetMessages, sendMessageToClient: _fnSendMessageToClient}}
+ * IFrame Client Library
+ * @param uriConst
+ * @param hashLib
+ * @param requestLib
+ * @param messageLib
+ * @param clientLib
+ * @param deferredLib
+ * @returns {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendMessageToClient: _fnSendMessageToClient}}
  * @constructor
  */
-function IFClientLibrary(_URIConst, _HASH, _Request, _Message, _Client, _Deferred) {
+function ifclientLibrary(uriConst, hashLib, requestLib, messageLib, clientLib, deferredLib) {
 
-  var _sParams = location.toString().replace(/^[^\?]+\?/g, "");
-  var _aParams = _sParams.split("&");
-  var _sClientID = _aParams [0].replace(/^id=/g, "");
-  var _oDeferredHASH = _HASH.generate();
-  var _oRequestLog = [];
-  var _oResponseLog = [];
+  /**
+   * Extract the IFrame ID from teh param string
+   * @type {string}
+   */
+  var param = location.toString().replace(/^[^\?]+\?/g, "");
+  var paramList = param.split("&");
+
+  /**
+   * Extracted IFrame ID from the URI parameters
+   * @type {XML|string|void|*}
+   */
+  var clientID = paramList [0].replace(/^id=/g, "");
+
+  /**
+   * Defer HASH used to track all the promises that need to be resolved
+   * @type {{reject: Deferred.reject, resolve: Deferred.resolve, promise: (*|Deferred._fnGenerateDefer.promise|fnDeferCreate_JQuery.promise|Deferred.fnGenerateDefer.promise|jQuery.promise|promise.promise), then: _fnThen}|{reject: (*|fnDeferCreate_JQuery.reject|Deferred.fnGenerateDefer.reject|DeferredLibrary._fnGenerateDeferred.reject|jQuery.Deferred.reject|Deferred.reject), resolve: (*|fnDeferCreate_JQuery.resolve|Deferred.fnGenerateDefer.resolve|DeferredLibrary._fnGenerateDeferred.resolve|jQuery.Deferred.resolve|Deferred.resolve), promise: (*|fnDeferCreate_JQuery.promise|Deferred.fnGenerateDefer.promise|DeferredLibrary._fnGenerateDeferred.promise|jQuery.promise|promise.promise), then: (*|fnDeferCreate_JQuery.then|Deferred.fnGenerateDefer.then|DeferredLibrary._fnGenerateDeferred.then|promise.then|Promise.then)}|{set: setInBucket, remove: removeFromBucket}|{id: (string|*), host: (XML|string|void|*), urn: (XML|string|void|*), contents: *, receipt: *}|*}
+   */
+  var deferHASH = hashLib.create();
+
+  /**
+   * A collection of all Client requests
+   * @type {Array}
+   */
+  var requestList = [];
+
+  /**
+   * A collection of all Host responses
+   * @type {Array}
+   */
+  var responseList = [];
 
   /**
    * Listen to Host
-   * @param __oWindowEvent
-   * @private
+   * @param event
    */
-  function _fnListenToHost(__oWindowEvent) {
+  function listenToHost(event) {
 
-    var __oDefer = null;
+    var defer;
 
     /**
      * The event data needs to be decoded back into a Request object
      * @type {*}
-     * @private
      */
-    var __oRequest = _Request.decode(_Client.listen(__oWindowEvent));
+    var request = requestLib.decode(clientLib.listen(event));
 
     /**
      * TODO need to make this conversion a bit more elegant, either create a new object type Response which is essentially a Request object..
      * Or rename Request to be more of a two-way binded variable name
      * @type {*}
      */
-    __oRequest.contents = _Message.decode(__oRequest.contents);
+    request.contents = messageLib.decode(request.contents);
 
-    __oDefer = _oDeferredHASH.get(__oRequest.id);
+    defer = deferHASH.get(request.id);
 
-    _oResponseLog.push(__oRequest);
+    responseList.push(request);
 
     /**
      * Handle specific requests
      */
-    if (__oDefer) {
-      __oDefer.resolve(__oRequest);
+    if (defer) {
+      defer.resolve(request);
     }
 
-    console.log (("%CLIENT% > Received a response from host:\n%RESPONSE%\n").replace (/%CLIENT%/g, _sClientID).replace (/%RESPONSE%/g, __oWindowEvent.data.toString ()));
+    console.log(("%CLIENT% > Received a response from host:\n%RESPONSE%\n").replace(/%CLIENT%/g, clientID).replace(/%RESPONSE%/g, event.data.toString()));
 
-    return _Deferred.when(__oRequest);
+    return deferredLib.when(request);
   }
 
   /**
    * Send a message to Host
-   * @param __oRequest
+   * @param request
    * @returns {*}
-   * @private
    */
-  function _fnSendRequestToHost(__oRequest) {
-    var __oDeferred = _oDeferredHASH.set(__oRequest.id, _Deferred.generate());
-    _oRequestLog.push(__oRequest);
-    _Client.send(__oRequest.encode());
+  function sendRequestToHost(request) {
+    var defer = deferHASH.set(request.id, deferredLib.create());
+    requestList.push(request);
+    clientLib.send(request.encode());
 
-    console.log (("%CLIENT% > Sent a request to host:\n%REQUEST%\n").replace (/%CLIENT%/g, _sClientID).replace (/%REQUEST%/g, __oRequest.encode ()));
+    console.log(("%CLIENT% > Sent a request to host:\n%REQUEST%\n").replace(/%CLIENT%/g, clientID).replace(/%REQUEST%/g, request.encode()));
 
-    return __oDeferred;
+    return defer;
   }
 
   /**
    * Connect to Host
    * @returns {*}
-   * @private
    */
-  function _fnConnectToHost() {
-    return _fnSendRequestToHost(_Request.generate(_sClientID, _URIConst.CONNECT_CLIENT, null, false))
-      .then(function (__oRequest) {
-        return __oRequest.contents.contents;
+  function connectToHost() {
+    return sendRequestToHost(requestLib.create(clientID, uriConst.CONNECT_CLIENT, null, false))
+      .then(function (request) {
+        return request.contents.contents;
       });
   }
 
   /**
    * Disconnect from Host
    * @returns {*}
-   * @private
    */
-  function _fnDisconnectFromHost() {
-    return _fnSendRequestToHost(_Request.generate(_sClientID, _URIConst.DISCONNECT_CLIENT, null, false))
-      .then(function (__oRequest) {
-        return __oRequest.contents.contents;
+  function disconnectFromHost() {
+    return sendRequestToHost(requestLib.create(clientID, uriConst.DISCONNECT_CLIENT, null, false))
+      .then(function (request) {
+        return request.contents.contents;
       });
   }
 
   /**
    * Get Username
    * @returns {XML|string|void|*}
-   * @private
    */
-  function _fnGetUsername() {
-    return _sClientID;
+  function getUsername() {
+    return clientID;
   }
 
   /**
    * Get Clients from Host
    * @returns {*}
-   * @private
    */
-  function _fnGetClientListFromHost() {
-    return _fnSendRequestToHost(_Request.generate(_sClientID, _URIConst.REQUEST_CLIENT_LIST, null, false))
-      .then(function (__oRequest) {
-        return __oRequest.contents.contents;
+  function getClientListFromHost() {
+    return sendRequestToHost(requestLib.create(clientID, uriConst.REQUEST_CLIENT_LIST, null, false))
+      .then(function (request) {
+        return request.contents.contents;
       });
   }
 
   /**
    * Get all client-to-host requests
    * @returns {Array}
-   * @private
    */
-  function _fnGetRequestLog() {
-    return _oRequestLog;
+  function getRequestLog() {
+    return requestList;
   }
 
   /**
    * Get all host-to-client responses
    * @returns {Array}
-   * @private
    */
-  function _fnGetResponseLog() {
-    return _oResponseLog;
+  function getResponseLog() {
+    return responseList;
   }
 
   /**
-   * Send message to Client
-   * @param __oMessage
-   * @param __bReceipt
+   * Send message to client
+   * @param recipientID
+   * @param contents
+   * @param useReceipt
    * @returns {*}
-   * @private
    */
-  function _fnSendMessageToClient(__sRecipient, __oContents, __bReceipt) {
-    return _fnSendRequestToHost(_Request.generate(_sClientID, _URIConst.SEND_CLIENT_MESSAGE, _Message.generate(_sClientID, __sRecipient, __oContents), __bReceipt))
-      .then(function (__oRequest) {
-        return __oRequest.contents;
+  function _fnSendMessageToClient(recipientID, contents, useReceipt) {
+    return sendRequestToHost(requestLib.create(clientID, uriConst.SEND_CLIENT_MESSAGE, messageLib.create(clientID, recipientID, contents), useReceipt))
+      .then(function (request) {
+        return request.contents;
       });
   }
 
@@ -155,14 +171,13 @@ function IFClientLibrary(_URIConst, _HASH, _Request, _Message, _Client, _Deferre
    * Public API
    */
   return {
-    listen: _fnListenToHost,
-    connect: _fnConnectToHost,
-    disconnect: _fnDisconnectFromHost,
-    getUsername: _fnGetUsername,
-    getClients: _fnGetClientListFromHost,
-    getRequestLog: _fnGetRequestLog,
-    getResponseLog: _fnGetResponseLog,
+    listen: listenToHost,
+    connect: connectToHost,
+    disconnect: disconnectFromHost,
+    getUsername: getUsername,
+    getClients: getClientListFromHost,
+    getRequestLog: getRequestLog,
+    getResponseLog: getResponseLog,
     sendMessageToClient: _fnSendMessageToClient
   };
-
 }

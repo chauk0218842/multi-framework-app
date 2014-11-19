@@ -1,95 +1,91 @@
 'use strict';
 
 /**
- * IFRoute Library
- * @param _URIConst
- * @param _Request
- * @param _Message
- * @param _Server
- * @param _fnProcessRequestExtension
+ * IFRouter Library
+ * @param uriConst
+ * @param requestLib
+ * @param messageLib
+ * @param serverLib
+ * @param routerExt
  * @returns {{process: _fnProcessRequest}}
  * @constructor
  */
-function IFRouterLibrary(_URIConst, _Request, _Message, _Server, _fnProcessRequestExtension) {
+function ifrouterLibrary(uriConst, requestLib, messageLib, serverLib, routerExt) {
 
   /**
    * Update client with new client lists
-   * @private
    */
-  function _fnUpdateClientsClientList () {
-    var __oClientList = _Server.getClientList();
-    for (var n = 0, nLen = __oClientList.length; n < nLen; n++) {
-      var sClient = __oClientList [n];
-      _Server.processRequest(sClient, _Request.generate (sClient, _URIConst.REQUEST_CLIENT_LIST, _Message.generate (_Server.Const.SERVER_NAME, sClient, __oClientList), false).encode ());
+  function updateClientsClientList () {
+    var clientList = serverLib.getClientList();
+    for (var n = 0, nLen = clientList.length; n < nLen; n++) {
+      var sClient = clientList [n];
+      serverLib.processRequest(sClient, requestLib.create (sClient, uriConst.REQUEST_CLIENT_LIST, messageLib.create (serverLib.const.SERVER_NAME, sClient, clientList), false).encode ());
     }
   }
 
   /**
    * Process an encoded request
-   * @param __oEncRequest
+   * @param encodedRequest
    * @returns {*}
-   * @private
    */
-  function _fnProcessRequest(__oEncRequest) {
+  function _fnProcessRequest(encodedRequest) {
 
     /**
      * Convert the encoded request into a Request object
      * @type {*}
-     * @private
      */
-    var __oDecRequest = _Request.decode(__oEncRequest);
+    var decodedRequest = requestLib.decode(encodedRequest);
 
     /**
      * Convert the encoded content into a Message object
      * @type {*}
-     * @private
      */
-    var __oMessage = _Message.decode (__oDecRequest.contents);
+    var message = messageLib.decode (decodedRequest.contents);
 
     /**
      * Connect a client
      */
-    if (__oDecRequest.uri === _URIConst.CONNECT_CLIENT) {
-      _Server.addClient(__oDecRequest.client);
-      _Server.processRequest(__oDecRequest.client, __oDecRequest.respond (_Message.generate (_Server.Const.SERVER_NAME, __oDecRequest.client, "connected to host")).encode ());
-      _fnUpdateClientsClientList ();
+    if (decodedRequest.uri === uriConst.CONNECT_CLIENT) {
+      serverLib.addClient(decodedRequest.client);
+      serverLib.processRequest(decodedRequest.client, decodedRequest.respond (messageLib.create (serverLib.const.SERVER_NAME, decodedRequest.client, "connected to host")).encode ());
+      updateClientsClientList ();
     }
 
     /**
      * Disconnect a client
      */
-    else if (__oDecRequest.uri === _URIConst.DISCONNECT_CLIENT) {
-      _Server.removeClient(__oDecRequest.client);
-      _Server.processRequest(__oDecRequest.client, __oDecRequest.respond (_Message.generate (_Server.Const.SERVER_NAME, __oDecRequest.client, "disconnected from host")).encode ());
+    else if (decodedRequest.uri === uriConst.DISCONNECT_CLIENT) {
+      serverLib.removeClient(decodedRequest.client);
+      serverLib.processRequest(decodedRequest.client, decodedRequest.respond (messageLib.create (serverLib.const.SERVER_NAME, decodedRequest.client, "disconnected from host")).encode ());
     }
 
     /**
      * Get client list
      */
-    else if (__oDecRequest.uri === _URIConst.REQUEST_CLIENT_LIST) {
-      _Server.processRequest(__oDecRequest.client, __oDecRequest.respond (_Message.generate (_Server.Const.SERVER_NAME, __oDecRequest.client, _Server.getClientList())).encode ());
+    else if (decodedRequest.uri === uriConst.REQUEST_CLIENT_LIST) {
+      serverLib.processRequest(decodedRequest.client, decodedRequest.respond (messageLib.create (serverLib.const.SERVER_NAME, decodedRequest.client, serverLib.getClientList())).encode ());
     }
 
     /**
-     * Send a _Message to client
+     * Send a messageLib to client
      */
-    else if (__oDecRequest.uri === _URIConst.SEND_CLIENT_MESSAGE) {
-      _Server.processRequest(__oMessage.recipient, __oEncRequest);
+    else if (decodedRequest.uri === uriConst.SEND_CLIENT_MESSAGE) {
+      serverLib.processRequest(message.recipient, encodedRequest);
     }
 
     /**
      * Custom server extension routine that needs to be executed
      */
-    else if (_fnProcessRequestExtension) {
-      var oResp = _fnProcessRequestExtension.call(null, _URIConst, _Request, _Message, _Server, __oEncRequest);
-      _Server.processRequest(oResp.client, oResp.request);
+    else if (routerExt) {
+      var oResp = routerExt.call(null, uriConst, requestLib, messageLib, serverLib, encodedRequest);
+      serverLib.processRequest(oResp.client, oResp.request);
     }
 
     /**
      * Something equivalent to a 404 (lol)
      */
     else {
-      _Server.processRequest(__oDecRequest.client, __oDecRequest.respond(_Message.generate(_Server.Const.SERVER_NAME, __oDecRequest.client, "you 404'ed!!")).encode());
+      serverLib.processRequest(decodedRequest.client, decodedRequest.respond(messageLib.create(serverLib.const.SERVER_NAME, decodedRequest.client, "you 404'ed!!")).encode());
     }
   }
 

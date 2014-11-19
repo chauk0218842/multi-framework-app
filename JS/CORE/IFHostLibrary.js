@@ -2,25 +2,27 @@
 
 /**
  * IFrame Host Library
- * @param _Router
- * @returns {{listen: _fnListen}}
+ * @param routerLib
+ * @returns {{listen: listen}}
  * @constructor
  */
-function IFHostLibrary (_Router) {
+function ifhostLibrary (routerLib) {
 
   /**
    * Window listener event handler
-   * @param __oWindowEvent
-   * @private
+   * @param event
    */
-  function _fnListen (__oWindowEvent) {
-    _Router.process (__oWindowEvent.data);
+  function listen (event) {
+    routerLib.process (event.data);
 
-    console.log (("HOST > Processing a request:\n%REQUEST%\n").replace (/%REQUEST%/g, __oWindowEvent.data));
+    console.log (("HOST > Processing a request:\n%REQUEST%\n").replace (/%REQUEST%/g, event.data));
   }
 
+  /**
+   * Public API
+   */
   return {
-    listen : _fnListen
+    listen : listen
   };
 
 }

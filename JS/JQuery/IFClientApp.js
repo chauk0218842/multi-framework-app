@@ -3,101 +3,95 @@
  */
 'use strict';
 
-function fnDocumentOnLoad (_$) {
+function documentOnload(_$) {
   /**
-   * HASH object
+   * HASH Library object
    * @type {{generate: _fnGenerateBucket, generateKey: _fnGenerateKey}}
-   * @private
    */
-  var HASH = HASHLibrary(window.atob);
+  var hashLib = hashLibrary(window.atob);
 
   /**
-   * Deferred object
+   * Deferred Library object
+   * @type {{generate: _fnGenerateDeferred, when: (*|jQuery.when|Function|$Q.when|deferredLibrary.when|when)}|{generate: createDefer, when: (*|deferredLibrary.when|jQuery.when|Function|$Q.when|when)}}
    */
-  var Deferred = DeferredLibrary(_$);
+  var deferredLib = deferredLibrary(_$);
 
   /**
-   * Message object
-   * @type {{generate: _fnGenerateMessage}}
-   * @private
+   * Message Library object
+   * @type {{generate: createNewMessage, decode: decodeMessage}}
    */
-  var Message = MessageLibrary(HASH.generateKey, JSON.stringify, JSON.parse);
+  var messageLib = messageLibrary(hashLib.createKey, JSON.stringify, JSON.parse);
 
   /**
-   * Request object
-   * @type {{generate: _fnGenerateRequest}}
-   * @private
+   * Request Library object
+   * @type {{generate: createNewRequest, decode: decodeRequest}}
    */
-  var Request = RequestLibrary(HASH.generateKey, JSON.stringify, JSON.parse);
+  var requestLib = requestLibrary(hashLib.createKey, JSON.stringify, JSON.parse);
 
   /**
-   * Server Constants object
-   * @type {ServerConstants|*}
-   * @private
+   * Server Constants library
+   * @type {{SERVER_NAME: string, DOMAIN_NAME: string}}
    */
-  var ServerConst = ServerConstants;
+  var serverConst = serverConstants;
 
   /**
-   * Client library object
-   * @type {{send: _fnSendRequestToServer, listen: _fnListenToServer}}
-   * @private
+   * Client Library object
+   * @type {{send: sendRequestToServer, listen: listenToServer}}
    */
-  var Client = ClientLibrary(ServerConst);
+  var clientLib = clientLibrary(serverConst);
 
   /**
    * IFURI Constants object
-   * @type {{CONNECTClient: string, DISCONNECTClient: string, REQUESTClient_LIST: string, SENDClientMessage: string}}
-   * @private
+   * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_MESSAGE: string}}
    */
-  var IFURIConst = IFURIConstants;
+  var ifuriConst = ifuriConstants;
 
   /**
-   * IFClient object
-   * @type {{listen: _fnListenToHost, connect: _fnConnectToHost, disconnect: _fnDisconnectFromHost, getUsername: _fnGetUsername, getClients: _fnGetClientListFromHost, getMessages: _fnGetMessages, sendMessageToClient: _fnSendMessageToClient}}
-   * @private
+   * IFClient Library object
+   * @type {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendMessageToClient: _fnSendMessageToClient}}
    */
-  var IFClient = IFClientLibrary(IFURIConst, HASH, Request, Message, Client, Deferred);
+  var ifClientLib = ifclientLibrary(ifuriConst, hashLib, requestLib, messageLib, clientLib, deferredLib);
 
   /**
    * Add on message window listener
    */
-  window.addEventListener("message", function (__oEvent) {
+  window.addEventListener("message", function (event) {
 
     /**
      * Listen for messages
      */
-    IFClient.listen(__oEvent).then(function (__oRequest) {
+    ifClientLib.listen(event).then(function (request) {
 
-      var ___o$Response = _$("#response");
-      var ___o$Contacts = _$("#contacts");
+      var $response = _$("#response");
+      var $contacts = _$("#contacts");
 
       /**
        * Update response
        */
-      if (__oRequest.uri === IFURIConst.CONNECT_CLIENT ||
-        __oRequest.uri === IFURIConst.DISCONNECT_CLIENT ||
-        __oRequest.uri === IFURIConst.SEND_CLIENT_MESSAGE) {
-        ___o$Response.val (("%SENDER% > %MESSAGE%\n--\n").replace(/%SENDER%/g, __oRequest.contents.sender).replace(/%MESSAGE%/g, __oRequest.contents.contents) + ___o$Response.val ());
+      if (request.uri === ifuriConst.CONNECT_CLIENT ||
+        request.uri === ifuriConst.DISCONNECT_CLIENT ||
+        request.uri === ifuriConst.SEND_CLIENT_MESSAGE) {
+        $response.val(("%SENDER% > %MESSAGE%\n--\n").replace(/%SENDER%/g, request.contents.sender).replace(/%MESSAGE%/g, request.contents.contents) + $response.val());
       }
 
       /**
-       * Client list was updated
+       * clientLib list was updated
        */
-      else if (__oRequest.uri === IFURIConst.REQUEST_CLIENT_LIST) {
+      else if (request.uri === ifuriConst.REQUEST_CLIENT_LIST) {
 
-        ___o$Contacts.empty();
+        $contacts.empty();
 
-        var __oContacts = __oRequest.contents.contents.sort();
-        ___o$Contacts.append('<option value = "ALL">ALL</option>');
+        var contacts = request.contents.contents.sort();
+        $contacts.append('<option value = "ALL">ALL</option>');
 
-        for (var n in __oContacts) {
-          if (__oContacts [n] === IFClient.getUsername()) {
+        for (var n in contacts) {
+          if (contacts [n] === ifClientLib.getUsername()) {
             continue;
           }
-          ___o$Contacts.append("<option value = \"" + __oContacts [n] + "\">" + __oContacts [n] + "</option>");
+          $contacts.append("<option value = \"" + contacts [n] + "\">" + contacts [n] + "</option>");
         }
 
-        ___o$Contacts.index(0);
+        $contacts.index(0);
       }
 
     });
@@ -114,28 +108,30 @@ function fnDocumentOnLoad (_$) {
   /**
    * Assign the client name
    */
-  _$("#clientName").text(IFClient.getUsername());
+  _$("#clientName").text(ifClientLib.getUsername());
 
   /**
    * Assign the send event
    */
   _$("#send").bind("click", function () {
 
-    var __o$Contacts = _$("#contacts");
-    var __sMessage = _$("#message").val();
+    var $contacts = _$("#contacts");
+    var message = _$("#message").val();
 
-    if (__o$Contacts.val () === "ALL") {
-      var oContacts = _$("#contacts>option").map(function() { return $(this).val(); });
+    if ($contacts.val() === "ALL") {
+      var oContacts = _$("#contacts>option").map(function () {
+        return $(this).val();
+      });
       for (var n = 0, nLen = oContacts.length; n < nLen; n++) {
         var oContact = oContacts [n];
         if (oContact === "ALL") {
           continue;
         }
-        IFClient.sendMessageToClient(oContact, __sMessage, false);
+        ifClientLib.sendMessageToClient(oContact, message, false);
       }
     }
     else {
-      IFClient.sendMessageToClient(__o$Contacts.val (), __sMessage, false);
+      ifClientLib.sendMessageToClient($contacts.val(), message, false);
     }
 
   });
@@ -143,12 +139,12 @@ function fnDocumentOnLoad (_$) {
   /**
    * Connect to the host
    */
-  IFClient.connect();
+  ifClientLib.connect();
 }
 
 /**
  * Upon document ready
  */
-$(document).ready (function () {
-  fnDocumentOnLoad ($);
+$(document).ready(function () {
+  documentOnload($);
 });

@@ -4,87 +4,87 @@
 'use strict';
 
 /**
- * HASHLibrary module
+ * Hash Library module
  * @type {module}
  */
-var HASHMod = angular.module("HASHLibrary", []);
-HASHMod.factory("HASH", function () {
-  return HASHLibrary(window.atob);
+var hashLibMod = angular.module("hashLibrary", []);
+hashLibMod.factory("hashLib", function () {
+  return hashLibrary(window.atob);
 });
 
 /**
- * DeferredLibrary module
+ * Deferred Library module
  * @type {module}
  */
-var DeferredMod = angular.module("DeferredLibrary", []);
-DeferredMod.factory("Deferred", function ($q) {
-  return DeferredLibrary($q);
+var deferredLibMod = angular.module("deferredLibrary", []);
+deferredLibMod.factory("deferredLib", function ($q) {
+  return deferredLibrary($q);
 });
 
 /**
- * MessageLibrary module
+ * Message Library module
  * @type {module}
  */
-var MessageMod = angular.module("MessageLibrary", ["HASHLibrary"]);
-MessageMod.factory("Message", function (HASH) {
-  return MessageLibrary(HASH.generateKey, angular.toJson, angular.fromJson);
+var messageLibMod = angular.module("messageLibrary", ["hashLibrary"]);
+messageLibMod.factory("messageLib", function (hashLib) {
+  return messageLibrary(hashLib.createKey, angular.toJson, angular.fromJson);
 });
 
 /**
- * RequestLibrary module
+ * Request Library module
  * @type {module}
  */
-var RequestMod = angular.module("RequestLibrary", ["HASHLibrary"]);
-RequestMod.factory("Request", function (HASH) {
-  return RequestLibrary(HASH.generateKey, angular.toJson, angular.fromJson);
+var requestLibMod = angular.module("requestLibrary", ["hashLibrary"]);
+requestLibMod.factory("requestLib", function (hashLib) {
+  return requestLibrary(hashLib.createKey, angular.toJson, angular.fromJson);
 });
 
 /**
- * ServerConstLibrary module
+ * Sever Constants module
  * @type {module}
  */
-var ServerConstMod = angular.module("ServerConstLibrary", []);
-ServerConstMod.factory("ServerConst", function () {
-  return ServerConstants;
+var serverConstMod = angular.module("serverConst", []);
+serverConstMod.factory("serverConst", function () {
+  return serverConstants;
 });
 
 /**
- * ClientLibrary module
+ * Client Library module
  * @type {module}
  */
-var ClientMod = angular.module("ClientLibrary", ["ServerConstLibrary"])
-ClientMod.factory("Client", function (ServerConst) {
-  return ClientLibrary(ServerConst);
+var clientLibMod = angular.module("ClientLibrary", ["serverConst"])
+clientLibMod.factory("clientLib", function (serverConst) {
+  return clientLibrary(serverConst);
 });
 
 /**
- * IFURIConstants module
+ * IFURI Constants module
  * @type {module}
  */
-var IFURIConstMod = angular.module("IFURIConstants", []);
-IFURIConstMod.factory("IFURIConst", function () {
-  return IFURIConstants;
+var ifuriConstMod = angular.module("ifuriConstants", []);
+ifuriConstMod.factory("ifuriConst", function () {
+  return ifuriConstants;
 });
 
 /**
- * IFClientLibrary module
+ * IFClient Library module
  * @type {module}
  */
-var IFClientMod = angular.module("IFClientLibrary", ["IFURIConstants", "HASHLibrary", "RequestLibrary", "MessageLibrary", "ClientLibrary", "DeferredLibrary"]);
-IFClientMod.factory("IFClient", function (IFURIConst, HASH, Request, Message, Client, Deferred) {
-  return IFClientLibrary(IFURIConst, HASH, Request, Message, Client, Deferred);
+var ifclientLibMod = angular.module("ifclientLibrary", ["ifuriConstants", "hashLibrary", "requestLibrary", "messageLibrary", "ClientLibrary", "deferredLibrary"]);
+ifclientLibMod.factory("ifclientLib", function (ifuriConst, hashLib, requestLib, messageLib, clientLib, deferredLib) {
+  return ifclientLibrary(ifuriConst, hashLib, requestLib, messageLib, clientLib, deferredLib);
 });
 
 
 /**
- * IFClientApp module
+ * IFClient App module
  */
-var IFClientApp = angular.module("IFClientApp", ["IFClientLibrary", "IFURIConstants"]);
+var ifclientApp = angular.module("ifclientApp", ["ifclientLibrary", "ifuriConstants"]);
 
-IFClientApp.controller("IFClientCtrl", function ($window, $scope, IFClient, IFURIConst) {
+ifclientApp.controller("ifclientCtrl", function ($window, $scope, ifclientLib, ifuriConst) {
 
   var _VM = $scope;
-  _VM.username = IFClient.getUsername();
+  _VM.username = ifclientLib.getUsername();
   _VM.response = "";
 
   angular.element($window).on("message", function (__oEvent) {
@@ -94,26 +94,26 @@ IFClientApp.controller("IFClientCtrl", function ($window, $scope, IFClient, IFUR
       /**
        * Listen for messages
        */
-      IFClient.listen(__oEvent).then(function (__oRequest) {
+      ifclientLib.listen(__oEvent).then(function (__oRequest) {
 
         /**
          * Update response
          */
-        if (__oRequest.uri === IFURIConst.CONNECT_CLIENT ||
-          __oRequest.uri === IFURIConst.DISCONNECT_CLIENT ||
-          __oRequest.uri === IFURIConst.SEND_CLIENT_MESSAGE) {
+        if (__oRequest.uri === ifuriConst.CONNECT_CLIENT ||
+          __oRequest.uri === ifuriConst.DISCONNECT_CLIENT ||
+          __oRequest.uri === ifuriConst.SEND_CLIENT_MESSAGE) {
           _VM.response = ("%SENDER% > %MESSAGE%\n--\n").replace(/%SENDER%/g, __oRequest.contents.sender).replace(/%MESSAGE%/g, __oRequest.contents.contents) + _VM.response;
         }
 
         /**
-         * Client list was updated
+         * clientLib list was updated
          */
-        else if (__oRequest.uri === IFURIConst.REQUEST_CLIENT_LIST) {
+        else if (__oRequest.uri === ifuriConst.REQUEST_CLIENT_LIST) {
 
           var __oContacts = __oRequest.contents.contents.sort();
           var __oNewContacts = ["ALL"];
           for (var n = 0, nLen = __oContacts.length; n < nLen; n++) {
-            if (__oContacts [n] === IFClient.getUsername()) {
+            if (__oContacts [n] === ifclientLib.getUsername()) {
               continue;
             }
             __oNewContacts.push(__oContacts [n]);
@@ -134,14 +134,14 @@ IFClientApp.controller("IFClientCtrl", function ($window, $scope, IFClient, IFUR
 
 });
 
-IFClientApp.directive("pmcResponse", function () {
+ifclientApp.directive("pmcResponse", function () {
   return {
     restrict: "E",
     template: '<textarea ng-model = "response" class = "response"></textarea>'
   };
 });
 
-IFClientApp.directive("pmcContacts", function (IFClient) {
+ifclientApp.directive("pmcContacts", function (ifclientLib) {
   return {
     restrict: "E",
     controller: function ($scope) {
@@ -155,7 +155,7 @@ IFClientApp.directive("pmcContacts", function (IFClient) {
   };
 });
 
-IFClientApp.directive("pmcMessage", function (IFClient) {
+ifclientApp.directive("pmcMessage", function (ifclientLib) {
   return {
     restrict: "E",
     controller: function ($scope) {
@@ -170,21 +170,21 @@ IFClientApp.directive("pmcMessage", function (IFClient) {
             if (oContact === "ALL") {
               continue;
             }
-            IFClient.sendMessageToClient(oContact, $scope.message, false);
+            ifclientLib.sendMessageToClient(oContact, $scope.message, false);
           }
         }
         else {
-          IFClient.sendMessageToClient($scope.recipient, $scope.message, false);
+          ifclientLib.sendMessageToClient($scope.recipient, $scope.message, false);
         }
       };
 
     },
-    template: 'Message' +
+    template: 'messageLib' +
     '<br/><textarea ng-model = "message" class = "message">Your message here</textarea>' +
     '<button ng-click = "sendMessage ()">Send</button>'
   };
 });
 
-IFClientApp.run(function (IFClient) {
-  IFClient.connect();
+ifclientApp.run(function (ifclientLib) {
+  ifclientLib.connect();
 });
