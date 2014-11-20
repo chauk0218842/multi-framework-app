@@ -1,0 +1,21 @@
+{
+  "name": "IFClient JQuery 2.1.1",
+  "version": "1.0.0",
+  "authors": [
+    "Kent Chau <kent@rangle.io>"
+  ],
+  "description": "This is a JQuery 2.1.1 client for the IFrame Host/Client project",
+  "main": "index.html",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.1"
+  }
+}

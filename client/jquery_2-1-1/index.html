@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>IFrame jquery 2.1.1 Client</title>
+    <link rel="stylesheet" href="../../css/Styles.css">
+</head>
+<body>
+
+    <!-- RAW JS libraries -->
+    <script src="../../js/core/clientLibrary/clientLibrary.js"></script>
+    <script src="../../js/core/hashLibrary/hashLibrary.js"></script>
+    <script src="../../js/core/messageLibrary/messageLibrary.js"></script>
+    <script src="../../js/core/serverConstants/serverConstants.js"></script>
+    <script src="../../js/core/serverLibrary/serverLibrary.js"></script>
+    <script src="../../js/ifuriConstants.js"></script>
+    <script src="../../js/ifclientLibrary.js"></script>
+
+    <!-- JQuery JS libraries -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+
+    <script src="js/core/deferredLibrary/deferredLibrary-wrap.js"></script>
+
+    <!-- App library -->
+    <script src="js/core/documentOnload.js"></script>
+    <script src="js/app.js"></script>
+
+    <h3><span id="clientName"></span> (Powered by jquery 2.1.1)</h3>
+
+    <textarea id="response" class = "response"></textarea>
+
+    <p>Contacts <select id="contacts"></select></p>
+    <p>
+        Message
+        <br/><textarea id = "message" class = "message">Your message here...</textarea>
+        <button id="send">Send</button>
+    </p>
+
+</body>
+</html>
