@@ -1,8 +1,9 @@
-'use strict';
-
 /**
  * Upon document ready
  */
 $(document).ready(function () {
-  documentOnload($);
+
+  'use strict';
+
+  onDOMContentLoaded($);
 });

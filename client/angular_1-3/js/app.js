@@ -1,39 +1,40 @@
-'use strict';
-
 /**
  * IFClient App module
  */
 angular.module("ifclientApp", ["ifclientLibrary", "ifuriConstants"]);
 angular.module("ifclientApp").controller("ifclientCtrl", function ($window, $scope, ifclientLib, ifuriConst) {
 
+  'use strict';
+
   var _VM = $scope;
   _VM.username = ifclientLib.getUsername();
   _VM.response = "";
 
-  angular.element($window).on("message", function (event) {
+  function transmissionListener (event) {
 
     _VM.$apply(function () {
 
       /**
-       * Listen for messages
+       * Listen for transmissions
        */
-      ifclientLib.listen(event).then(function (message) {
+      ifclientLib.listen(event).then(function (trans) {
 
         /**
          * Update response
          */
-        if (message.uri === ifuriConst.CONNECT_CLIENT ||
-          message.uri === ifuriConst.DISCONNECT_CLIENT ||
-          message.uri === ifuriConst.SEND_CLIENT_MESSAGE) {
-          _VM.response = ("%CLIENT% > %MESSAGE%\n--\n").replace(/%CLIENT%/g, message.client).replace(/%MESSAGE%/g, message.parameters.body) + _VM.response;
+        if (trans.uri === ifuriConst.CONNECT_CLIENT ||
+          trans.uri === ifuriConst.DISCONNECT_CLIENT ||
+          trans.uri === ifuriConst.SEND_CLIENT_PACKAGE) {
+
+          _VM.response = ("%CLIENT% > %MESSAGE%\n--\n").replace(/%CLIENT%/g, trans.client).replace(/%MESSAGE%/g, trans.package.body) + _VM.response;
         }
 
         /**
          * clientLib list was updated
          */
-        else if (message.uri === ifuriConst.REQUEST_CLIENT_LIST) {
+        else if (trans.uri === ifuriConst.REQUEST_CLIENT_LIST) {
 
-          var __oContacts = message.parameters.contacts.sort();
+          var __oContacts = trans.package.list.sort();
           var __oNewContacts = ["ALL"];
           for (var n = 0, nLen = __oContacts.length; n < nLen; n++) {
             if (__oContacts [n] === ifclientLib.getUsername()) {
@@ -49,20 +50,28 @@ angular.module("ifclientApp").controller("ifclientCtrl", function ($window, $sco
       });
     });
 
-  });
+  }
 
-  angular.element($window).on("unload", function () {
-    $window.removeEventListener("message");
-  })
+  function transmissionUnlistener () {
+    $window.removeEventListener("trans");
+  }
+
+  angular.element($window).on("message", transmissionListener);
 
 });
 angular.module("ifclientApp").directive("pmcResponse", function () {
+
+  'use strict';
+
   return {
     restrict: "E",
     template: '<textarea ng-model = "response" class = "response"></textarea>'
   };
 });
 angular.module("ifclientApp").directive("pmcContacts", function () {
+
+  'use strict';
+
   return {
     restrict: "E",
     controller: function ($scope) {
@@ -76,6 +85,9 @@ angular.module("ifclientApp").directive("pmcContacts", function () {
   };
 });
 angular.module("ifclientApp").directive("pmcMessage", function (ifclientLib) {
+
+  'use strict';
+
   return {
     restrict: "E",
     controller: function ($scope) {
@@ -95,20 +107,23 @@ angular.module("ifclientApp").directive("pmcMessage", function (ifclientLib) {
             if (oContact === "ALL") {
               continue;
             }
-            ifclientLib.sendMessageToClient(oContact, $scope.message, false);
+            ifclientLib.sendTextMessageToClient(oContact, $scope.message, false);
           }
         }
         else {
-          ifclientLib.sendMessageToClient($scope.recipient, $scope.message, false);
+          ifclientLib.sendTextMessageToClient($scope.recipient, $scope.message, false);
         }
       };
 
     },
-    template: 'messageLib' +
+    template: 'Message' +
     '<br/><textarea ng-model = "message" class = "message">Your message here</textarea>' +
     '<button ng-click = "sendMessage ()">Send</button>'
   };
 });
 angular.module("ifclientApp").run(function (ifclientLib) {
+
+  'use strict';
+
   ifclientLib.connect();
 });

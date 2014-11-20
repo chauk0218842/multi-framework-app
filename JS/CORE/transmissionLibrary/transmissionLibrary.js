@@ -1,11 +1,11 @@
-'use strict';
-
 /**
- * Package Library
+ * Transmission Library
  * @param createHASHKey
- * @returns {{create: createNewMessage}}
+ * @returns {{create: createNewTransmission}}
  */
-function messageLibrary(createHASHKey) {
+function transmissionLibrary(createHASHKey) {
+
+  'use strict';
 
   /**
    * Request ID prefix
@@ -21,47 +21,47 @@ function messageLibrary(createHASHKey) {
 
   /**
    * Create a Message
-   * @param messageID
+   * @param transID
    * @param uri
    * @param clientID
-   * @param parameters
+   * @param pkg
    * @returns {{id: *, client: *, host: *, urn: *, parameters: *, receipt: *}}
    */
-  function createMessage(messageID, uri, clientID, parameters) {
+  function createTransmission(transID, uri, clientID, pkg) {
     return {
-      id: messageID,
+      id: transID,
       uri: uri,
       client: clientID,
-      parameters: parameters
+      package: pkg
     };
   }
 
   /**
    * Create Response
-   * @param message
-   * @param parameters
+   * @param transmission
+   * @param pkg
    * @returns {{id: *, client: *, host: *, urn: *, parameters: *, receipt: *}}
    */
-  function createResponse(message, parameters) {
-    return createMessage(message.id, message.uri, message.client, parameters);
+  function createResponse(transmission, pkg) {
+    return createTransmission(transmission.id, transmission.uri, transmission.client, pkg);
   }
 
   /**
    * Generate a Request
    * @param uri
    * @param clientID
-   * @param parameters
+   * @param pkg
    * @returns {{id: (string|*), host: (XML|string|void|*), urn: (XML|string|void|*), parameters: *, receipt: *}}
    */
-  function createNewMessage(uri, clientID, parameters) {
-    return createMessage(createHASHKey(keyPrefix + (keyCounter++)), uri, clientID, parameters);
+  function createNewTransmission(uri, clientID, pkg) {
+    return createTransmission(String (createHASHKey(keyPrefix + (keyCounter++))), uri, clientID, pkg);
   }
 
   /**
    * Public API
    */
   return {
-    create: createNewMessage,
+    create: createNewTransmission,
     createResponse: createResponse
   };
 }

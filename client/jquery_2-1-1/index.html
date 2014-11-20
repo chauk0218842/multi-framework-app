@@ -10,30 +10,32 @@
     <!-- RAW JS libraries -->
     <script src="../../js/core/clientLibrary/clientLibrary.js"></script>
     <script src="../../js/core/hashLibrary/hashLibrary.js"></script>
-    <script src="../../js/core/messageLibrary/messageLibrary.js"></script>
+    <script src="../../js/core/packageLibrary/packageConstants.js"></script>
+    <script src="../../js/core/packageLibrary/packageLibrary.js"></script>
     <script src="../../js/core/serverConstants/serverConstants.js"></script>
     <script src="../../js/core/serverLibrary/serverLibrary.js"></script>
+    <script src="../../js/core/transmissionLibrary/transmissionLibrary.js"></script>
     <script src="../../js/ifuriConstants.js"></script>
     <script src="../../js/ifclientLibrary.js"></script>
 
     <!-- JQuery JS libraries -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
-
     <script src="js/core/deferredLibrary/deferredLibrary-wrap.js"></script>
 
     <!-- App library -->
-    <script src="js/core/documentOnload.js"></script>
+    <script src="js/core/onDOMContentLoaded.js"></script>
     <script src="js/app.js"></script>
 
     <h3><span id="clientName"></span> (Powered by jquery 2.1.1)</h3>
 
-    <textarea id="response" class = "response"></textarea>
+    <div id="response" class = "response"></div>
 
-    <p>Contacts <select id="contacts"></select></p>
+
+    <p>Contacts <select id="contacts" name = "contacts"></select></p>
     <p>
         Message
-        <br/><textarea id = "message" class = "message">Your message here...</textarea>
-        <button id="send">Send</button>
+        <br/><textarea id = "message" name = "message" class = "message">&lt; Type a message / drag and drop a file into here &gt;</textarea>
+        <button id="send">Send</button> <button id="reset">Reset</button>
     </p>
 
 </body>

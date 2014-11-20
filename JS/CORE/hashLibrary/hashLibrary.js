@@ -1,11 +1,11 @@
-'use strict';
-
 /**
  * HASH Library
  * @param encodeToBase64
  * @returns {{create: createHASHBucket, createKey: createHASHKey}}
  */
 function hashLibrary (encodeToBase64) {
+
+  'use strict';
 
   /**
    * Generate Bucket

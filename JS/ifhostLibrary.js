@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * IFrame Host Library
  * @param routerLib
@@ -7,6 +5,8 @@
  * @constructor
  */
 function ifhostLibrary (routerLib) {
+
+  'use strict';
 
   /**
    * Window listener event handler

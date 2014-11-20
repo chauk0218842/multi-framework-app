@@ -1,8 +1,6 @@
-'use strict';
-
 /**
  * IFrame URI Constants
- * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_MESSAGE: string}}
+ * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_PACKAGE: string}}
  */
 var ifuriConstants = {
 
@@ -24,5 +22,5 @@ var ifuriConstants = {
   /**
    * Client: send a message to a client
    */
-  SEND_CLIENT_MESSAGE: "HOST: send client message"
+  SEND_CLIENT_PACKAGE: "HOST: send client package"
 };

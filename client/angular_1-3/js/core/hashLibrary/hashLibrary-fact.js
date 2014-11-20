@@ -5,5 +5,5 @@
  */
 angular.module('hashLibrary')
   .factory('hashLib', function ($window) {
-    return hashLibrary($window.atob);
+    return hashLibrary($window.btoa);
   });

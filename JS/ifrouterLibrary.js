@@ -1,51 +1,51 @@
-'use strict';
-
 /**
  * IFRouter Library
  * @param uriConst
- * @param messageLib
- * @param messageLib
+ * @param transLib
+ * @param packLib
  * @param serverLib
  * @param routerExt
  * @returns {{process: processMessage}}
  * @constructor
  */
-function ifrouterLibrary(uriConst, messageLib, serverLib, routerExt) {
+function ifrouterLibrary(uriConst, transLib, packLib, serverLib, routerExt) {
+
+  'use strict';
 
   /**
    * Add a client
    * @param message
    */
-  function addClient(message) {
+  function addClient(trans) {
 
-    var parameters = {
-      type: "text",
+    var pkg = packLib.create({
+      type: packLib.const.TEXT_MESSAGE_TYPE,
       sender: serverLib.const.SERVER_NAME,
-      recipient: message.client,
-      body: 'connected to host',
-      receipt: false
-    };
+      recipient: trans.client,
+      body: 'Connected to host',
+      useReceipt: false
+    });
 
-    serverLib.addClient(message.client);
-    serverLib.sendMessage(message.client, messageLib.createResponse(message, parameters));
+    serverLib.addClient(trans.client);
+    serverLib.send(trans.client, transLib.createResponse(trans, pkg));
   }
 
   /**
    * Remove Client
-   * @param message
+   * @param trans
    */
-  function removeClient(message) {
+  function removeClient(trans) {
 
-    var parameters = {
-      type: "text",
+    var pkg = packLib.create({
+      type: packLib.const.TEXT_MESSAGE_TYPE,
       sender: serverLib.const.SERVER_NAME,
-      recipient: message.client,
-      body: 'disconnected from host',
-      receipt: false
-    };
+      recipient: trans.client,
+      body: 'Disconnected from host',
+      useReceipt: false
+    });
 
-    serverLib.removeClient(message.client);
-    serverLib.sendMessage(message.client, messageLib.createResponse(message, parameters));
+    serverLib.removeClient(trans.client);
+    serverLib.send(trans.client, transLib.createResponse(trans, pkg));
   }
 
   /**
@@ -54,93 +54,95 @@ function ifrouterLibrary(uriConst, messageLib, serverLib, routerExt) {
   function updateClientsClientList() {
 
     var clientList = serverLib.getClientList();
+    var pkg = packLib.create({type: packLib.const.CLIENT_LIST, list: clientList});
 
     /**
      * Respond back to the client that made the request
      */
-    var parameters = {
-      type: "contacts",
-      contacts: clientList
-    };
-
     for (var n = 0, nLen = clientList.length; n < nLen; n++) {
       var sClient = clientList [n];
-      serverLib.sendMessage(sClient, messageLib.create(uriConst.REQUEST_CLIENT_LIST, sClient, parameters));
+      serverLib.send(sClient, transLib.create(uriConst.REQUEST_CLIENT_LIST, sClient, pkg));
     }
   }
 
   /**
    * Send a client the list of connect clients
-   * @param message
+   * @param trans
    */
-  function getClientList(message) {
+  function getClientList(trans) {
+
+    var pkg = packLib.create({type: packLib.const.CLIENT_LIST, list: serverLib.getClientList()});
 
     /**
      * Respond back to the client that made the request
      */
-    var parameters = {
-      type: "contacts",
-      contacts: serverLib.getClientList()
-    };
-
-    serverLib.sendMessage(message.client, messageLib.createResponse(message, parameters));
+    serverLib.send(trans.client, transLib.createResponse(trans, pkg));
   }
 
   /**
-   * Send a client a message
-   * @param message
+   * Forward a client a package
+   * @param trans
    */
-  function sendClientMessage(message) {
+  function sendClientPackage(trans) {
 
     /**
      * Extract the recipient from the parameters
      */
-    serverLib.sendMessage(message.parameters.recipient, messageLib.createResponse(message, message.parameters));
+    serverLib.send(trans.package.recipient, transLib.createResponse(trans, trans.package));
   }
 
   /**
    * Bad route
-   * @param message
+   * @param trans
    */
-  function badRoute(message) {
-    serverLib.sendMessage(message.client, messageLib.createResponse(message, "you 404'ed!!"));
+  function badRoute(trans) {
+
+    var pkg = packLib.create({
+      type: packLib.const.TEXT_MESSAGE_TYPE,
+      sender: serverLib.const.SERVER_NAME,
+      recipient: trans.client,
+      body: 'you 404\'ed!!',
+      useReceipt: false
+    });
+
+    serverLib.send(trans.client, transLib.createResponse(trans, pkg));
   }
 
   /**
-   * Process an encoded message
-   * @param message
+   * Process an encoded trans
+   * @param trans
    * @returns {*}
    */
-  function processMessage(message) {
+  function processTransmission(trans) {
 
     /**
      * Connect a client
      */
-    if (message.uri === uriConst.CONNECT_CLIENT) {
-      addClient(message);
+    if (trans.uri === uriConst.CONNECT_CLIENT) {
+      addClient(trans);
       updateClientsClientList();
     }
 
     /**
      * Disconnect a client
      */
-    else if (message.uri === uriConst.DISCONNECT_CLIENT) {
-      removeClient(message);
+    else if (trans.uri === uriConst.DISCONNECT_CLIENT) {
+      removeClient(trans);
       updateClientsClientList();
     }
 
     /**
      * Get client list
      */
-    else if (message.uri === uriConst.REQUEST_CLIENT_LIST) {
-      getClientList(message);
+    else if (trans.uri === uriConst.REQUEST_CLIENT_LIST) {
+      getClientList(trans);
     }
 
     /**
-     * Send a messageLib to client
+     * Send a transLib to client
      */
-    else if (message.uri === uriConst.SEND_CLIENT_MESSAGE) {
-      sendClientMessage(message);
+    else if (trans.uri === uriConst.SEND_CLIENT_PACKAGE) {
+      sendClientPackage(trans);
     }
 
     /**
@@ -148,15 +150,15 @@ function ifrouterLibrary(uriConst, messageLib, serverLib, routerExt) {
      * TODO we need to test this
      */
     else if (routerExt) {
-      //var oResp = routerExt.call(null, uriConst, messageLib, messageLib, serverLib, message);
-      //serverLib.sendMessage(oResp.client, oResp.message);
+      //var oResp = routerExt.call(null, uriConst, transLib, transLib, serverLib, trans);
+      //serverLib.send(oResp.client, oResp.trans);
     }
 
     /**
      * Something equivalent to a 404 (lol)
      */
     else {
-      badRoute(message);
+      badRoute(trans);
     }
   }
 
@@ -164,7 +166,7 @@ function ifrouterLibrary(uriConst, messageLib, serverLib, routerExt) {
    * Public API
    */
   return {
-    process: processMessage
+    process: processTransmission
   };
 
 }

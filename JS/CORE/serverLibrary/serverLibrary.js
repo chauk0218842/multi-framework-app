@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Server Library
  * @param serverConst
@@ -7,6 +5,8 @@
  * @returns {{const: *, addClient: addClient, removeClient: removeClient, getClientList: getClientList, processMessage: processMessage}}
  */
 function serverLibrary(serverConst, hashLib) {
+
+  'use strict';
 
   /**
    * List of connected clients
@@ -46,12 +46,12 @@ function serverLibrary(serverConst, hashLib) {
   }
 
   /**
-   * Send message to client
+   * Send transmission to client
    * @param clientID
-   * @param message
+   * @param trans
    */
-  function sendMessage(clientID, message) {
-    document.getElementById (clientID).contentWindow.postMessage(message, serverConst.DOMAIN_NAME);
+  function sendTransmission(clientID, trans) {
+    document.getElementById (clientID).contentWindow.postMessage(trans, serverConst.DOMAIN_NAME);
   }
 
   /**
@@ -62,6 +62,6 @@ function serverLibrary(serverConst, hashLib) {
     addClient: addClient,
     removeClient: removeClient,
     getClientList: getClientList,
-    sendMessage: sendMessage
+    send: sendTransmission
   };
 }

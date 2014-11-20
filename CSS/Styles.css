@@ -15,12 +15,23 @@ iframe {
 
 textarea {
     border: 1px solid #AAA;
+    height: 275px;
     width: 275px;
+    resize: none;
 }
 
 .response {
+    border: 1px solid #AAA;
+    width: 280px;
     height: 150px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .message {
     height: 100px;
+}
+
+.thumbnail {
+    height: 100px;
+    border: 1px solid #000;
 }

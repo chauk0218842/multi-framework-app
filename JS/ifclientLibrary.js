@@ -1,16 +1,17 @@
-'use strict';
-
 /**
  * IFrame Client Library
  * @param uriConst
  * @param hashLib
- * @param messageLib
+ * @param transLib
+ * @param packLib
  * @param clientLib
  * @param deferredLib
  * @returns {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendMessageToClient: sendMessageToClient}}
  * @constructor
  */
-function ifclientLibrary(uriConst, hashLib, messageLib, clientLib, deferredLib) {
+function ifclientLibrary(uriConst, hashLib, transLib, packLib, clientLib, deferredLib) {
+
+  'use strict';
 
   /**
    * Extract the IFrame ID from teh param string
@@ -51,25 +52,25 @@ function ifclientLibrary(uriConst, hashLib, messageLib, clientLib, deferredLib) 
     /**
      * @type {*}
      */
-    var message = clientLib.listen (event);
+    var trans = clientLib.listen (event);
 
     /**
      * Find the Defer object that should be resolved
      */
-    var defer = deferHASH.get(message.id);
+    var defer = deferHASH.get(trans.id);
 
-    responseList.push(message);
+    responseList.push(trans);
 
     /**
      * Handle specific requests
      */
     if (defer) {
-      defer.resolve(message);
+      defer.resolve(trans);
     }
 
     console.log(('%CLIENT% > Received a response from host: %RESPONSE%').replace(/%CLIENT%/g, clientID).replace(/%RESPONSE%/g, event.data.toString()));
 
-    return deferredLib.when(message);
+    return deferredLib.when(trans);
   }
 
   /**
@@ -77,16 +78,15 @@ function ifclientLibrary(uriConst, hashLib, messageLib, clientLib, deferredLib) 
    * @param message
    * @returns {*}
    */
-  function sendMessageToHost(message) {
+  function sendTransmissionToHost(trans) {
 
     /**
      * Create a Defer object that should be resolved later on when the listener receives a response
      */
-    var defer = deferHASH.set(message.id, deferredLib.create());
-    requestList.push(message);
-
-    clientLib.send(message);
-    console.log(('%CLIENT% > Sent a request to host: "%URI%"').replace(/%CLIENT%/g, clientID).replace(/%URI%/g, message.uri));
+    var defer = deferHASH.set(trans.id, deferredLib.create());
+    requestList.push(trans);
+    clientLib.send(trans);
+    console.log(('%CLIENT% > Sent a request to host: "%URI%"').replace(/%CLIENT%/g, clientID).replace(/%URI%/g, trans.uri));
 
     return defer;
   }
@@ -96,9 +96,9 @@ function ifclientLibrary(uriConst, hashLib, messageLib, clientLib, deferredLib) 
    * @returns {*}
    */
   function connectToHost() {
-    return sendMessageToHost(messageLib.create(uriConst.CONNECT_CLIENT, clientID, null))
-      .then(function (message) {
-        return message.parameters.body;
+    return sendTransmissionToHost(transLib.create(uriConst.CONNECT_CLIENT, clientID, null))
+      .then(function (transmission) {
+        return transmission.package;
       });
   }
 
@@ -107,9 +107,9 @@ function ifclientLibrary(uriConst, hashLib, messageLib, clientLib, deferredLib) 
    * @returns {*}
    */
   function disconnectFromHost() {
-    return sendMessageToHost(messageLib.create(uriConst.DISCONNECT_CLIENT, clientID, null))
-      .then(function (message) {
-        return message.parameters.body;
+    return sendTransmissionToHost(transLib.create(uriConst.DISCONNECT_CLIENT, clientID, null))
+      .then(function (transmission) {
+        return transmission.package;
       });
   }
 
@@ -118,30 +118,50 @@ function ifclientLibrary(uriConst, hashLib, messageLib, clientLib, deferredLib) 
    * @returns {*}
    */
   function getClientListFromHost() {
-    return sendMessageToHost(messageLib.create(uriConst.REQUEST_CLIENT_LIST, clientID, null))
-      .then(function (message) {
-        return message.parameters.contacts;
+    return sendTransmissionToHost(transLib.create(uriConst.REQUEST_CLIENT_LIST, clientID, null))
+      .then(function (transmission) {
+        return transmission.package;
       });
   }
 
   /**
-   * Send message to client
+   * Send text message to client
    * @param recipientID
-   * @param contents
+   * @param body
    * @param useReceipt
    * @returns {*}
    */
-  function sendMessageToClient(recipientID, text, useReceipt) {
+  function sendMessage(recipientID, body, useReceipt) {
 
-    var parameters = {
-      type: "text",
+    var pkg = packLib.create ({
+      type: packLib.const.TEXT_MESSAGE_TYPE,
       sender: clientID,
       recipient: recipientID,
-      body: text,
-      receipt: useReceipt
-    };
+      body: body,
+      useReceipt: useReceipt
+    });
 
-    return sendMessageToHost(messageLib.create(uriConst.SEND_CLIENT_MESSAGE, clientID, parameters))
+    return sendTransmissionToHost(transLib.create(uriConst.SEND_CLIENT_PACKAGE, clientID, pkg))
+  }
+
+  /**
+   * Send files to a client
+   * @param recipientID
+   * @param files
+   * @param useReceipt
+   * @returns {*}
+   */
+  function sendFilesToClient(recipientID, files, useReceipt) {
+
+    var pkg = packLib.create ({
+      type: packLib.const.FILE_TYPE,
+      sender: clientID,
+      recipient: recipientID,
+      files: files,
+      useReceipt: useReceipt
+    });
+
+    return sendTransmissionToHost(transLib.create(uriConst.SEND_CLIENT_PACKAGE, clientID, pkg))
   }
 
   /**
@@ -179,6 +199,7 @@ function ifclientLibrary(uriConst, hashLib, messageLib, clientLib, deferredLib) 
     getClients: getClientListFromHost,
     getRequestLog: getRequestLog,
     getResponseLog: getResponseLog,
-    sendMessageToClient: sendMessageToClient
+    sendFiles: sendFilesToClient,
+    sendMessage: sendMessage
   };
 }

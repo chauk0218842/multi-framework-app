@@ -1,19 +1,19 @@
-'use strict';
-
 /**
  * Client Library
  * @param serverConst
- * @returns {{send: sendMessageToServer, listen: listenToServer}}
+ * @returns {{send: sendTransmissionToHost, listen: listenToServer}}
  * @constructor
  */
 function clientLibrary(serverConst) {
 
+  'use strict';
+
   /**
    * Send a request to server
-   * @param request
+   * @param transmission
    */
-  function sendMessageToServer(message) {
-    parent.postMessage(message, serverConst.DOMAIN_NAME);
+  function sendTransmissionToHost(transmission) {
+    parent.postMessage(transmission, serverConst.DOMAIN_NAME);
   }
 
   /**
@@ -29,7 +29,7 @@ function clientLibrary(serverConst) {
    * Public API
    */
   return {
-    send : sendMessageToServer,
+    send : sendTransmissionToHost,
     listen: listenToServer
   };
 }

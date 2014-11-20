@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Server Constants object
  * @type {{SERVER_NAME: string, DOMAIN_NAME: string}}
