@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Sever Constants module
  * @type {module}

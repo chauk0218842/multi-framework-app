@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Deferred Library module
  * @type {module}

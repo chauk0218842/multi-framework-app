@@ -63,126 +63,6 @@ function onDOMContentLoaded(_$) {
   var ifclientLib = ifclientLibrary(ifuriConst, hashLib, transLib, packLib, clientLib, deferredLib);
 
   /**
-   * Update the chat box from the received messages
-   * @param pkg
-   */
-  function updateResponses(trans) {
-    var $response = _$('#response');
-    var responseHTML = "";
-
-    /**
-     * Received a text message
-     */
-    if (trans.package.type === packLib.const.TEXT_MESSAGE_TYPE) {
-      responseHTML = ('%CLIENT% > %MESSAGE%<br />--<br />').replace(/%CLIENT%/g, trans.client).replace(/%MESSAGE%/g, trans.package.body);
-      $response.prepend(responseHTML);
-    }
-
-    /**
-     * Received files
-     */
-    else if (trans.package.type === packLib.const.FILE_TYPE) {
-
-      var defers = [];
-      var deferHASH = hashLib.create();
-      var files = trans.package.files;
-      var fileCount = 0;
-
-      for (var n = 0, nLen = files.length; n < nLen; n++) {
-
-        var fileReader = new FileReader();
-        var defer = deferHASH.set(n, deferredLib.create());
-        defers.push(defer);
-        defer.then(function (file, url) {
-
-          fileCount++;
-
-          if (file.type.indexOf('image/') === 0) {
-            responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/><a href = "' + url + '" target = "new"><img class = "thumbnail" src = ' + url + '></a><br/>';
-          }
-          else if (file.type === 'text/html') {
-            responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/>';
-          }
-
-          return;
-        });
-
-        fileReader.onloadend = (function (deferKey, file) {
-          return function (event) {
-            if (event.target.readyState == FileReader.DONE) {
-              deferHASH.get(deferKey).resolve(file, event.target.result);
-            }
-          }
-        })(n, files[n]);
-
-        fileReader.readAsDataURL(files[n]);
-
-      }
-
-      deferredLib.when(defers).then(function () {
-        $response.prepend(('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, trans.client) + responseHTML + "--<br/>>");
-      });
-
-    }
-
-  }
-
-  /**
-   * Update the contact list received from the host
-   * @param list
-   */
-  function updateContacts(list) {
-
-    var userName = ifclientLib.getUsername();
-    var $contacts = _$('#contacts');
-    $contacts.empty();
-    $contacts.append('<option value = "ALL">ALL</option>');
-
-    for (var n = 0, nLen = list.length; n < nLen; n++) {
-      var recipient = list [n];
-
-      if (recipient === userName) {
-        continue;
-      }
-      $contacts.append('<option value = \"' + recipient + '\">' + recipient + '</option>');
-    }
-
-    $contacts.index(0);
-
-  }
-
-  /**
-   * Window Message Listener
-   * @param event
-   */
-  function transmissionListener(event) {
-
-    /**
-     * Listen for transmission
-     */
-    ifclientLib.listen(event).then(function (trans) {
-
-      /**
-       * Update response
-       */
-      if (trans.uri === ifuriConst.CONNECT_CLIENT ||
-        trans.uri === ifuriConst.DISCONNECT_CLIENT ||
-        trans.uri === ifuriConst.SEND_CLIENT_PACKAGE) {
-        updateResponses(trans);
-      }
-
-      /**
-       * clientLib list was updated
-       */
-      else if (trans.uri === ifuriConst.REQUEST_CLIENT_LIST) {
-        updateContacts(trans.package.list);
-      }
-
-    });
-
-  }
-
-  /**
    * Format bytes to appropriate units
    * @param bytes
    * @returns {*}
@@ -226,6 +106,153 @@ function onDOMContentLoaded(_$) {
   }
 
   /**
+   * Window Message Listener
+   * @param event
+   */
+  function transmissionListener(event) {
+
+    /**
+     * Listen for transmission
+     */
+    ifclientLib.listen(event).then(function (trans) {
+
+      /**
+       * Update response
+       */
+      if (trans.uri === ifuriConst.CONNECT_CLIENT ||
+        trans.uri === ifuriConst.DISCONNECT_CLIENT ||
+        trans.uri === ifuriConst.SEND_CLIENT_PACKAGE) {
+        updateResponses(trans);
+      }
+
+      /**
+       * clientLib list was updated
+       */
+      else if (trans.uri === ifuriConst.REQUEST_CLIENT_LIST) {
+        updateContacts(trans.package.list);
+      }
+
+    });
+
+  }
+
+  /**
+   * Update the contact list received from the host
+   * @param list
+   */
+  function updateContacts(list) {
+
+    var userName = ifclientLib.getUsername();
+    var $contacts = _$('#contacts');
+    $contacts.empty();
+    $contacts.append('<option value = "ALL">ALL</option>');
+
+    for (var n = 0, nLen = list.length; n < nLen; n++) {
+      var recipient = list [n];
+
+      if (recipient === userName) {
+        continue;
+      }
+      $contacts.append('<option value = \"' + recipient + '\">' + recipient + '</option>');
+    }
+
+    $contacts.index(0);
+
+  }
+
+  /**
+   * Update the chat box from the received messages
+   * @param pkg
+   */
+  function updateResponses(trans) {
+
+    /**
+     * Handle message transmission
+     * @param trans
+     */
+    function handleMessage (trans) {
+      _$('#response').prepend(('%CLIENT% > %MESSAGE%<br />--<br />').replace(/%CLIENT%/g, trans.client).replace(/%MESSAGE%/g, trans.package.body));
+    }
+
+    /**
+     * Handle files transmission
+     * @param trans
+     */
+    function handleFiles (trans) {
+      var $response = _$('#response');
+      var responseHTML = "";
+      var defers = [];
+      var deferHASH = hashLib.create();
+      var files = trans.package.files;
+      var fileCount = 0;
+
+      /**
+       * Handle file transmission
+       * @param file
+       * @param url
+       */
+      function handleFile (file, url) {
+
+        fileCount++;
+
+        if (file.type.indexOf('image/') === 0) {
+          responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/><a href = "' + url + '" target = "new"><img class = "thumbnail" src = ' + url + '></a><br/>';
+        }
+        else if (file.type === 'text/html') {
+          responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/>';
+        }
+
+        return;
+      }
+
+      for (var n = 0, nLen = files.length; n < nLen; n++) {
+
+        var fileReader = new FileReader();
+        var defer = deferHASH.set(n, deferredLib.create());
+        defers.push(defer);
+        defer.then(handleFile);
+
+        fileReader.onloadend = (function (deferKey, file) {
+          return function (event) {
+            if (event.target.readyState == FileReader.DONE) {
+              deferHASH.get(deferKey).resolve(file, event.target.result);
+            }
+          }
+        })(n, files[n]);
+
+        fileReader.readAsDataURL(files[n]);
+
+      }
+
+      deferredLib.when(defers).then(function () {
+        $response.prepend(('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, trans.client) + responseHTML + "--<br/>>");
+      });
+
+    }
+    /**
+     * Received a text message
+     */
+    if (trans.package.type === packLib.const.TEXT_MESSAGE_TYPE) {
+      handleMessage (trans);
+    }
+
+    /**
+     * Received files
+     */
+    else if (trans.package.type === packLib.const.FILE_TYPE) {
+      handleFiles (trans);
+    }
+
+    /**
+     * Don't do anything LOL
+     */
+    else {
+
+    }
+
+  }
+
+  /**
    * Reset form
    */
   function resetForm() {
@@ -236,21 +263,36 @@ function onDOMContentLoaded(_$) {
   }
 
   /**
-   * Add window listener
-   */
-  window.addEventListener('message', transmissionListener);
-
-  /**
-   * Remove 'message' upon unload
-   */
-  window.addEventListener('unload', function () {
-    window.removeEventListener('message', transmissionListener);
-  });
-
-  /**
    * Assign the client name
    */
   _$('#clientName').text(ifclientLib.getUsername());
+
+  /**
+   * Clear the filesPackage list if the user decides to start typing
+   */
+  _$("#message").keypress(function () {
+    filesPackage = null;
+  });
+
+  /**
+   * Drag and drop file into message box
+   */
+  _$('#message').on('drop', function (event) {
+
+    var files = event.originalEvent.dataTransfer.files;
+
+    event.preventDefault();
+
+    _$(this).val(createFileList(files));
+
+    filesPackage = files;
+
+  });
+
+  /**
+   * Reset the message box on click
+   */
+  _$('#message').bind('click', resetForm);
 
   /**
    * Assign the send event
@@ -294,36 +336,21 @@ function onDOMContentLoaded(_$) {
   });
 
   /**
-   * Clear the filesPackage list if the user decides to start typing
-   */
-  _$("#message").keypress(function () {
-    filesPackage = null;
-  });
-
-  /**
    * Assign the send event
    */
   _$('#reset').bind('click', resetForm);
 
   /**
-   * Drag and drop file into message box
+   * Add window listener
    */
-  _$('#message').on('drop', function (event) {
-
-    var files = event.originalEvent.dataTransfer.files;
-
-    event.preventDefault();
-
-    _$(this).val(createFileList(files));
-
-    filesPackage = files;
-
-  });
+  window.addEventListener('message', transmissionListener);
 
   /**
-   * Reset the message box on click
+   * Remove 'message' upon unload
    */
-  _$('#message').bind('click', resetForm);
+  window.addEventListener('unload', function () {
+    window.removeEventListener('message', transmissionListener);
+  });
 
   /**
    * Connect to the host

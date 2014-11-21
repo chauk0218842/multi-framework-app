@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Deferred Library Wrapper for Angular
  * Since a lot of libraries implement 'promises' differently we need to create a wrapper interface to have a common ground between different JS frameworks
@@ -7,6 +5,7 @@
  * @returns {{create: createDefer, when: createWhen}}
  */
 function deferredLibrary (_$q) {
+  'use strict';
 
   /**
    * Create a Defer object

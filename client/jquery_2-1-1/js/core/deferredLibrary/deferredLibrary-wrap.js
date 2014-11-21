@@ -26,6 +26,7 @@ function deferredLibrary(_$) {
 
   /**
    * Create a Defer when
+   * Needed to support having "Array" as an argument - (silly) JQuery
    * @param object
    * @returns {*|Promise}
    */

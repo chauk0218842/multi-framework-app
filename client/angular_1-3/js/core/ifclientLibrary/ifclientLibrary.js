@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * IFClient Library module
  * @type {module}

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Transmission Library module
  * @type {module}

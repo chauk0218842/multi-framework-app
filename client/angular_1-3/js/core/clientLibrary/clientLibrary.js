@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Client Library module
  * @type {module}

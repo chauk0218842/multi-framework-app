@@ -37,12 +37,14 @@ function transmissionLibrary(createHASHKey) {
   }
 
   /**
-   * Create Response
+   * Create Response - this is for the server to respond back to incoming transmissions from clients,
+   * OR when receipts are enabled during a client-to-host-to-client communication - the receiving client will have to "respond" back to
+   * their incoming transmission
    * @param transmission
    * @param pkg
    * @returns {{id: *, client: *, host: *, urn: *, parameters: *, receipt: *}}
    */
-  function createResponse(transmission, pkg) {
+  function createResponseTransmission(transmission, pkg) {
     return createTransmission(transmission.id, transmission.uri, transmission.client, pkg);
   }
 
@@ -62,6 +64,6 @@ function transmissionLibrary(createHASHKey) {
    */
   return {
     create: createNewTransmission,
-    createResponse: createResponse
+    createResponse: createResponseTransmission
   };
 }

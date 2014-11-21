@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Hash Library module
  * @type {module}
