@@ -18,20 +18,30 @@ textarea {
     height: 275px;
     width: 275px;
     resize: none;
+
 }
 
 .response {
     border: 1px solid #AAA;
-    width: 280px;
-    height: 150px;
+    width: 260px;
+    height: 140px;
     overflow-x: hidden;
     overflow-y: auto;
+    padding: 10px;
 }
 .message {
     height: 100px;
+
 }
 
 .thumbnail {
     height: 100px;
     border: 1px solid #000;
+}
+
+hr {
+    width: 100%;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #CCC;
 }

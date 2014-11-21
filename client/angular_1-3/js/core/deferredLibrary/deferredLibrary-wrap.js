@@ -2,7 +2,7 @@
  * Deferred Library Wrapper for Angular
  * Since a lot of libraries implement 'promises' differently we need to create a wrapper interface to have a common ground between different JS frameworks
  * @param _$q
- * @returns {{create: createDefer, when: createWhen}}
+ * @returns {{create: createDefer, when: createWhen, all: createAll}}
  */
 function deferredLibrary (_$q) {
   'use strict';
@@ -36,10 +36,20 @@ function deferredLibrary (_$q) {
   }
 
   /**
+   * Create a Defer all
+   * @param object
+   * @returns {*|Promise}
+   */
+  function createAll (object) {
+    return _$q.all (object);
+  }
+
+  /**
    * Public API
    */
   return {
     create : createDefer,
-    when : createWhen
+    when : createWhen,
+    all : createAll
   };
 }

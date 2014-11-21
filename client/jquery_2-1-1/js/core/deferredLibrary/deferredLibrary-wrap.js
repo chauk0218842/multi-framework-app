@@ -1,10 +1,9 @@
 'use strict';
-
 /**
  * Deferred Library for JQuery
  * Since a lot of libraries implement 'promises' differently we need to create a wrapper interface to have a common ground between different JS frameworks
-* @param _$
- * @returns {{create: createDefer, when: createWhen}}
+ * @param _$
+ * @returns {{create: createDefer, when: createWhen, all: createAll}}
  */
 function deferredLibrary(_$) {
   'use strict';
@@ -38,11 +37,25 @@ function deferredLibrary(_$) {
   }
 
   /**
+   * Create a Defer all - JQuery's when is equivalent to Angular's $q.all as well (silly) JQuery
+   * Need to support having "Array" as an argument - (silly) JQuery
+   * @param object
+   * @returns {*|Promise|*|Promise}
+   */
+  function createAll (object) {
+    if (object instanceof Array) {
+      return _$.when.apply(null, object);
+    }
+    return _$.when (object);
+  }
+
+  /**
    * Public API
    */
   return {
     create: createDefer,
-    when: createWhen
+    when: createWhen,
+    all : createAll
   };
 
 }
