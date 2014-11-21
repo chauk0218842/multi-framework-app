@@ -17,6 +17,7 @@ function ifpackageLibrary(ifclientLib, hashLib, deferredLib, packLib, formatByte
    * @returns {*}
    */
   function processClientListPackage(pkg) {
+
     var list = pkg.list.sort();
     var contacts = ['ALL'];
     for (var n = 0, nLen = list.length; n < nLen; n++) {

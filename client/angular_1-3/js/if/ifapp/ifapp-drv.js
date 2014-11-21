@@ -20,6 +20,7 @@ angular.module('ifclientApp')
          */
         ifclientLib.listen(event).then(function (pkg) {
 
+
           /**
            * clientLib list was updated
            */

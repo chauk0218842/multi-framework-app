@@ -115,18 +115,10 @@ function onDOMContentLoaded(_$) {
    */
   function updateContacts(clients) {
 
-    /**
-     * TODO nee to find out why clients can be passed a string - I'm not sure if this has to do with my JQuery defer.when wrapper
-     * KC 2014-11-21
-     */
-    if (!(clients instanceof Array)) {
-      return;
-    }
-
     var userName = ifclientLib.getUsername();
     var $contacts = _$('#contacts');
     $contacts.empty();
-    
+
     clients = clients.sort();
 
     for (var n = 0, nLen = clients.length; n < nLen; n++) {

@@ -30,10 +30,6 @@ function deferredLibrary(_$) {
    * @returns {*|Promise}
    */
   function createWhen (object) {
-
-    if (object instanceof Array) {
-   //   return _$.when.apply(null, object);
-    }
     return _$.when (object);
   }
 
