@@ -12,7 +12,7 @@ angular.module('ifclientApp')
      * @param event
      */
     function onMessageListener(VM, event) {
-
+      
       VM.$apply(function () {
 
         /**
@@ -74,17 +74,17 @@ angular.module('ifclientApp')
      */
     function sendMessage (VM) {
       if (VM.recipient === 'ALL') {
-        for (var n in $scope.contacts) {
+        for (var n in VM.contacts) {
 
           if (!VM.contacts.hasOwnProperty(n)) {
             continue;
           }
 
-          var oContact = VM.contacts [n];
-          if (oContact === 'ALL') {
+          var recipient = VM.contacts [n];
+          if (recipient === 'ALL') {
             continue;
           }
-          ifclientLib.sendMessage(oContact, VM.message, false);
+          ifclientLib.sendMessage(recipient, VM.message, false);
         }
       }
       else {
@@ -119,6 +119,7 @@ angular.module('ifclientApp')
         };
 
         angular.element($window).on('message', function (event) {
+
           onMessageListener(VM, event);
         });
 
