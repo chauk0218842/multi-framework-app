@@ -68,13 +68,13 @@ function onDOMContentLoaded(_$) {
    * So no need for a promise
    * @param list
    */
-  function updateContacts(list) {
+  function updateContacts(pkg) {
 
     var userName = ifclientLib.getUsername();
     var $contacts = _$('#contacts');
     $contacts.empty();
     $contacts.append('<option value = "ALL">ALL</option>');
-    list = list.sort();
+    var list = pkg.list.sort();
 
     for (var n = 0, nLen = list.length; n < nLen; n++) {
       var recipient = list [n];
@@ -93,19 +93,19 @@ function onDOMContentLoaded(_$) {
    * Handle message transmission
    * @param trans
    */
-  function handleMessage(trans) {
-    return ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, trans.client).replace(/%MESSAGE%/g, trans.package.body);
+  function handleMessage(pkg) {
+    return ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, pkg.recipient).replace(/%MESSAGE%/g, pkg.body);
   }
 
   /**
    * Handle files transmission
    * @param trans
    */
-  function handleFiles(trans) {
+  function handleFiles(pkg) {
     var responseHTML = "";
     var defers = [];
     var deferHASH = hashLib.create();
-    var files = trans.package.files;
+    var files = pkg.files;
     var fileCount = 0;
 
     /**
@@ -147,7 +147,7 @@ function onDOMContentLoaded(_$) {
     }
 
     return deferredLib.all(defers).then(function () {
-      return ('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, trans.client) + responseHTML + "<hr/>";
+      return ('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, pkg.recipient) + responseHTML + "<hr/>";
     });
 
   }
@@ -156,22 +156,22 @@ function onDOMContentLoaded(_$) {
    * Update the chat box from the received messages
    * @param pkg
    */
-  function updateResponses(trans) {
+  function updateResponses(pkg) {
 
     var responseHTML = "";
 
     /**
      * Received a text message
      */
-    if (trans.package.type === packLib.const.TEXT_MESSAGE_TYPE) {
-      responseHTML = handleMessage(trans);
+    if (pkg.type === packLib.const.TEXT_MESSAGE_TYPE) {
+      responseHTML = handleMessage(pkg);
     }
 
     /**
      * Received files
      */
-    else if (trans.package.type === packLib.const.FILE_TYPE) {
-      responseHTML = handleFiles(trans);
+    else if (pkg.type === packLib.const.FILE_TYPE) {
+      responseHTML = handleFiles(pkg);
     }
 
     /**
@@ -195,28 +195,31 @@ function onDOMContentLoaded(_$) {
     /**
      * Listen for transmission
      */
-    ifclientLib.listen(event).then(function (trans) {
+    ifclientLib.listen(event).then(function (pkg) {
 
       /**
        * clientLib list was updated
        */
-      if (trans.uri === ifuriConst.REQUEST_CLIENT_LIST) {
-
+	  if (pkg.type == packLib.const.CLIENT_LIST) {
         /**
          * Not as complicated as Angular where you have to respond with a promise, we can get away with this one
          */
-        updateContacts(trans.package.list);
+        updateContacts(pkg);
       }
 
       /**
        * Update response
        */
-      else if (trans.uri === ifuriConst.CONNECT_CLIENT ||
-        trans.uri === ifuriConst.DISCONNECT_CLIENT ||
-        trans.uri === ifuriConst.SEND_CLIENT_PACKAGE) {
-        updateResponses(trans).then(function (responseHTML) {
+      else if (pkg.type === packLib.const.TEXT_MESSAGE_TYPE) {
+        updateResponses(pkg).then(function (responseHTML) {
           $response.prepend(responseHTML);
         });
+      }
+      
+      else if (pkg.type === packLib.const.FILE_TYPE) {
+		  updateResponses(pkg).then(function (responseHTML) {
+			  $response.prepend(responseHTML);
+			});
       }
     });
   }

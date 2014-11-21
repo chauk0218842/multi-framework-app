@@ -70,7 +70,7 @@ function ifclientLibrary(uriConst, hashLib, transLib, packLib, clientLib, deferr
 
     console.log(('%CLIENT% > Received a response from host: %RESPONSE%').replace(/%CLIENT%/g, clientID).replace(/%RESPONSE%/g, event.data.toString()));
 
-    return deferredLib.when(trans);
+    return deferredLib.when(trans.package);
   }
 
   /**
