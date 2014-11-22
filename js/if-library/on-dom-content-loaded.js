@@ -24,16 +24,28 @@ function onDOMContentLoaded () {
   var transLib = transmissionLibrary(hashLib.createKey);
 
   /**
+   * Package Constants
+   * @type {{}}
+   */
+  var packConst = packageConstants;
+
+  /**
    * Package Library
    * @type {{const: (packConst|*), create: createNewPackage}}
    */
-  var packLib = packageLibrary (packageConstants);
+  var packLib = packageLibrary (packConst);
+
+  /**
+   * IFURI Constants
+   * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_PACKAGE: string}}
+   */
+  var ifuriConst = ifuriConstants;
 
   /**
    * IFRouter Library
    * @type {{process: processMessage}}
    */
-  var ifrouterLib = ifrouterLibrary(ifuriConstants, transLib, packLib, serverLib, null);
+  var ifrouterLib = ifrouterLibrary(ifuriConst, transLib, packLib, serverLib, null);
 
   /**
    * IFHost library

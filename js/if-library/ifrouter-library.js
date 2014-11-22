@@ -5,8 +5,7 @@
  * @param packLib
  * @param serverLib
  * @param routerExt
- * @returns {{process: processMessage}}
- * @constructor
+ * @returns {{const: *, process: processTransmission}}
  */
 function ifrouterLibrary(uriConst, transLib, packLib, serverLib, routerExt) {
 
@@ -166,6 +165,7 @@ function ifrouterLibrary(uriConst, transLib, packLib, serverLib, routerExt) {
    * Public API
    */
   return {
+    const: uriConst,
     process: processTransmission
   };
 
