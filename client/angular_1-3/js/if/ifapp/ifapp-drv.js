@@ -2,9 +2,68 @@
  * IF Chat directive
  */
 angular.module('ifclientApp')
+
+  .directive('ifFileDrop', function (utilLib) {
+
+    function dropFile (VM, event) {
+
+      VM.$apply (function () {
+
+        var files = event.dataTransfer.files;
+
+        event.preventDefault();
+        VM.message = utilLib.createFileList(files);
+        VM.filesPackage = files;
+      })
+    }
+
+    return {
+
+      restrict: 'A',
+      link : function (VM, element, attr) {
+        element.bind ('drop', function (event) {
+          return dropFile (VM, event);
+        });
+      }
+    };
+  })
+
   .directive('ifChat', function ($window, $sce, ifclientLib, ifpackLib) {
 
     'use strict';
+
+    /**
+     * VM Handler
+     * @type {{}}
+     */
+    var vmDataHandler = {};
+
+    /**
+     * VM Handler for Client List
+     * @param VM
+     * @param clients
+     */
+    vmDataHandler [ifpackLib.const.CLIENT_LIST_TYPE] = function (VM, clients) {
+      updateContacts(VM, clients);
+    };
+
+    /**
+     * VM Handler for Text Message
+     * @param VM
+     * @param response
+     */
+    vmDataHandler [ifpackLib.const.TEXT_MESSAGE_TYPE] = function (VM, response) {
+      updateResponse(VM, response);
+    };
+
+    /**
+     * VM Handler for File Type
+     * @param VM
+     * @param response
+     */
+    vmDataHandler [ifpackLib.const.FILES_TYPE] = function (VM, response) {
+      updateResponse(VM, response);
+    };
 
     /**
      * Window listener event
@@ -12,40 +71,36 @@ angular.module('ifclientApp')
      * @param event
      */
     function onMessageListener(VM, event) {
-      
+
       VM.$apply(function () {
 
         /**
          * Listen for transmissions
          */
-        ifclientLib.listen(event).then(function (pkg) {
+        ifclientLib.listen(event)
 
+        /**
+         * Process the data
+         */
+          .then(function (receivedPackage) {
 
-          /**
-           * clientLib list was updated
-           */
-          if (pkg.type == ifpackLib.const.CLIENT_LIST_TYPE) {
-            ifpackLib.process(pkg).then(function (clients) {
-              updateContacts (VM, clients);
-            });
-          }
+            return ifpackLib.process(receivedPackage)
 
-          else if (pkg.type === ifpackLib.const.TEXT_MESSAGE_TYPE) {
-            ifpackLib.process(pkg).then(function (response) {
-              updateResponse (VM, response);
-            });
-          }
+            /**
+             * pass to the appropriate scope handler
+             */
+              .then(function (data) {
+                vmDataHandler [receivedPackage.type](VM, data);
+              });
 
-          else if (pkg.type === ifpackLib.const.FILE_TYPE) {
-            ifpackLib.process(pkg).then(function (response) {
-              updateResponse (VM, response);
-            });
-          }
+          })
 
-          else {
-          }
+        /**
+         * Error handler
+         */
+          .then(null, function () {
 
-        });
+          });
       });
     }
 
@@ -54,7 +109,7 @@ angular.module('ifclientApp')
      * @param VM
      * @param clients
      */
-    function updateContacts (VM, clients) {
+    function updateContacts(VM, clients) {
       VM.contacts = clients;
       VM.recipient = VM.contacts [0];
     }
@@ -64,7 +119,7 @@ angular.module('ifclientApp')
      * @param VM
      * @param response
      */
-    function updateResponse (VM, response) {
+    function updateResponse(VM, response) {
       VM.response = $sce.trustAsHtml(response + VM.response);
     }
 
@@ -72,31 +127,25 @@ angular.module('ifclientApp')
      * Send message
      * @param VM
      */
-    function sendMessage (VM) {
-      if (VM.recipient === 'ALL') {
-        for (var n in VM.contacts) {
+    function sendMessage(VM) {
 
-          if (!VM.contacts.hasOwnProperty(n)) {
-            continue;
-          }
+      var recipients = VM.recipient === 'ALL' ? VM.contacts.slice(1, VM.contacts.length) : [VM.recipient];
 
-          var recipient = VM.contacts [n];
-          if (recipient === 'ALL') {
-            continue;
-          }
-          ifclientLib.sendMessage(recipient, VM.message, false);
-        }
+      if (VM.filesPackage) {
+        ifclientLib.sendFiles (recipients, VM.filesPackage, false);
       }
       else {
-        ifclientLib.sendMessage(VM.recipient, VM.message, false);
+        ifclientLib.sendMessage(recipients, VM.message, false);
       }
+
+      resetForm(VM);
     }
 
     /**
      * Reset form
      * @param VM
      */
-    function resetForm (VM) {
+    function resetForm(VM) {
       VM.message = '< Type a message / drag and drop a file into here >';
     }
 
@@ -109,21 +158,21 @@ angular.module('ifclientApp')
         VM.contacts = '';
         VM.recipient = '';
         VM.message = '';
+        VM.filesPackage = '';
 
         VM.sendMessage = function () {
-          sendMessage (VM);
+          sendMessage(VM);
         };
 
         VM.resetForm = function () {
-          resetForm (VM);
+          resetForm(VM);
         };
 
         angular.element($window).on('message', function (event) {
-
           onMessageListener(VM, event);
         });
 
-        VM.resetForm();
+        VM.resetForm(VM);
       },
 
       /**
@@ -136,9 +185,11 @@ angular.module('ifclientApp')
       '<option ng-repeat = "contact in contacts" value = "{{contact}}">{{contact}}</option></p>' +
       '</select>' +
       '<p>' +
-      '<textarea ng-model = "message"></textarea>' +
+      '<textarea if-file-drop ng-model = "message"></textarea>' +
       '<br/><button ng-click = "sendMessage ()">Send</button> <button ng-click = "resetForm ()">Reset</button>' +
       '</p>'
     };
 
-  });
+  }
+)
+;

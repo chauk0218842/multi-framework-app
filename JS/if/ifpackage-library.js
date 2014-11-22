@@ -19,7 +19,7 @@ function ifpackageLibrary(ifclientLib, hashLib, deferredLib, packLib, formatByte
   function processClientListPackage(pkg) {
 
     var list = pkg.list.sort();
-    var contacts = ['ALL'];
+    var contacts = ["ALL"];
     for (var n = 0, nLen = list.length; n < nLen; n++) {
       if (list [n] === ifclientLib.getUsername()) {
         continue;
@@ -69,6 +69,10 @@ function ifpackageLibrary(ifclientLib, hashLib, deferredLib, packLib, formatByte
       else if (file.type.indexOf('text/') === 0) {
         responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/>';
       }
+      else if (file.type === 'application/json') {
+        debugger
+        responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/>';
+      }
     }
 
     for (var n = 0, nLen = files.length; n < nLen; n++) {
@@ -109,7 +113,7 @@ function ifpackageLibrary(ifclientLib, hashLib, deferredLib, packLib, formatByte
     else if (pkg.type === packLib.const.TEXT_MESSAGE_TYPE) {
       defer = processTextMessagePackage(pkg);
     }
-    else if (pkg.type === packLib.const.FILE_TYPE) {
+    else if (pkg.type === packLib.const.FILES_TYPE) {
       defer = processFilesPackage(pkg);
     }
 

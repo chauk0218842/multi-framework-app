@@ -6,8 +6,7 @@
  * @param packLib
  * @param clientLib
  * @param deferredLib
- * @returns {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendMessageToClient: sendMessageToClient}}
- * @constructor
+ * @returns {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendFiles: sendFilesToClient, sendMessage: sendMessage}}
  */
 function ifclientLibrary(uriConst, hashLib, transLib, packLib, clientLib, deferredLib) {
 
@@ -52,7 +51,7 @@ function ifclientLibrary(uriConst, hashLib, transLib, packLib, clientLib, deferr
     /**
      * @type {*}
      */
-    var trans = clientLib.listen (event);
+    var trans = clientLib.listen(event);
 
     /**
      * Find the Defer object that should be resolved
@@ -75,7 +74,7 @@ function ifclientLibrary(uriConst, hashLib, transLib, packLib, clientLib, deferr
 
   /**
    * Send a message to Host
-   * @param message
+   * @param trans
    * @returns {*}
    */
   function sendTransmissionToHost(trans) {
@@ -126,42 +125,55 @@ function ifclientLibrary(uriConst, hashLib, transLib, packLib, clientLib, deferr
 
   /**
    * Send text message to client
-   * @param recipientID
+   * @param recipients
    * @param body
    * @param useReceipt
    * @returns {*}
    */
-  function sendMessage(recipientID, body, useReceipt) {
+  function sendMessage(recipients, body, useReceipt) {
 
-    var pkg = packLib.create ({
-      type: packLib.const.TEXT_MESSAGE_TYPE,
-      sender: clientID,
-      recipient: recipientID,
-      body: body,
-      useReceipt: useReceipt
-    });
+    var defers = [];
+    for (var n = 0, nLen = recipients.length; n < nLen; n++) {
 
-    return sendTransmissionToHost(transLib.create(uriConst.SEND_CLIENT_PACKAGE, clientID, pkg))
+      var pkg = packLib.create({
+        type: packLib.const.TEXT_MESSAGE_TYPE,
+        sender: clientID,
+        recipient: recipients [n],
+        body: body,
+        useReceipt: useReceipt
+      });
+
+      defers.push(sendTransmissionToHost(transLib.create(uriConst.SEND_CLIENT_PACKAGE, clientID, pkg)));
+
+    }
+
+    return defers;
   }
 
   /**
    * Send files to a client
-   * @param recipientID
+   * @param recipients
    * @param files
    * @param useReceipt
    * @returns {*}
    */
-  function sendFilesToClient(recipientID, files, useReceipt) {
+  function sendFilesToClient(recipients, files, useReceipt) {
 
-    var pkg = packLib.create ({
-      type: packLib.const.FILE_TYPE,
-      sender: clientID,
-      recipient: recipientID,
-      files: files,
-      useReceipt: useReceipt
-    });
+    var defers = [];
+    for (var n = 0, nLen = recipients.length; n < nLen; n++) {
 
-    return sendTransmissionToHost(transLib.create(uriConst.SEND_CLIENT_PACKAGE, clientID, pkg))
+      var pkg = packLib.create({
+        type: packLib.const.FILES_TYPE,
+        sender: clientID,
+        recipient: recipients [n],
+        files: files,
+        useReceipt: useReceipt
+      });
+
+      defers.push(sendTransmissionToHost(transLib.create(uriConst.SEND_CLIENT_PACKAGE, clientID, pkg)));
+    }
+
+    return defers;
   }
 
   /**

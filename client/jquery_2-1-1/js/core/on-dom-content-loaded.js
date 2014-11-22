@@ -6,17 +6,20 @@ function onDOMContentLoaded(_$) {
 
   'use strict';
 
+  var username = "";
+  var contacts = "";
   var filesPackage = null;
 
   /**
    * HASH Library
    * @type {{create: createHASHBucket, createKey: createHASHKey}}
    */
+
   var hashLib = hashLibrary(window.btoa);
 
   /**
    * Deferred Library
-   * @type {{generate: createDefer, when: (*|jQuery.when|Function|$Q.when|deferredLibrary.when|when)}|{generate: createDefer, when: (*|deferredLibrary.when|jQuery.when|Function|$Q.when|when)}}
+   * @type {{create: createDefer, when: createWhen, all: createAll}}
    */
   var deferredLib = deferredLibrary(_$);
 
@@ -75,6 +78,33 @@ function onDOMContentLoaded(_$) {
   var ifpackLib = ifpackageLibrary(ifclientLib, hashLib, deferredLib, packLib, utilLib.formatBytesToUnits);
 
   /**
+   * VM Handler
+   * @type {{}}
+   */
+  var vmDataHandler = {};
+
+  /**
+   * VM Handler for Client List
+   * @param VM
+   * @param clients
+   */
+  vmDataHandler [ifpackLib.const.CLIENT_LIST_TYPE] = updateContacts;
+
+  /**
+   * VM Handler for Text Message
+   * @param VM
+   * @param response
+   */
+  vmDataHandler [ifpackLib.const.TEXT_MESSAGE_TYPE] = updateResponse;
+
+  /**
+   * VM Handler for File Type
+   * @param VM
+   * @param response
+   */
+  vmDataHandler [ifpackLib.const.FILES_TYPE] = updateResponse;
+
+  /**
    * Window Message Listener
    * @param event
    */
@@ -83,27 +113,28 @@ function onDOMContentLoaded(_$) {
     /**
      * Listen for transmissions
      */
-    ifclientLib.listen(event).then(function (pkg) {
+    ifclientLib.listen(event)
 
-      /**
-       * clientLib list was updated
-       */
-      if (pkg.type == ifpackLib.const.CLIENT_LIST_TYPE) {
-        ifpackLib.process(pkg).then(updateContacts);
-      }
+    /**
+     * Process the data
+     */
+      .then(function (receivedPackage) {
 
-      else if (pkg.type === ifpackLib.const.TEXT_MESSAGE_TYPE) {
-        ifpackLib.process(pkg).then(updateResponse);
-      }
+        return ifpackLib.process(receivedPackage)
 
-      else if (pkg.type === ifpackLib.const.FILE_TYPE) {
-        ifpackLib.process(pkg).then(updateResponse);
-      }
+        /**
+         * pass to the appropriate scope handler
+         */
+          .then(vmDataHandler [receivedPackage.type]);
 
-      else {
-      }
+      })
 
-    });
+    /**
+     * Error handler
+     */
+      .then(null, function () {
+        debugger;
+      });
 
   }
 
@@ -115,8 +146,10 @@ function onDOMContentLoaded(_$) {
    */
   function updateContacts(clients) {
 
-    var userName = ifclientLib.getUsername();
     var $contacts = _$('#contacts');
+
+    contacts = clients;
+
     $contacts.empty();
 
     clients = clients.sort();
@@ -124,10 +157,10 @@ function onDOMContentLoaded(_$) {
     for (var n = 0, nLen = clients.length; n < nLen; n++) {
       var contact = clients [n];
 
-      if (contact === userName) {
+      if (contact === username) {
         continue;
       }
-      $contacts.append('<option value = \"' + contact + '\">' + contact + '</option>');
+      $contacts.append('<option value = "' + contact + '">' + contact + '</option>');
     }
 
     $contacts.index(0);
@@ -148,35 +181,15 @@ function onDOMContentLoaded(_$) {
   function sendMessage() {
 
     var $contacts = _$('#contacts');
-    var contact = $contacts.val();
+    var recipient = $contacts.val();
+    var recipients = recipient === 'ALL' ? contacts.slice (0, contacts.length) : [recipient];
     var message = _$('#message').val();
 
-    if (contact === 'ALL') {
-      var contacts = _$('#contacts>option').map(function () {
-        return $(this).val();
-      });
-
-      for (var n = 0, nLen = contacts.length; n < nLen; n++) {
-        var recipient = contacts [n];
-        if (recipient === 'ALL') {
-          continue;
-        }
-
-        if (filesPackage) {
-          ifclientLib.sendFiles(recipient, filesPackage, false);
-        }
-        else {
-          ifclientLib.sendMessage(recipient, message, false);
-        }
-      }
+    if (filesPackage) {
+      ifclientLib.sendFiles (recipients, filesPackage, false);
     }
     else {
-      if (filesPackage) {
-        ifclientLib.sendFiles(contact, filesPackage, false);
-      }
-      else {
-        ifclientLib.sendMessage(contact, message, false);
-      }
+      ifclientLib.sendMessage (recipients, message, false);
     }
 
     resetForm();
@@ -192,10 +205,6 @@ function onDOMContentLoaded(_$) {
 
   }
 
-  /**
-   * Assign the client name
-   */
-  _$('#clientName').text(ifclientLib.getUsername());
 
   /**
    * On Drop of a file
@@ -212,6 +221,13 @@ function onDOMContentLoaded(_$) {
     filesPackage = files;
 
   }
+
+  username = ifclientLib.getUsername ();
+
+  /**
+   * Assign the client name
+   */
+  _$('#clientName').text(username);
 
   /**
    * Drag and drop file into message box

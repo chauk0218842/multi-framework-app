@@ -41,8 +41,16 @@ function packageLibrary(packConst) {
    * @param blob
    * @returns {*}
    */
+  /**
+   * Create a files package
+   * @param senderID
+   * @param recipientID
+   * @param files
+   * @param useReceipt
+   * @returns {{type: *}}
+   */
   function createFilePackage(senderID, recipientID, files, useReceipt) {
-    var pkg = createPackage(packConst.FILE_TYPE);
+    var pkg = createPackage(packConst.FILES_TYPE);
     pkg.sender = senderID;
     pkg.recipient = recipientID;
     pkg.files = files;
@@ -79,7 +87,7 @@ function packageLibrary(packConst) {
       pkg = createTextMessagePackage(params.sender, params.recipient, params.body, params.useReceipt);
     }
 
-    else if (params.type === packConst.FILE_TYPE) {
+    else if (params.type === packConst.FILES_TYPE) {
       pkg = createFilePackage(params.sender, params.recipient, params.files, params.useReceipt);
     }
 
