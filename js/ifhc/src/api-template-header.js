@@ -4,7 +4,6 @@
 
 /**
  * ifhc Library
- * TODO - write a task script for this (this is just a mock layout
  */
 var ifhc = (function (window) {
 
