@@ -1,0 +1,22 @@
+{
+  "name": "ifhc",
+  "version": "1.0.0",
+  "description": "##Introduction## This is a research app to allow different Single Page Applications (SPA) be able to reside in harmony on a single browser window.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://kentchau@bitbucket.org/rangle/iframe-host-client.git"
+  },
+  "author": "kent@rangle.io",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.8.10",
+    "gulp-beautify": "^1.1.1",
+    "gulp-concat": "^2.4.2",
+    "gulp-uglify": "^1.0.1",
+    "gulp-util": "^3.0.1"
+  }
+}
