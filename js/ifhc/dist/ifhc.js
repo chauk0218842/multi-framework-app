@@ -1,5 +1,8 @@
 /**
+ * @description
  * ifhc Library
+ * The library that allows different Single Page Applications (SPAs) to be able to reside in harmony on a single browser window via
+ * I-F-R-A-M-E-S!!!.
  */
 var ifhc = (function (window) {
 
@@ -54,6 +57,45 @@ var ifhc = (function (window) {
    * @type {Function}
    */
   var base64Encoder = window.btoa;
+  /**
+   * Client Library
+   * This is the base client library, responsible for sending "messages" to the host/server window
+   * @param serverConst - Server constant
+   * @returns {{send: sendMessageToHost, listen: listenToServer}}
+   * @constructor
+   */
+
+  function clientLibrary(serverConst) {
+
+    'use strict';
+
+    /**
+     * Send a request to server
+     * @param message
+     */
+
+    function sendMessageToHost(message) {
+      parent.postMessage(message, serverConst.DOMAIN_NAME);
+    }
+
+    /**
+     * Listen to request responded back from Server
+     * @param event
+     * @returns {*}
+     */
+
+    function listenToServer(event) {
+      return event.data;
+    }
+
+    /**
+     * Public API
+     */
+    return {
+      send: sendMessageToHost,
+      listen: listenToServer
+    };
+  }
   /**
    * Package Constants
    * @type {{}}
@@ -165,45 +207,6 @@ var ifhc = (function (window) {
     return {
       const: attachmentConst,
       create: createNewAttachment
-    };
-  }
-  /**
-   * Client Library
-   * This is the base client library, responsible for sending "messages" to the host/server window
-   * @param serverConst - Server constant
-   * @returns {{send: sendMessageToHost, listen: listenToServer}}
-   * @constructor
-   */
-
-  function clientLibrary(serverConst) {
-
-    'use strict';
-
-    /**
-     * Send a request to server
-     * @param message
-     */
-
-    function sendMessageToHost(message) {
-      parent.postMessage(message, serverConst.DOMAIN_NAME);
-    }
-
-    /**
-     * Listen to request responded back from Server
-     * @param event
-     * @returns {*}
-     */
-
-    function listenToServer(event) {
-      return event.data;
-    }
-
-    /**
-     * Public API
-     */
-    return {
-      send: sendMessageToHost,
-      listen: listenToServer
     };
   }
   /**

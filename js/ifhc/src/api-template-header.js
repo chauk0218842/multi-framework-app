@@ -1,5 +1,8 @@
 /**
+ * @description
  * ifhc Library
+ * The library that allows different Single Page Applications (SPAs) to be able to reside in harmony on a single browser window via
+ * I--F--R--A--M--E--S!!!.
  */
 var ifhc = (function (window) {
 
