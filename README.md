@@ -15,6 +15,10 @@ For DEMO purposes, we have currently have three different IFrame clients based o
 3. [JQuery 2.1.1](http://www.jquery.com/)
 
 ##How to Use##
-1. The host application is located in the folder **index.html**
+1. The host application is located in the root folder **index.html**
 2. Add client IFrames by clicking the "+"
 3. Messages can be sent to different clients via the recipient list
+
+##To-Do's##
+There are plenty :-(
+**Top item: write unit tests - may be convert the 'api' and 'core' libraries to use AMD module definitions (Common/RequiredJS) for easier unit-testing**
