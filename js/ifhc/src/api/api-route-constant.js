@@ -7,20 +7,20 @@ var apiRouteConstant = {
   /**
    * Client: connect to host
    */
-  CONNECT_CLIENT: "HOST: connect client",
+  CONNECT_CLIENT: "connect client",
 
   /**
    * Client: disconnect from host
    */
-  DISCONNECT_CLIENT: "HOST: disconnect client",
+  DISCONNECT_CLIENT: "disconnect client",
 
   /**
    * Client: request connected clients list from host
    */
-  REQUEST_CLIENT_LIST: "HOST: request client list",
+  REQUEST_CLIENT_LIST: "request client list",
 
   /**
    * Client: send a message to a client
    */
-  SEND_CLIENT_PACKAGE: "HOST: send client package"
+  SEND_CLIENT_PACKAGE: "send client package"
 };

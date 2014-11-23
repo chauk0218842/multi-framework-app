@@ -1,7 +1,7 @@
 /**
  * Server Library
- * @param serverConst
- * @param hashLib
+ * @param serverConst - Server constant
+ * @param hashLib - HASH library
  * @returns {{const: *, addClient: addClient, removeClient: removeClient, getClientList: getClientList, send: sendTransmission}}
  */
 function serverLibrary(serverConst, hashLib) {

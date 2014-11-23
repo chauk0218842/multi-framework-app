@@ -1,7 +1,6 @@
 /******************************************************************************************************
  * API TEMPLATE HEADER STARTS HERE
  ******************************************************************************************************/
-base64Encoder = typeof(base64Encoder) === 'undefined' ? window.btoa : base64Encoder;
 
 /**
  * ifhc Library
@@ -69,8 +68,46 @@ var ifhc = (function (window) {
    * GENERATED SOURCE STARTS HERE
    ******************************************************************************************************/
   /**
+   * Client Library
+   * @param serverConst - Server constant
+   * @returns {{send: sendTransmissionToHost, listen: listenToServer}}
+   * @constructor
+   */
+
+  function clientLibrary(serverConst) {
+
+    'use strict';
+
+    /**
+     * Send a request to server
+     * @param transmission
+     */
+
+    function sendTransmissionToHost(transmission) {
+      parent.postMessage(transmission, serverConst.DOMAIN_NAME);
+    }
+
+    /**
+     * Listen to request responded back from Server
+     * @param event
+     * @returns {*}
+     */
+
+    function listenToServer(event) {
+      return event.data;
+    }
+
+    /**
+     * Public API
+     */
+    return {
+      send: sendTransmissionToHost,
+      listen: listenToServer
+    };
+  }
+  /**
    * HASH Library
-   * @param encodeToBase64
+   * @param encodeToBase64 - Encode to base64 function
    * @returns {{create: createHASHBucket, createKey: createHASHKey}}
    */
 
@@ -154,44 +191,6 @@ var ifhc = (function (window) {
     };
   }
   /**
-   * Client Library
-   * @param serverConst
-   * @returns {{send: sendTransmissionToHost, listen: listenToServer}}
-   * @constructor
-   */
-
-  function clientLibrary(serverConst) {
-
-    'use strict';
-
-    /**
-     * Send a request to server
-     * @param transmission
-     */
-
-    function sendTransmissionToHost(transmission) {
-      parent.postMessage(transmission, serverConst.DOMAIN_NAME);
-    }
-
-    /**
-     * Listen to request responded back from Server
-     * @param event
-     * @returns {*}
-     */
-
-    function listenToServer(event) {
-      return event.data;
-    }
-
-    /**
-     * Public API
-     */
-    return {
-      send: sendTransmissionToHost,
-      listen: listenToServer
-    };
-  }
-  /**
    * Package Constants
    * @type {{}}
    */
@@ -203,7 +202,7 @@ var ifhc = (function (window) {
   };
   /**
    * Package Library
-   * @param packgConst
+   * @param packgConst packageConstant
    * @returns {{const: (packgConst|*), create: createNewPackage}}
    */
 
@@ -217,9 +216,9 @@ var ifhc = (function (window) {
      */
 
     function createClientListPackage(params) {
-      var pkg = createPackage(params);
-      pkg.list = params.list;
-      return pkg;
+      var packg = createPackage(params);
+      packg.list = params.list;
+      return packg;
     }
 
     /**
@@ -229,9 +228,9 @@ var ifhc = (function (window) {
      */
 
     function createTextMessagePackage(params) {
-      var pkg = createPackage(params);
-      pkg.body = params.body;
-      return pkg;
+      var packg = createPackage(params);
+      packg.body = params.body;
+      return packg;
     }
 
     /**
@@ -241,9 +240,9 @@ var ifhc = (function (window) {
      */
 
     function createFilePackage(params) {
-      var pkg = createPackage(params);
-      pkg.files = params.files;
-      return pkg;
+      var packg = createPackage(params);
+      packg.files = params.files;
+      return packg;
     }
 
     /**
@@ -268,12 +267,10 @@ var ifhc = (function (window) {
      */
 
     function createNewPackage(params) {
-
       var packageHandler = {};
       packageHandler[packgConst.CLIENT_LIST_TYPE] = createClientListPackage;
       packageHandler[packgConst.TEXT_MESSAGE_TYPE] = createTextMessagePackage;
       packageHandler[packgConst.FILES_TYPE] = createFilePackage;
-
       return packageHandler[params.type] ? packageHandler[params.type](params) : createPackage(null);
     }
 
@@ -303,8 +300,8 @@ var ifhc = (function (window) {
   };
   /**
    * Server Library
-   * @param serverConst
-   * @param hashLib
+   * @param serverConst - Server constant
+   * @param hashLib - HASH library
    * @returns {{const: *, addClient: addClient, removeClient: removeClient, getClientList: getClientList, send: sendTransmission}}
    */
 
@@ -375,7 +372,7 @@ var ifhc = (function (window) {
   }
   /**
    * Transmission Library
-   * @param createHASHKey
+   * @param createHASHKey - Create HASH key function
    * @returns {{create: createNewTransmission}}
    */
 
@@ -511,12 +508,12 @@ var ifhc = (function (window) {
   }
   /**
    * API Client Library
-   * @param hash
-   * @param client
-   * @param transmission
-   * @param routeConst
-   * @param packg
-   * @param deferred
+   * @param hash - HASH library
+   * @param client - Client library
+   * @param transmission - Transmission library
+   * @param routeConst - Route constant
+   * @param packg - Package library
+   * @param deferred - Deferred library
    * @returns {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendFiles: sendFilesToClient, sendMessage: sendMessage}}
    */
 
@@ -560,6 +557,7 @@ var ifhc = (function (window) {
 
     /**
      * Listen to Host
+     * Returns a deferred object
      * @param event
      */
 
@@ -575,6 +573,9 @@ var ifhc = (function (window) {
        */
       var defer = deferHASH.get(trans.id);
 
+      /**
+       * Keep track of all transmissions received
+       */
       responseList.push(trans);
 
       /**
@@ -595,6 +596,7 @@ var ifhc = (function (window) {
 
     /**
      * Send a message to Host
+     * Returns a deferred object
      * @param trans
      * @returns {*}
      */
@@ -614,6 +616,7 @@ var ifhc = (function (window) {
 
     /**
      * Connect to Host
+     * Returns a deferred object
      * @returns {*}
      */
 
@@ -625,6 +628,7 @@ var ifhc = (function (window) {
 
     /**
      * Disconnect from Host
+     * Returns a deferred object
      * @returns {*}
      */
 
@@ -636,6 +640,7 @@ var ifhc = (function (window) {
 
     /**
      * Get Clients from Host
+     * Returns a deferred object
      * @returns {*}
      */
 
@@ -647,6 +652,7 @@ var ifhc = (function (window) {
 
     /**
      * Send text message to client
+     * TODO need to implement use receipts, make note that you are dealing with an array of defers...
      * @param recipients
      * @param body
      * @param useReceipt
@@ -655,6 +661,10 @@ var ifhc = (function (window) {
 
     function sendMessage(recipients, body, useReceipt) {
 
+      /**
+       * Collection of defers that will be returned
+       * @type {Array}
+       */
       var defers = [];
       for (var n = 0, nLen = recipients.length; n < nLen; n++) {
 
@@ -675,6 +685,7 @@ var ifhc = (function (window) {
 
     /**
      * Send files to a client
+     * Returns a deferred object
      * @param recipients
      * @param files
      * @param useReceipt
@@ -747,7 +758,7 @@ var ifhc = (function (window) {
   }
   /**
    * API Host Library
-   * @param router
+   * @param router - Router library
    * @returns {{listen: listen}}
    * @constructor
    */
@@ -763,7 +774,6 @@ var ifhc = (function (window) {
 
     function listen(event) {
       router.process(event.data);
-
       console.log(("HOST > Processing a request: %URI%").replace(/%URI%/g, event.data.uri));
     }
 
@@ -778,10 +788,10 @@ var ifhc = (function (window) {
   /**
    * API Package Library
    * TODO this needs major refactoring
-   * @param hash
-   * @param packg
-   * @param formatBytesToUnits
-   * @param deferred
+   * @param hash - HASH library
+   * @param packg - Package library
+   * @param formatBytesToUnits - Format Bytes to KB/MB/GB function
+   * @param deferred - Deferred library
    * @returns {*}
    */
 
@@ -791,33 +801,33 @@ var ifhc = (function (window) {
 
     /**
      * Process Client List
-     * @param pkg
+     * @param receivedPackage
      * @returns {*}
      */
 
-    function processClientListPackage(pkg) {
-      pkg.list = ["ALL"].concat(pkg.list);
-      return deferred.when(pkg);
+    function processClientListPackage(receivedPackage) {
+      receivedPackage.list = ["ALL"].concat(receivedPackage.list);
+      return deferred.when(receivedPackage);
     }
 
     /**
      * Process Text Message
-     * @param pkg
+     * @param receivedPackage
      * @returns {*}
      */
 
-    function processTextMessagePackage(pkg) {
-      pkg.body = ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, pkg.sender).replace(/%MESSAGE%/g, pkg.body);
-      return deferred.when(pkg);
+    function processTextMessagePackage(receivedPackage) {
+      receivedPackage.body = ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, receivedPackage.sender).replace(/%MESSAGE%/g, receivedPackage.body);
+      return deferred.when(receivedPackage);
     }
 
     /**
-     * Process Files
-     * @param pkg
+     * Process Files, this actually returns a Text message, as you will need to show a "response" instead
+     * @param receivedPackage
      * @returns {*}
      */
 
-    function processFilesPackage(pkg) {
+    function processFilesPackage(receivedPackage) {
 
       /**
        * @type {string}
@@ -836,9 +846,9 @@ var ifhc = (function (window) {
       var deferHASH = hash.create();
 
       /**
-       * @type {pkg.files|*}
+       * @type {receivedPackage.files|*}
        */
-      var files = pkg.files;
+      var files = receivedPackage.files;
 
       /**
        * Total files provided
@@ -933,21 +943,21 @@ var ifhc = (function (window) {
       return deferred.all(defers).then(function () {
         return packg.create({
           type: packg.const.TEXT_MESSAGE_TYPE,
-          sender: pkg.sender,
-          recipient: pkg.recipient,
-          body: ('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, pkg.recipient) + responseHTML + "<hr/>",
-          useReceipt: pkg.receipt
+          sender: receivedPackage.sender,
+          recipient: receivedPackage.recipient,
+          body: ('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, receivedPackage.recipient) + responseHTML + "<hr/>",
+          useReceipt: receivedPackage.receipt
         });
       });
     }
 
     /**
      * Process Package
-     * @param pkg
+     * @param receivedPackage
      * @returns {*}
      */
 
-    function processPackage(pkg) {
+    function processPackage(receivedPackage) {
 
       /**
        * Process packages based on type
@@ -958,7 +968,7 @@ var ifhc = (function (window) {
       packageHandler[packg.const.TEXT_MESSAGE_TYPE] = processTextMessagePackage;
       packageHandler[packg.const.FILES_TYPE] = processFilesPackage;
 
-      return deferred.when(packageHandler[pkg.type](pkg));
+      return deferred.when(packageHandler[receivedPackage.type](receivedPackage));
     }
 
     /**
@@ -981,30 +991,30 @@ var ifhc = (function (window) {
     /**
      * Client: connect to host
      */
-    CONNECT_CLIENT: "HOST: connect client",
+    CONNECT_CLIENT: "connect client",
 
     /**
      * Client: disconnect from host
      */
-    DISCONNECT_CLIENT: "HOST: disconnect client",
+    DISCONNECT_CLIENT: "disconnect client",
 
     /**
      * Client: request connected clients list from host
      */
-    REQUEST_CLIENT_LIST: "HOST: request client list",
+    REQUEST_CLIENT_LIST: "request client list",
 
     /**
      * Client: send a message to a client
      */
-    SEND_CLIENT_PACKAGE: "HOST: send client package"
+    SEND_CLIENT_PACKAGE: "send client package"
   };
   /**
    * API Router Library
-   * @param transmission
-   * @param server
-   * @param packg
-   * @param routeConst
-   * @param routerExt
+   * @param transmission - Transmission library
+   * @param server - Server library
+   * @param packg - Package library
+   * @param routeConst - Route constant
+   * @param routerExt - Custom Router Extension TODO - need to implement this feature
    * @returns {{const: *, process: processTransmission}}
    */
 
@@ -1014,40 +1024,40 @@ var ifhc = (function (window) {
 
     /**
      * Add a client
-     * @param trans
+     * @param receivedTrans
      */
 
-    function addClient(trans) {
+    function addClient(receivedTrans) {
 
-      var pkg = packg.create({
+      var sendPackage = packg.create({
         type: packg.const.TEXT_MESSAGE_TYPE,
         sender: server.const.SERVER_NAME,
-        recipient: trans.client,
+        recipient: receivedTrans.client,
         body: 'Connected to host',
         useReceipt: false
       });
 
-      server.addClient(trans.client);
-      server.send(trans.client, transmission.createResponse(trans, pkg));
+      server.addClient(receivedTrans.client);
+      server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
     }
 
     /**
      * Remove Client
-     * @param trans
+     * @param receivedTrans
      */
 
-    function removeClient(trans) {
+    function removeClient(receivedTrans) {
 
-      var pkg = packg.create({
+      var sendPackage = packg.create({
         type: packg.const.TEXT_MESSAGE_TYPE,
         sender: server.const.SERVER_NAME,
-        recipient: trans.client,
+        recipient: receivedTrans.client,
         body: 'Disconnected from host',
         useReceipt: false
       });
 
-      server.removeClient(trans.client);
-      server.send(trans.client, transmission.createResponse(trans, pkg));
+      server.removeClient(receivedTrans.client);
+      server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
     }
 
     /**
@@ -1081,100 +1091,100 @@ var ifhc = (function (window) {
       for (var n = 0, nLen = clientList.length; n < nLen; n++) {
         var sClient = clientList[n];
 
-        var pkg = packg.create({
+        var sendPackage = packg.create({
           type: packg.const.CLIENT_LIST_TYPE,
           list: createClientList(sClient)
         });
 
-        server.send(sClient, transmission.create(routeConst.REQUEST_CLIENT_LIST, sClient, pkg));
+        server.send(sClient, transmission.create(routeConst.REQUEST_CLIENT_LIST, sClient, sendPackage));
       }
     }
 
     /**
      * Send a client the list of connect clients
-     * @param trans
+     * @param receivedTrans
      */
 
-    function getClientList(trans) {
+    function getClientList(receivedTrans) {
 
-      var pkg = packg.create({
+      var sendPackage = packg.create({
         type: packg.const.CLIENT_LIST_TYPE,
-        list: createClientList(trans.client)
+        list: createClientList(receivedTrans.client)
       });
 
       /**
        * Respond back to the client that made the request
        */
-      server.send(trans.client, transmission.createResponse(trans, pkg));
+      server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
     }
 
     /**
      * Forward a client a package
-     * @param trans
+     * @param receivedTrans
      */
 
-    function sendClientPackage(trans) {
+    function sendClientPackage(receivedTrans) {
 
       /**
        * Extract the recipient from the parameters
        */
-      server.send(trans.package.recipient, transmission.createResponse(trans, trans.package));
+      server.send(receivedTrans.package.recipient, transmission.createResponse(receivedTrans, receivedTrans.package));
     }
 
     /**
      * Bad route
-     * @param trans
+     * @param receivedTrans
      */
 
-    function badRoute(trans) {
+    function badRoute(receivedTrans) {
 
-      var pkg = packg.create({
+      var sendPackage = packg.create({
         type: packg.const.TEXT_MESSAGE_TYPE,
         sender: server.const.SERVER_NAME,
-        recipient: trans.client,
+        recipient: receivedTrans.client,
         body: 'you 404\'ed!!',
         useReceipt: false
       });
 
-      server.send(trans.client, transmission.createResponse(trans, pkg));
+      server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
     }
 
     /**
      * Process an encoded trans
-     * @param trans
+     * @param receivedTrans
      * @returns {*}
      */
 
-    function processTransmission(trans) {
+    function processTransmission(receivedTrans) {
 
       /**
        * Connect a client
        */
-      if (trans.uri === routeConst.CONNECT_CLIENT) {
-        addClient(trans);
+      if (receivedTrans.uri === routeConst.CONNECT_CLIENT) {
+        addClient(receivedTrans);
         updateClientsClientList();
       }
 
       /**
        * Disconnect a client
        */
-      else if (trans.uri === routeConst.DISCONNECT_CLIENT) {
-        removeClient(trans);
+      else if (receivedTrans.uri === routeConst.DISCONNECT_CLIENT) {
+        removeClient(receivedTrans);
         updateClientsClientList();
       }
 
       /**
        * Get client list
        */
-      else if (trans.uri === routeConst.REQUEST_CLIENT_LIST) {
-        getClientList(trans);
+      else if (receivedTrans.uri === routeConst.REQUEST_CLIENT_LIST) {
+        getClientList(receivedTrans);
       }
 
       /**
        * Send a transmission to client
        */
-      else if (trans.uri === routeConst.SEND_CLIENT_PACKAGE) {
-        sendClientPackage(trans);
+      else if (receivedTrans.uri === routeConst.SEND_CLIENT_PACKAGE) {
+        sendClientPackage(receivedTrans);
       }
 
       /**

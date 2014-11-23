@@ -1,11 +1,11 @@
 /**
  * API Client Library
- * @param hash
- * @param client
- * @param transmission
- * @param routeConst
- * @param packg
- * @param deferred
+ * @param hash - HASH library
+ * @param client - Client library
+ * @param transmission - Transmission library
+ * @param routeConst - Route constant
+ * @param packg - Package library
+ * @param deferred - Deferred library
  * @returns {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendFiles: sendFilesToClient, sendMessage: sendMessage}}
  */
 function apiClientLibrary (hash, client, transmission, routeConst, packg, deferred) {
@@ -48,6 +48,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
 
   /**
    * Listen to Host
+   * Returns a deferred object
    * @param event
    */
   function listenToHost(event) {
@@ -62,6 +63,9 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
      */
     var defer = deferHASH.get(trans.id);
 
+    /**
+     * Keep track of all transmissions received
+     */
     responseList.push(trans);
 
     /**
@@ -82,6 +86,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
 
   /**
    * Send a message to Host
+   * Returns a deferred object
    * @param trans
    * @returns {*}
    */
@@ -100,6 +105,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
 
   /**
    * Connect to Host
+   * Returns a deferred object
    * @returns {*}
    */
   function connectToHost() {
@@ -111,6 +117,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
 
   /**
    * Disconnect from Host
+   * Returns a deferred object
    * @returns {*}
    */
   function disconnectFromHost() {
@@ -122,6 +129,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
 
   /**
    * Get Clients from Host
+   * Returns a deferred object
    * @returns {*}
    */
   function getClientListFromHost() {
@@ -133,6 +141,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
 
   /**
    * Send text message to client
+   * TODO need to implement use receipts, make note that you are dealing with an array of defers...
    * @param recipients
    * @param body
    * @param useReceipt
@@ -140,6 +149,10 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
    */
   function sendMessage(recipients, body, useReceipt) {
 
+    /**
+     * Collection of defers that will be returned
+     * @type {Array}
+     */
     var defers = [];
     for (var n = 0, nLen = recipients.length; n < nLen; n++) {
 
@@ -160,6 +173,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
 
   /**
    * Send files to a client
+   * Returns a deferred object
    * @param recipients
    * @param files
    * @param useReceipt

@@ -1,6 +1,6 @@
 /**
  * Transmission Library
- * @param createHASHKey
+ * @param createHASHKey - Create HASH key function
  * @returns {{create: createNewTransmission}}
  */
 function transmissionLibrary(createHASHKey) {

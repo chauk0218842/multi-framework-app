@@ -1,6 +1,6 @@
 /**
  * Client Library
- * @param serverConst
+ * @param serverConst - Server constant
  * @returns {{send: sendTransmissionToHost, listen: listenToServer}}
  * @constructor
  */

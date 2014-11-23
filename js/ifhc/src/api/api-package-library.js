@@ -1,10 +1,10 @@
 /**
  * API Package Library
  * TODO this needs major refactoring
- * @param hash
- * @param packg
- * @param formatBytesToUnits
- * @param deferred
+ * @param hash - HASH library
+ * @param packg - Package library
+ * @param formatBytesToUnits - Format Bytes to KB/MB/GB function
+ * @param deferred - Deferred library
  * @returns {*}
  */
 function apiPackageLibrary(hash, packg, formatBytesToUnits, deferred) {
@@ -13,30 +13,30 @@ function apiPackageLibrary(hash, packg, formatBytesToUnits, deferred) {
 
   /**
    * Process Client List
-   * @param pkg
+   * @param receivedPackage
    * @returns {*}
    */
-  function processClientListPackage(pkg) {
-    pkg.list = ["ALL"].concat (pkg.list);
-    return deferred.when (pkg);
+  function processClientListPackage(receivedPackage) {
+    receivedPackage.list = ["ALL"].concat (receivedPackage.list);
+    return deferred.when (receivedPackage);
   }
 
   /**
    * Process Text Message
-   * @param pkg
+   * @param receivedPackage
    * @returns {*}
    */
-  function processTextMessagePackage(pkg) {
-    pkg.body = ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, pkg.sender).replace(/%MESSAGE%/g, pkg.body);
-    return deferred.when (pkg);
+  function processTextMessagePackage(receivedPackage) {
+    receivedPackage.body = ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, receivedPackage.sender).replace(/%MESSAGE%/g, receivedPackage.body);
+    return deferred.when (receivedPackage);
   }
 
   /**
-   * Process Files
-   * @param pkg
+   * Process Files, this actually returns a Text message, as you will need to show a "response" instead
+   * @param receivedPackage
    * @returns {*}
    */
-  function processFilesPackage(pkg) {
+  function processFilesPackage(receivedPackage) {
 
     /**
      * @type {string}
@@ -55,9 +55,9 @@ function apiPackageLibrary(hash, packg, formatBytesToUnits, deferred) {
     var deferHASH = hash.create();
 
     /**
-     * @type {pkg.files|*}
+     * @type {receivedPackage.files|*}
      */
-    var files = pkg.files;
+    var files = receivedPackage.files;
 
     /**
      * Total files provided
@@ -148,20 +148,20 @@ function apiPackageLibrary(hash, packg, formatBytesToUnits, deferred) {
     return deferred.all(defers).then(function () {
       return packg.create({
         type: packg.const.TEXT_MESSAGE_TYPE,
-        sender: pkg.sender,
-        recipient: pkg.recipient,
-        body: ('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, pkg.recipient) + responseHTML + "<hr/>",
-        useReceipt: pkg.receipt
+        sender: receivedPackage.sender,
+        recipient: receivedPackage.recipient,
+        body: ('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, receivedPackage.recipient) + responseHTML + "<hr/>",
+        useReceipt: receivedPackage.receipt
       });
     });
   }
 
   /**
    * Process Package
-   * @param pkg
+   * @param receivedPackage
    * @returns {*}
    */
-  function processPackage(pkg) {
+  function processPackage(receivedPackage) {
 
     /**
      * Process packages based on type
@@ -172,7 +172,7 @@ function apiPackageLibrary(hash, packg, formatBytesToUnits, deferred) {
     packageHandler [packg.const.TEXT_MESSAGE_TYPE] = processTextMessagePackage;
     packageHandler [packg.const.FILES_TYPE] = processFilesPackage;
 
-    return deferred.when (packageHandler [pkg.type] (pkg));
+    return deferred.when (packageHandler [receivedPackage.type] (receivedPackage));
   }
 
   /**

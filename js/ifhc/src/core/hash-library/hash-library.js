@@ -1,6 +1,6 @@
 /**
  * HASH Library
- * @param encodeToBase64
+ * @param encodeToBase64 - Encode to base64 function
  * @returns {{create: createHASHBucket, createKey: createHASHKey}}
  */
 function hashLibrary (encodeToBase64) {

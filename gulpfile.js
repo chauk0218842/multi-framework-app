@@ -12,7 +12,7 @@ gulp.task('js', function () {
   /**
    * Generate library file
    */
-  gulp.src(['./js/ifhc/src/api_template_header.js', './js/ifhc/src/core/*/*.js', './js/ifhc/src/api/*.js', './js/ifhc/src/api_template_footer.js'])
+  gulp.src(['./js/ifhc/src/api-template-header.js', './js/ifhc/src/core/*/*.js', './js/ifhc/src/api/*.js', './js/ifhc/src/api-template-footer.js'])
     .pipe(concat('ifhc.js'))
     .pipe(beautify({indentSize: 2}))
     .pipe(gulp.dest('./js/ifhc/dist'));

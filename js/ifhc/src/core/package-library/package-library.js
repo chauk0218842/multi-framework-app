@@ -1,6 +1,6 @@
 /**
  * Package Library
- * @param packgConst
+ * @param packgConst packageConstant
  * @returns {{const: (packgConst|*), create: createNewPackage}}
  */
 function packageLibrary(packgConst) {
@@ -12,9 +12,9 @@ function packageLibrary(packgConst) {
    * @param params
    */
   function createClientListPackage(params) {
-    var pkg = createPackage(params);
-    pkg.list = params.list;
-    return pkg;
+    var packg = createPackage(params);
+    packg.list = params.list;
+    return packg;
   }
 
   /**
@@ -23,9 +23,9 @@ function packageLibrary(packgConst) {
    * @returns {{type: *}}
    */
   function createTextMessagePackage(params) {
-    var pkg = createPackage(params);
-    pkg.body = params.body;
-    return pkg;
+    var packg = createPackage(params);
+    packg.body = params.body;
+    return packg;
   }
 
   /**
@@ -34,9 +34,9 @@ function packageLibrary(packgConst) {
    * @returns {{type: *}}
    */
   function createFilePackage(params) {
-    var pkg = createPackage(params);
-    pkg.files = params.files;
-    return pkg;
+    var packg = createPackage(params);
+    packg.files = params.files;
+    return packg;
   }
 
   /**
@@ -59,12 +59,10 @@ function packageLibrary(packgConst) {
    * @returns {*}
    */
   function createNewPackage(params) {
-
     var packageHandler = {};
     packageHandler [packgConst.CLIENT_LIST_TYPE] = createClientListPackage;
     packageHandler [packgConst.TEXT_MESSAGE_TYPE] = createTextMessagePackage;
     packageHandler [packgConst.FILES_TYPE] = createFilePackage;
-
     return packageHandler [params.type] ? packageHandler [params.type] (params) : createPackage(null);
   }
 

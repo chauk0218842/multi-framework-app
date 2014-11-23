@@ -1,10 +1,10 @@
 /**
  * API Router Library
- * @param transmission
- * @param server
- * @param packg
- * @param routeConst
- * @param routerExt
+ * @param transmission - Transmission library
+ * @param server - Server library
+ * @param packg - Package library
+ * @param routeConst - Route constant
+ * @param routerExt - Custom Router Extension TODO - need to implement this feature
  * @returns {{const: *, process: processTransmission}}
  */
 function apiRouterLibrary(transmission, server, packg, routeConst, routerExt) {
@@ -13,38 +13,38 @@ function apiRouterLibrary(transmission, server, packg, routeConst, routerExt) {
 
   /**
    * Add a client
-   * @param trans
+   * @param receivedTrans
    */
-  function addClient(trans) {
+  function addClient(receivedTrans) {
 
-    var pkg = packg.create({
+    var sendPackage = packg.create({
       type: packg.const.TEXT_MESSAGE_TYPE,
       sender: server.const.SERVER_NAME,
-      recipient: trans.client,
+      recipient: receivedTrans.client,
       body: 'Connected to host',
       useReceipt: false
     });
 
-    server.addClient(trans.client);
-    server.send(trans.client, transmission.createResponse(trans, pkg));
+    server.addClient(receivedTrans.client);
+    server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
   }
 
   /**
    * Remove Client
-   * @param trans
+   * @param receivedTrans
    */
-  function removeClient(trans) {
+  function removeClient(receivedTrans) {
 
-    var pkg = packg.create({
+    var sendPackage = packg.create({
       type: packg.const.TEXT_MESSAGE_TYPE,
       sender: server.const.SERVER_NAME,
-      recipient: trans.client,
+      recipient: receivedTrans.client,
       body: 'Disconnected from host',
       useReceipt: false
     });
 
-    server.removeClient(trans.client);
-    server.send(trans.client, transmission.createResponse(trans, pkg));
+    server.removeClient(receivedTrans.client);
+    server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
   }
 
   /**
@@ -76,96 +76,96 @@ function apiRouterLibrary(transmission, server, packg, routeConst, routerExt) {
     for (var n = 0, nLen = clientList.length; n < nLen; n++) {
       var sClient = clientList [n];
 
-      var pkg = packg.create({
+      var sendPackage = packg.create({
         type: packg.const.CLIENT_LIST_TYPE,
         list: createClientList (sClient)
       });
 
-      server.send(sClient, transmission.create(routeConst.REQUEST_CLIENT_LIST, sClient, pkg));
+      server.send(sClient, transmission.create(routeConst.REQUEST_CLIENT_LIST, sClient, sendPackage));
     }
   }
 
   /**
    * Send a client the list of connect clients
-   * @param trans
+   * @param receivedTrans
    */
-  function getClientList(trans) {
+  function getClientList(receivedTrans) {
 
-    var pkg = packg.create({
+    var sendPackage = packg.create({
       type: packg.const.CLIENT_LIST_TYPE,
-      list: createClientList (trans.client)
+      list: createClientList (receivedTrans.client)
     });
 
     /**
      * Respond back to the client that made the request
      */
-    server.send(trans.client, transmission.createResponse(trans, pkg));
+    server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
   }
 
   /**
    * Forward a client a package
-   * @param trans
+   * @param receivedTrans
    */
-  function sendClientPackage(trans) {
+  function sendClientPackage(receivedTrans) {
 
     /**
      * Extract the recipient from the parameters
      */
-    server.send(trans.package.recipient, transmission.createResponse(trans, trans.package));
+    server.send(receivedTrans.package.recipient, transmission.createResponse(receivedTrans, receivedTrans.package));
   }
 
   /**
    * Bad route
-   * @param trans
+   * @param receivedTrans
    */
-  function badRoute(trans) {
+  function badRoute(receivedTrans) {
 
-    var pkg = packg.create({
+    var sendPackage = packg.create({
       type: packg.const.TEXT_MESSAGE_TYPE,
       sender: server.const.SERVER_NAME,
-      recipient: trans.client,
+      recipient: receivedTrans.client,
       body: 'you 404\'ed!!',
       useReceipt: false
     });
 
-    server.send(trans.client, transmission.createResponse(trans, pkg));
+    server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
   }
 
   /**
    * Process an encoded trans
-   * @param trans
+   * @param receivedTrans
    * @returns {*}
    */
-  function processTransmission(trans) {
+  function processTransmission(receivedTrans) {
 
     /**
      * Connect a client
      */
-    if (trans.uri === routeConst.CONNECT_CLIENT) {
-      addClient(trans);
+    if (receivedTrans.uri === routeConst.CONNECT_CLIENT) {
+      addClient(receivedTrans);
       updateClientsClientList();
     }
 
     /**
      * Disconnect a client
      */
-    else if (trans.uri === routeConst.DISCONNECT_CLIENT) {
-      removeClient(trans);
+    else if (receivedTrans.uri === routeConst.DISCONNECT_CLIENT) {
+      removeClient(receivedTrans);
       updateClientsClientList();
     }
 
     /**
      * Get client list
      */
-    else if (trans.uri === routeConst.REQUEST_CLIENT_LIST) {
-      getClientList(trans);
+    else if (receivedTrans.uri === routeConst.REQUEST_CLIENT_LIST) {
+      getClientList(receivedTrans);
     }
 
     /**
      * Send a transmission to client
      */
-    else if (trans.uri === routeConst.SEND_CLIENT_PACKAGE) {
-      sendClientPackage(trans);
+    else if (receivedTrans.uri === routeConst.SEND_CLIENT_PACKAGE) {
+      sendClientPackage(receivedTrans);
     }
 
     /**
