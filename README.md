@@ -1,4 +1,4 @@
-#IFrame Host/Client 1.0.1#
+#IFrame Host/Client (IFHC 1.0.1)#
 
 ##Introduction##
 This is a research app to allow different Single Page Applications (SPA) be able to reside in harmony on a single browser window.
