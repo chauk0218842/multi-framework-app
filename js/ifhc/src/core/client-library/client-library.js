@@ -1,7 +1,8 @@
 /**
  * Client Library
+ * This is the base client library, responsible for sending "messages" to the host/server window
  * @param serverConst - Server constant
- * @returns {{send: sendTransmissionToHost, listen: listenToServer}}
+ * @returns {{send: sendMessageToHost, listen: listenToServer}}
  * @constructor
  */
 function clientLibrary(serverConst) {
@@ -10,10 +11,10 @@ function clientLibrary(serverConst) {
 
   /**
    * Send a request to server
-   * @param transmission
+   * @param message
    */
-  function sendTransmissionToHost(transmission) {
-    parent.postMessage(transmission, serverConst.DOMAIN_NAME);
+  function sendMessageToHost(message) {
+    parent.postMessage(message, serverConst.DOMAIN_NAME);
   }
 
   /**
@@ -29,7 +30,7 @@ function clientLibrary(serverConst) {
    * Public API
    */
   return {
-    send : sendTransmissionToHost,
+    send : sendMessageToHost,
     listen: listenToServer
   };
 }

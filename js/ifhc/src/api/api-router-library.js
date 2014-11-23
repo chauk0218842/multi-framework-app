@@ -1,171 +1,213 @@
 /**
  * API Router Library
+ * Used by the api-host-library to process incoming transmission request as a route, and responds back to request with a server response
+ * TODO -  may want to consider including a promise library that is dependent on the version of the JS Framework used...
  * @param transmission - Transmission library
  * @param server - Server library
- * @param packg - Package library
+ * @param attachment - Attachment library
  * @param routeConst - Route constant
  * @param routerExt - Custom Router Extension TODO - need to implement this feature
  * @returns {{const: *, process: processTransmission}}
  */
-function apiRouterLibrary(transmission, server, packg, routeConst, routerExt) {
+function apiRouterLibrary(transmission, server, attachment, routeConst, routerExt) {
 
   'use strict';
 
   /**
-   * Add a client
-   * @param receivedTrans
+   * Transmission Processor
+   * @type {{}}
    */
-  function addClient(receivedTrans) {
+  var transmissionProcessor = {};
 
-    var sendPackage = packg.create({
-      type: packg.const.TEXT_MESSAGE_TYPE,
-      sender: server.const.SERVER_NAME,
-      recipient: receivedTrans.client,
-      body: 'Connected to host',
-      useReceipt: false
-    });
-
-    server.addClient(receivedTrans.client);
-    server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
+  /**
+   * Cookie cutter for text message sent from the server
+   * @param parameters
+   * @returns {*}
+   */
+  function serverAttachmentResponse(parameters) {
+    parameters.sender = server.const.SERVER_NAME;
+    return attachment.create(parameters);
   }
 
   /**
-   * Remove Client
-   * @param receivedTrans
+   * Connect a client
+   * @param receivedTransmission
    */
-  function removeClient(receivedTrans) {
+  function connectClient(receivedTransmission) {
 
-    var sendPackage = packg.create({
-      type: packg.const.TEXT_MESSAGE_TYPE,
-      sender: server.const.SERVER_NAME,
-      recipient: receivedTrans.client,
-      body: 'Disconnected from host',
-      useReceipt: false
+    var sendAttachment = serverAttachmentResponse({
+      type: attachment.const.TEXT_MESSAGE_TYPE,
+      recipient: receivedTransmission.client,
+      body: ('Connected to %SERVER%').replace(/%SERVER%/g, server.const.SERVER_NAME),
+      receipt: false
     });
 
-    server.removeClient(receivedTrans.client);
-    server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
+    server.connectClient(receivedTransmission.client);
+    server.send(receivedTransmission.client, transmission.createResponse(receivedTransmission, sendAttachment));
   }
 
   /**
-   * Create a client list that excludes the client hiimself
-   * @param client
+   * Disconnect a client
+   * @param receivedTransmission
    */
-  function createClientList (client) {
-    var list = server.getClientList();
+  function disconnectClient(receivedTransmission) {
+
+    var sendAttachment = serverAttachmentResponse({
+      type: attachment.const.TEXT_MESSAGE_TYPE,
+      recipient: receivedTransmission.client,
+      body: ('Disconnected from %SERVER%').replace(/%SERVER%/g, server.const.SERVER_NAME),
+      receipt: false
+    });
+
+    server.disconnectClient(receivedTransmission.client);
+    server.send(receivedTransmission.client, transmission.createResponse(receivedTransmission, sendAttachment));
+  }
+
+  /**
+   * Create a client list that excludes the request client
+   * @param clientID
+   */
+  function createClientList(clientID) {
+    var list = server.getConnectedClients();
     var newList = [];
     for (var n = 0, nLen = list.length; n < nLen; n++) {
-      if (list [n] === client) {
+      if (list [n] === clientID) {
         continue;
       }
-      newList.push (list [n]);
+      newList.push(list [n]);
     }
 
     return newList;
   }
 
   /**
-   * Update client with new client lists
+   * Calls server api to message clients with a refreshed connected client list
+   * (Occurs whenever a new client joins the network)
    */
   function updateClientsClientList() {
 
-    var clientList = server.getClientList();
+    var clientList = server.getConnectedClients();
+
     /**
      * Respond back to the client that made the request
      */
     for (var n = 0, nLen = clientList.length; n < nLen; n++) {
-      var sClient = clientList [n];
+      var clientID = clientList [n];
 
-      var sendPackage = packg.create({
-        type: packg.const.CLIENT_LIST_TYPE,
-        list: createClientList (sClient)
+      /**
+       * Create a client list attachment
+       */
+      var sendAttachment = serverAttachmentResponse({
+        type: attachment.const.CLIENT_LIST_TYPE,
+        recipient: clientID,
+        list: createClientList(clientID),
+        receipt: false
       });
 
-      server.send(sClient, transmission.create(routeConst.REQUEST_CLIENT_LIST, sClient, sendPackage));
+      /**
+       * Respond back to client with a transmission response
+       */
+      server.send(clientID, transmission.create(routeConst.REQUEST_CLIENT_LIST, clientID, sendAttachment));
     }
   }
 
   /**
-   * Send a client the list of connect clients
-   * @param receivedTrans
+   * Calls server api to respond back to client's request for a refreshed connected client list
+   * @param receivedTransmission
    */
-  function getClientList(receivedTrans) {
+  function getClientList(receivedTransmission) {
 
-    var sendPackage = packg.create({
-      type: packg.const.CLIENT_LIST_TYPE,
-      list: createClientList (receivedTrans.client)
+    /**
+     * Create a client list attachment
+     */
+    var sendAttachment = serverAttachmentResponse({
+      type: attachment.const.CLIENT_LIST_TYPE,
+      recipient: receivedTransmission.client,
+      list: createClientList(receivedTransmission.client),
+      receipt: false
     });
 
     /**
      * Respond back to the client that made the request
      */
-    server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
+    server.send(receivedTransmission.client, transmission.createResponse(receivedTransmission, sendAttachment));
   }
 
   /**
-   * Forward a client a package
-   * @param receivedTrans
+   * Forward a client a Attachment
+   * @param receivedTransmission
    */
-  function sendClientPackage(receivedTrans) {
+  function sendClientAttachment(receivedTransmission) {
 
     /**
      * Extract the recipient from the parameters
      */
-    server.send(receivedTrans.package.recipient, transmission.createResponse(receivedTrans, receivedTrans.package));
+    server.send(receivedTransmission.attachment.recipient, transmission.createResponse(receivedTransmission, receivedTransmission.attachment));
   }
 
   /**
-   * Bad route
-   * @param receivedTrans
+   * A bad route / invalid URI
+   * @param receivedTransmission
    */
-  function badRoute(receivedTrans) {
+  function handleInvalidRequest(receivedTransmission) {
 
-    var sendPackage = packg.create({
-      type: packg.const.TEXT_MESSAGE_TYPE,
-      sender: server.const.SERVER_NAME,
-      recipient: receivedTrans.client,
-      body: 'you 404\'ed!!',
-      useReceipt: false
+    var sendAttachment = serverAttachmentResponse({
+      type: attachment.const.TEXT_MESSAGE_TYPE,
+      recipient: receivedTransmission.client,
+      body: 'You 404\'ed!!',
+      receipt: false
     });
 
-    server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
+    server.send(receivedTransmission.client, transmission.createResponse(receivedTransmission, sendAttachment));
   }
+
+  /**
+   * Connect a client
+   */
+  transmissionProcessor [routeConst.CONNECT_CLIENT] = function transmissionProcessorConnectClient(receivedTransmission) {
+    connectClient(receivedTransmission);
+    updateClientsClientList();
+  };
+
+  /**
+   * Disconnect a client
+   */
+  transmissionProcessor [routeConst.DISCONNECT_CLIENT] = function transmissionProcessorDisconnectClient(receivedTransmission) {
+    disconnectClient(receivedTransmission);
+    updateClientsClientList();
+  };
+
+  /**
+   * Get client list
+   */
+  transmissionProcessor [routeConst.REQUEST_CLIENT_LIST] = function transmissionProcessorRequestClientList(receivedTransmission) {
+    getClientList(receivedTransmission);
+  };
+
+  /**
+   * Send a transmission to client
+   */
+  transmissionProcessor [routeConst.SEND_CLIENT_ATTACHMENT] = function transmissionProcessorSendClientAttachment(receivedTransmission) {
+    sendClientAttachment(receivedTransmission);
+  };
+
+  /**
+   * Something equivalent to a 404 (lol)
+   */
+  transmissionProcessor [routeConst.INVALID_REQUEST] = handleInvalidRequest;
 
   /**
    * Process an encoded trans
-   * @param receivedTrans
+   * @param receivedTransmission
    * @returns {*}
    */
-  function processTransmission(receivedTrans) {
+  function processTransmission(receivedTransmission) {
 
     /**
-     * Connect a client
+     * Handle the request
      */
-    if (receivedTrans.uri === routeConst.CONNECT_CLIENT) {
-      addClient(receivedTrans);
-      updateClientsClientList();
-    }
-
-    /**
-     * Disconnect a client
-     */
-    else if (receivedTrans.uri === routeConst.DISCONNECT_CLIENT) {
-      removeClient(receivedTrans);
-      updateClientsClientList();
-    }
-
-    /**
-     * Get client list
-     */
-    else if (receivedTrans.uri === routeConst.REQUEST_CLIENT_LIST) {
-      getClientList(receivedTrans);
-    }
-
-    /**
-     * Send a transmission to client
-     */
-    else if (receivedTrans.uri === routeConst.SEND_CLIENT_PACKAGE) {
-      sendClientPackage(receivedTrans);
+    if (transmissionProcessor [receivedTransmission.uri]) {
+      return transmissionProcessor [receivedTransmission.uri](receivedTransmission);
     }
 
     /**
@@ -174,15 +216,13 @@ function apiRouterLibrary(transmission, server, packg, routeConst, routerExt) {
      */
     else if (routerExt) {
       //var oResp = routerExt.call(null, routeConst, transmission, transmission, server, trans);
-      //server.send(oResp.client, oResp.trans);
+      //return server.send(oResp.client, oResp.trans);
     }
 
     /**
      * Something equivalent to a 404 (lol)
      */
-    else {
-      badRoute(trans);
-    }
+    return transmissionProcessor [routeConst.INVALID_REQUEST](receivedTransmission);
   }
 
   /**

@@ -1,8 +1,13 @@
 /**
  * API Route Constants
- * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_PACKAGE: string}}
+ * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_ATTACHMENT: string}}
  */
 var apiRouteConstant = {
+
+  /**
+   * Invalid request
+   */
+  INVALID_REQUEST: "invalid request",
 
   /**
    * Client: connect to host
@@ -22,5 +27,5 @@ var apiRouteConstant = {
   /**
    * Client: send a message to a client
    */
-  SEND_CLIENT_PACKAGE: "send client package"
+  SEND_CLIENT_ATTACHMENT: "send client attachment"
 };

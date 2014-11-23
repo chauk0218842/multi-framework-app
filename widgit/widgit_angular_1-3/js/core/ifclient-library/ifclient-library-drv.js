@@ -15,7 +15,7 @@ angular.module('ifclientLibrary')
 
         event.preventDefault();
         VM.message = ifhc.util.createFileList(files);
-        VM.filesPackage = files;
+        VM.filesAttachment = files;
       })
     }
 
@@ -46,28 +46,28 @@ angular.module('ifclientLibrary')
     /**
      * VM Handler for Client List
      * @param VM
-     * @param receivedPackage
+     * @param receivedAttachment
      */
-    vmDataHandler [ifhc.const.package.CLIENT_LIST_TYPE] = function (VM, receivedPackage) {
-      updateContacts(VM, receivedPackage);
+    vmDataHandler [ifhc.const.attachment.CLIENT_LIST_TYPE] = function (VM, receivedAttachment) {
+      updateContacts(VM, receivedAttachment);
     };
 
     /**
      * VM Handler for Text Message
      * @param VM
-     * @param receivedPackage
+     * @param receivedAttachment
      */
-    vmDataHandler [ifhc.const.package.TEXT_MESSAGE_TYPE] = function (VM, receivedPackage) {
-      updateResponse(VM, receivedPackage);
+    vmDataHandler [ifhc.const.attachment.TEXT_MESSAGE_TYPE] = function (VM, receivedAttachment) {
+      updateResponse(VM, receivedAttachment);
     };
 
     /**
      * VM Handler for File Type
      * @param VM
-     * @param receivedPackage
+     * @param receivedAttachment
      */
-    vmDataHandler [ifhc.const.package.FILES_TYPE] = function (VM, receivedPackage) {
-      updateResponse(VM, receivedPackage);
+    vmDataHandler [ifhc.const.attachment.FILES_TYPE] = function (VM, receivedAttachment) {
+      updateResponse(VM, receivedAttachment);
     };
 
     /**
@@ -87,8 +87,8 @@ angular.module('ifclientLibrary')
         /**
          * pass to the appropriate scope handler
          */
-          .then(function (receivedPackage) {
-            return vmDataHandler [receivedPackage.type](VM, receivedPackage);
+          .then(function (receivedAttachment) {
+            return vmDataHandler [receivedAttachment.type](VM, receivedAttachment);
           })
 
         /**
@@ -103,20 +103,20 @@ angular.module('ifclientLibrary')
     /**
      * Update contacts
      * @param VM
-     * @param receivedPackage
+     * @param receivedAttachment
      */
-    function updateContacts(VM, receivedPackage) {
-      VM.contacts = receivedPackage.list;
+    function updateContacts(VM, receivedAttachment) {
+      VM.contacts = receivedAttachment.list;
       VM.recipient = VM.contacts [0];
     }
 
     /**
      * Update responses
      * @param VM
-     * @param receivedPackage
+     * @param receivedAttachment
      */
-    function updateResponse(VM, receivedPackage) {
-      VM.response = $sce.trustAsHtml(receivedPackage.body + VM.response);
+    function updateResponse(VM, receivedAttachment) {
+      VM.response = $sce.trustAsHtml(receivedAttachment.body + VM.response);
     }
 
     /**
@@ -127,8 +127,8 @@ angular.module('ifclientLibrary')
 
       var recipients = VM.recipient === 'ALL' ? VM.contacts.slice(1, VM.contacts.length) : [VM.recipient];
 
-      if (VM.filesPackage) {
-        ifhcClient.sendFiles (recipients, VM.filesPackage, false);
+      if (VM.filesAttachment) {
+        ifhcClient.sendFiles (recipients, VM.filesAttachment, false);
       }
       else {
         ifhcClient.sendMessage(recipients, VM.message, false);
@@ -154,7 +154,7 @@ angular.module('ifclientLibrary')
         VM.contacts = '';
         VM.recipient = '';
         VM.message = '';
-        VM.filesPackage = '';
+        VM.filesAttachment = '';
 
         VM.sendMessage = function () {
           sendMessage(VM);

@@ -1,10 +1,5 @@
-/******************************************************************************************************
- * API TEMPLATE HEADER STARTS HERE
- ******************************************************************************************************/
-
 /**
  * ifhc Library
- * TODO - write a task script for this (this is just a mock layout
  */
 var ifhc = (function (window) {
 
@@ -59,18 +54,124 @@ var ifhc = (function (window) {
    * @type {Function}
    */
   var base64Encoder = window.btoa;
+  /**
+   * Package Constants
+   * @type {{}}
+   */
+  var attachmentConstant = {
+    GENERIC_TYPE: 'generic type',
+    CLIENT_LIST_TYPE: 'client list type',
+    TEXT_MESSAGE_TYPE: 'text message type',
+    FILES_TYPE: 'files type'
+  };
+  /**
+   * Attachment Library
+   * This is the base attachment library, responsible for creating attachment objects
+   * @param attachmentConst attachmentConstant
+   * @returns {{const: (attachmentConst|*), create: createNewAttachment}}
+   */
 
-  /******************************************************************************************************
-   * API TEMPLATE HEADER ENDS HERE
-   ******************************************************************************************************/
+  function attachmentLibrary(attachmentConst) {
 
-  /******************************************************************************************************
-   * GENERATED SOURCE STARTS HERE
-   ******************************************************************************************************/
+    'use strict';
+
+    /**
+     * Attachment Creator
+     * @type {{}}
+     */
+    var attachmentCreator = {};
+
+    /**
+     * Create client list package
+     * @param params
+     */
+
+    function createClientListAttachment(params) {
+      var attachment = createAttachment(params);
+      attachment.list = params.list;
+      return attachment;
+    }
+
+    /**
+     * Create a text message package
+     * @param params
+     * @returns {{type: *}}
+     */
+
+    function createTextMessageAttachment(params) {
+      var attachment = createAttachment(params);
+      attachment.body = params.body;
+      return attachment;
+    }
+
+    /**
+     * Create a files package
+     * @param params
+     * @returns {{type: *}}
+     */
+
+    function createFileAttachment(params) {
+      var attachment = createAttachment(params);
+      attachment.files = params.files;
+      return attachment;
+    }
+
+    /**
+     * Create a Attachment
+     * @param params
+     * @returns {{type: *}}
+     */
+
+    function createAttachment(params) {
+      return {
+        type: params.type || attachmentConst.GENERIC_TYPE,
+        sender: params.sender,
+        recipient: params.recipient,
+        receipt: params.receipt
+      };
+    }
+
+    /**
+     * Client List type
+     * @type {createClientListAttachment}
+     */
+    attachmentCreator[attachmentConst.CLIENT_LIST_TYPE] = createClientListAttachment;
+
+    /**
+     * Text Message type
+     * @type {createTextMessageAttachment}
+     */
+    attachmentCreator[attachmentConst.TEXT_MESSAGE_TYPE] = createTextMessageAttachment;
+
+    /**
+     * Files type
+     * @type {createFileAttachment}
+     */
+    attachmentCreator[attachmentConst.FILES_TYPE] = createFileAttachment;
+
+    /**
+     * Create a New Attachment
+     * @param params
+     * @returns {*}
+     */
+
+    function createNewAttachment(params) {
+      return attachmentCreator[params.type] ? attachmentCreator[params.type](params) : createAttachment(null);
+    }
+
+    /**
+     * Public API
+     */
+    return {
+      const: attachmentConst,
+      create: createNewAttachment
+    };
+  }
   /**
    * Client Library
+   * This is the base client library, responsible for sending "messages" to the host/server window
    * @param serverConst - Server constant
-   * @returns {{send: sendTransmissionToHost, listen: listenToServer}}
+   * @returns {{send: sendMessageToHost, listen: listenToServer}}
    * @constructor
    */
 
@@ -80,11 +181,11 @@ var ifhc = (function (window) {
 
     /**
      * Send a request to server
-     * @param transmission
+     * @param message
      */
 
-    function sendTransmissionToHost(transmission) {
-      parent.postMessage(transmission, serverConst.DOMAIN_NAME);
+    function sendMessageToHost(message) {
+      parent.postMessage(message, serverConst.DOMAIN_NAME);
     }
 
     /**
@@ -101,12 +202,13 @@ var ifhc = (function (window) {
      * Public API
      */
     return {
-      send: sendTransmissionToHost,
+      send: sendMessageToHost,
       listen: listenToServer
     };
   }
   /**
    * HASH Library
+   * Basic HASH library object - useful for tracking objects
    * @param encodeToBase64 - Encode to base64 function
    * @returns {{create: createHASHBucket, createKey: createHASHKey}}
    */
@@ -175,11 +277,12 @@ var ifhc = (function (window) {
 
     /**
      * Generate a HASH key
-     * @returns {string}
+     * @param value
+     * @returns {*}
      */
 
-    function createHASHKey(__sValue) {
-      return encodeToBase64(__sValue);
+    function createHASHKey(value) {
+      return encodeToBase64(value);
     }
 
     /**
@@ -188,98 +291,6 @@ var ifhc = (function (window) {
     return {
       create: createHASHBucket,
       createKey: createHASHKey
-    };
-  }
-  /**
-   * Package Constants
-   * @type {{}}
-   */
-  var packageConstant = {
-    GENERIC_TYPE: 'generic type',
-    CLIENT_LIST_TYPE: 'client list type',
-    TEXT_MESSAGE_TYPE: 'text message type',
-    FILES_TYPE: 'files type'
-  };
-  /**
-   * Package Library
-   * @param packgConst packageConstant
-   * @returns {{const: (packgConst|*), create: createNewPackage}}
-   */
-
-  function packageLibrary(packgConst) {
-
-    'use strict';
-
-    /**
-     * Create client list package
-     * @param params
-     */
-
-    function createClientListPackage(params) {
-      var packg = createPackage(params);
-      packg.list = params.list;
-      return packg;
-    }
-
-    /**
-     * Create a text message package
-     * @param params
-     * @returns {{type: *}}
-     */
-
-    function createTextMessagePackage(params) {
-      var packg = createPackage(params);
-      packg.body = params.body;
-      return packg;
-    }
-
-    /**
-     * Create a files package
-     * @param params
-     * @returns {{type: *}}
-     */
-
-    function createFilePackage(params) {
-      var packg = createPackage(params);
-      packg.files = params.files;
-      return packg;
-    }
-
-    /**
-     * Create a Package
-     * @param params
-     * @returns {{type: *}}
-     */
-
-    function createPackage(params) {
-      return {
-        type: params.type || packgConst.GENERIC_TYPE,
-        sender: params.sender,
-        recipient: params.recipient,
-        receipt: params.receipt
-      };
-    }
-
-    /**
-     * Create a New Package
-     * @param params
-     * @returns {*}
-     */
-
-    function createNewPackage(params) {
-      var packageHandler = {};
-      packageHandler[packgConst.CLIENT_LIST_TYPE] = createClientListPackage;
-      packageHandler[packgConst.TEXT_MESSAGE_TYPE] = createTextMessagePackage;
-      packageHandler[packgConst.FILES_TYPE] = createFilePackage;
-      return packageHandler[params.type] ? packageHandler[params.type](params) : createPackage(null);
-    }
-
-    /**
-     * Public API
-     */
-    return {
-      const: packgConst,
-      create: createNewPackage
     };
   }
   /**
@@ -300,12 +311,13 @@ var ifhc = (function (window) {
   };
   /**
    * Server Library
+   * Base server library, responsible for listening to messages from client IFrames
    * @param serverConst - Server constant
-   * @param hashLib - HASH library
-   * @returns {{const: *, addClient: addClient, removeClient: removeClient, getClientList: getClientList, send: sendTransmission}}
+   * @param hash - HASH library
+   * @returns {{const: *, connectClient: connectClient, disconnectClient: disconnectClient, getConnectedClients: getConnectedClients, send: sendMessageToClient}}
    */
 
-  function serverLibrary(serverConst, hashLib) {
+  function serverLibrary(serverConst, hash) {
 
     'use strict';
 
@@ -313,12 +325,12 @@ var ifhc = (function (window) {
      * List of connected clients
      * @type {Array}
      */
-    var clientList = [];
+    var clientsCollection = [];
 
     /**
      * List of IFrames stored in a HASH
      */
-    var iframeHASH = hashLib.create();
+    var iframeHASH = hash.create();
 
     /**
      * Add a new Client
@@ -326,9 +338,9 @@ var ifhc = (function (window) {
      * @returns {Number}
      */
 
-    function addClient(clientID) {
-      clientList.push(clientID);
-      iframeHASH.set(clientID, clientList[clientList.length - 1]);
+    function connectClient(clientID) {
+      clientsCollection.push(clientID);
+      iframeHASH.set(clientID, clientsCollection[clientsCollection.length - 1]);
     }
 
     /**
@@ -336,7 +348,10 @@ var ifhc = (function (window) {
      * @param clientID
      */
 
-    function removeClient(clientID) {
+    function disconnectClient(clientID) {
+      /**
+       * TODO need to remove clients from the clientsCollection when they disconnect
+       */
       iframeHASH.remove(clientID);
     }
 
@@ -345,18 +360,18 @@ var ifhc = (function (window) {
      * @returns {Array}
      */
 
-    function getClientList() {
-      return clientList.sort();
+    function getConnectedClients() {
+      return clientsCollection.sort();
     }
 
     /**
-     * Send transmission to client
+     * Send message to client IFrame
      * @param clientID
-     * @param trans
+     * @param message
      */
 
-    function sendTransmission(clientID, trans) {
-      document.getElementById(clientID).contentWindow.postMessage(trans, serverConst.DOMAIN_NAME);
+    function sendMessageToClient(clientID, message) {
+      document.getElementById(clientID).contentWindow.postMessage(message, serverConst.DOMAIN_NAME);
     }
 
     /**
@@ -364,10 +379,10 @@ var ifhc = (function (window) {
      */
     return {
       const: serverConst,
-      addClient: addClient,
-      removeClient: removeClient,
-      getClientList: getClientList,
-      send: sendTransmission
+      connectClient: connectClient,
+      disconnectClient: disconnectClient,
+      getConnectedClients: getConnectedClients,
+      send: sendMessageToClient
     };
   }
   /**
@@ -395,44 +410,44 @@ var ifhc = (function (window) {
     /**
      * Create a Message
      * @param transID
-     * @param uri
+     * @param uri - TODO change URI to request or something else
      * @param clientID
-     * @param pkg
+     * @param attachment
      * @returns {{id: *, client: *, host: *, urn: *, parameters: *, receipt: *}}
      */
 
-    function createTransmission(transID, uri, clientID, pkg) {
+    function createTransmission(transID, uri, clientID, attachment) {
       return {
         id: transID,
         uri: uri,
         client: clientID,
-        package: pkg
+        attachment: attachment
       };
     }
 
     /**
      * Create Response - this is for the server to respond back to incoming transmissions from clients,
      * OR when receipts are enabled during a client-to-host-to-client communication - the receiving client will have to "respond" back to
-     * their incoming transmission
-     * @param transmission
-     * @param pkg
+     * their incoming trans
+     * @param trans
+     * @param attachment
      * @returns {{id: *, client: *, host: *, urn: *, parameters: *, receipt: *}}
      */
 
-    function createResponseTransmission(transmission, pkg) {
-      return createTransmission(transmission.id, transmission.uri, transmission.client, pkg);
+    function createResponseTransmission(trans, attachment) {
+      return createTransmission(trans.id, trans.uri, trans.client, attachment);
     }
 
     /**
      * Generate a Request
      * @param uri
      * @param clientID
-     * @param pkg
+     * @param attachment
      * @returns {{id: (string|*), host: (XML|string|void|*), urn: (XML|string|void|*), parameters: *, receipt: *}}
      */
 
-    function createNewTransmission(uri, clientID, pkg) {
-      return createTransmission(String(createHASHKey(keyPrefix + (keyCounter++))), uri, clientID, pkg);
+    function createNewTransmission(uri, clientID, attachment) {
+      return createTransmission(String(createHASHKey(keyPrefix + (keyCounter++))), uri, clientID, attachment);
     }
 
     /**
@@ -445,6 +460,7 @@ var ifhc = (function (window) {
   }
   /**
    * Utility Library
+   * Helper library
    * @returns {{formatBytesToUnits: formatBytesToUnits, createFileList: createFileList}}
    */
 
@@ -507,17 +523,228 @@ var ifhc = (function (window) {
     };
   }
   /**
-   * API Client Library
+   * API Attachment Library
+   * Used by the api-client-library / api-router-library
+   * Every transmission usually has an attachment object and this is API's attachment pre/post processing library
+   * TODO this needs major refactoring
    * @param hash - HASH library
-   * @param client - Client library
-   * @param transmission - Transmission library
-   * @param routeConst - Route constant
-   * @param packg - Package library
+   * @param attachment - Attachment library
+   * @param formatBytesToUnits - Format Bytes to KB/MB/GB function
    * @param deferred - Deferred library
-   * @returns {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendFiles: sendFilesToClient, sendMessage: sendMessage}}
+   * @returns {*}
    */
 
-  function apiClientLibrary(hash, client, transmission, routeConst, packg, deferred) {
+  function apiAttachmentLibrary(hash, attachment, formatBytesToUnits, deferred) {
+
+    'use strict';
+
+    /**
+     * Process attachments based on type
+     * @type {{}}
+     */
+    var attachmentProcessor = {};
+
+    /**
+     * Process response HTML
+     * @type {{}}
+     */
+    var responseFileHTMLFormatter = {};
+
+    /**
+     * Process Client List
+     * @param receivedAttachment
+     * @returns {*}
+     */
+
+    function processClientListAttachment(receivedAttachment) {
+      receivedAttachment.list = ["ALL"].concat(receivedAttachment.list);
+      return deferred.when(receivedAttachment);
+    }
+
+    /**
+     * Process Text Message
+     * @param receivedAttachment
+     * @returns {*}
+     */
+
+    function processTextMessageAttachment(receivedAttachment) {
+      receivedAttachment.body = ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, receivedAttachment.sender).replace(/%MESSAGE%/g, receivedAttachment.body);
+      return deferred.when(receivedAttachment);
+    }
+
+    /**
+     * Response formatter for Image file type
+     * @param index
+     * @param file
+     * @returns {string}
+     */
+    responseFileHTMLFormatter["image"] = function (index, fileInfo) {
+      return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/><a href = "' + fileInfo.url + '" target = "new"><img class = "thumbnail" src = ' + fileInfo.url + '></a><br/>';
+    };
+
+    /**
+     * Response formatter for Text file type
+     * @param index
+     * @param file
+     * @returns {string}
+     */
+    responseFileHTMLFormatter["text"] = function (index, fileInfo) {
+      return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/>';
+    };
+
+    /**
+     * Response formatter for JSON file type
+     * @param index
+     * @param file
+     * @returns {string}
+     */
+    responseFileHTMLFormatter["json"] = function (index, fileInfo) {
+      return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/>';
+    };
+
+    /**
+     * Process Files, this actually returns a Text message, as you will need to show a "response" instead
+     * @param receivedAttachment
+     * @returns {*}
+     */
+
+    function processFilesAttachment(receivedAttachment) {
+
+      /**
+       * @type {string}
+       */
+      var responseHTML = "";
+
+      /**
+       * Defer collection used to track all file status
+       * @type {Array}
+       */
+      var deferCollection = [];
+
+      /**
+       * Defer HASH since we aren't using promises to read files, as each file completes reading its respective defer is resolved
+       */
+      var deferHASH = hash.create();
+
+      /**
+       * Received files
+       * @type {sendAttachment.files|*|FileList|r.files|files}
+       */
+      var files = receivedAttachment.files;
+
+      /**
+       * Total files provided
+       * @type {number}
+       */
+      var fileCount = 0;
+
+      /**
+       * Process each file that's been uploaded
+       */
+      for (var n = 0, nLen = files.length; n < nLen; n++) {
+
+        /**
+         * @type {FileReader}
+         */
+        var fileReader = new FileReader();
+
+        /**
+         * Create a defer and store it into a HASH for later resolving
+         */
+        var defer = deferHASH.set(n, deferred.create());
+        deferCollection.push(defer);
+        defer.then(function (fileInfo) {
+          /**
+           * Increment the file count as we process more files
+           */
+          fileCount++;
+          responseHTML += responseFileHTMLFormatter[fileInfo.file.type.replace(/(^application\/)+|(\/.*)/, "")](fileCount, fileInfo);
+        });
+
+        /**
+         * When a file is completed processing, the respectivce defer needs to be resolved
+         */
+        fileReader.onloadend = (function (deferKey, file) {
+          return function (event) {
+            if (event.target.readyState == FileReader.DONE) {
+              deferHASH.get(deferKey).resolve({
+                file: file,
+                url: event.target.result
+              });
+            }
+          };
+        })(n, files[n]);
+
+        fileReader.readAsDataURL(files[n]);
+
+      }
+
+      /**
+       * Once all the deferred are resolved, provide an organized summary of all the files uploaded
+       */
+      return deferred.all(deferCollection).then(function () {
+        return attachment.create({
+          type: attachment.const.TEXT_MESSAGE_TYPE,
+          sender: receivedAttachment.sender,
+          recipient: receivedAttachment.recipient,
+          body: ('%CLIENT% > Sent files...<br />').replace(/%CLIENT%/g, receivedAttachment.sender) + responseHTML + "<hr/>",
+          useReceipt: receivedAttachment.receipt
+        });
+      });
+    }
+
+    /**
+     * Client list attachment
+     * @type {processClientListAttachment}
+     */
+    attachmentProcessor[attachment.const.CLIENT_LIST_TYPE] = processClientListAttachment;
+
+    /**
+     * Text message attachment
+     * @type {processTextMessageAttachment}
+     */
+    attachmentProcessor[attachment.const.TEXT_MESSAGE_TYPE] = processTextMessageAttachment;
+
+    /**
+     * Files type attachment
+     * @type {processFilesAttachment}
+     */
+    attachmentProcessor[attachment.const.FILES_TYPE] = processFilesAttachment;
+
+    /**
+     * Process Attachment
+     * @param receivedAttachment
+     * @returns {*}
+     */
+
+    function processAttachment(receivedAttachment) {
+      return deferred.when(attachmentProcessor[receivedAttachment.type](receivedAttachment));
+    }
+
+    /**
+     * Append the CORE attachment library into this API
+     */
+    var publicAPI = attachment;
+    publicAPI.process = processAttachment;
+
+    /**
+     * Public API
+     */
+    return publicAPI;
+  }
+  /**
+   * API Client Library
+   * Used to allow IFrame Clients to connect to the Host
+   * @param hash
+   * @param client
+   * @param transmission
+   * @param routeConst
+   * @param attachment
+   * @param deferred
+   * @returns {{listen: receiveTransmissionFromHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendMessage: sendMessageToClients, sendFiles: sendFilesToClients}}
+   */
+
+  function apiClientLibrary(hash, client, transmission, routeConst, attachment, deferred) {
 
     'use strict';
 
@@ -556,27 +783,39 @@ var ifhc = (function (window) {
     var responseList = [];
 
     /**
-     * Listen to Host
+     * Cookie cutter for text message sent from the client
+     * @param parameters
+     * @returns {*}
+     */
+
+    function clientAttachmentResponse(parameters) {
+      parameters.sender = clientID;
+      return attachment.create(parameters);
+    }
+
+    /**
+     * Receive transmission from Host
      * Returns a deferred object
      * @param event
      */
 
-    function listenToHost(event) {
+    function receiveTransmissionFromHost(event) {
 
       /**
+       * Received transmission
        * @type {*}
        */
-      var trans = client.listen(event);
+      var receivedTransmission = client.listen(event);
 
       /**
        * Find the Defer object that should be resolved
        */
-      var defer = deferHASH.get(trans.id);
+      var defer = deferHASH.get(receivedTransmission.id);
 
       /**
        * Keep track of all transmissions received
        */
-      responseList.push(trans);
+      responseList.push(receivedTransmission);
 
       /**
        * Handle specific requests that require receipts when transmission is made
@@ -585,33 +824,47 @@ var ifhc = (function (window) {
        * TODO implement receipts for client-to-client messaging
        */
       if (defer) {
-        defer.resolve(trans);
+        defer.resolve(receivedTransmission);
       }
 
       console.log(('%CLIENT% > Received a response from host: %RESPONSE%').replace(/%CLIENT%/g, clientID).replace(/%RESPONSE%/g, event.data.toString()));
 
-      return deferred.when(packg.process(trans.package));
+      return deferred.when(attachment.process(receivedTransmission.attachment));
 
     }
 
     /**
      * Send a message to Host
      * Returns a deferred object
-     * @param trans
+     * @param receivedTransmission
      * @returns {*}
      */
 
-    function sendTransmissionToHost(trans) {
+    function sendTransmissionToHost(receivedTransmission) {
 
       /**
        * Create a Defer object that should be resolved later on when the listener receives a response
        */
-      var defer = deferHASH.set(trans.id, deferred.create());
-      requestList.push(trans);
-      client.send(trans);
-      console.log(('%CLIENT% > Sent a request to host: "%URI%"').replace(/%CLIENT%/g, clientID).replace(/%URI%/g, trans.uri));
+      var defer = deferHASH.set(receivedTransmission.id, deferred.create());
+      requestList.push(receivedTransmission);
+      client.send(receivedTransmission);
+      console.log(('%CLIENT% > Sent a request to host: "%URI%"').replace(/%CLIENT%/g, clientID).replace(/%URI%/g, receivedTransmission.uri));
 
       return defer;
+    }
+
+    /**
+     * Create a transmission and send it to the host
+     * TODO make this into a real curried function
+     * @param route
+     * @param attachment
+     * @returns {*}
+     */
+
+    function createTransmissionAndSendToHost(route, attachment) {
+      return sendTransmissionToHost(transmission.create(route, clientID, attachment)).then(function (responseTransmission) {
+        return responseTransmission.attachment;
+      });
     }
 
     /**
@@ -621,9 +874,7 @@ var ifhc = (function (window) {
      */
 
     function connectToHost() {
-      return sendTransmissionToHost(transmission.create(routeConst.CONNECT_CLIENT, clientID, null)).then(function (transmission) {
-        return transmission.package;
-      });
+      return createTransmissionAndSendToHost(routeConst.CONNECT_CLIENT, null);
     }
 
     /**
@@ -633,85 +884,7 @@ var ifhc = (function (window) {
      */
 
     function disconnectFromHost() {
-      return sendTransmissionToHost(transmission.create(routeConst.DISCONNECT_CLIENT, clientID, null)).then(function (transmission) {
-        return transmission.package;
-      });
-    }
-
-    /**
-     * Get Clients from Host
-     * Returns a deferred object
-     * @returns {*}
-     */
-
-    function getClientListFromHost() {
-      return sendTransmissionToHost(transmission.create(routeConst.REQUEST_CLIENT_LIST, clientID, null)).then(function (transmission) {
-        return transmission.package;
-      });
-    }
-
-    /**
-     * Send text message to client
-     * TODO need to implement use receipts, make note that you are dealing with an array of defers...
-     * @param recipients
-     * @param body
-     * @param useReceipt
-     * @returns {*}
-     */
-
-    function sendMessage(recipients, body, useReceipt) {
-
-      /**
-       * Collection of defers that will be returned
-       * @type {Array}
-       */
-      var defers = [];
-      for (var n = 0, nLen = recipients.length; n < nLen; n++) {
-
-        var pkg = packg.create({
-          type: packg.const.TEXT_MESSAGE_TYPE,
-          sender: clientID,
-          recipient: recipients[n],
-          body: body,
-          receipt: useReceipt
-        });
-
-        defers.push(sendTransmissionToHost(transmission.create(routeConst.SEND_CLIENT_PACKAGE, clientID, pkg)));
-
-      }
-
-      return defers;
-    }
-
-    /**
-     * Send files to a client
-     * Returns a deferred object
-     * @param recipients
-     * @param files
-     * @param useReceipt
-     * @returns {*}
-     */
-
-    function sendFilesToClient(recipients, files, useReceipt) {
-
-      /**
-       * @type {Array}
-       */
-      var defers = [];
-      for (var n = 0, nLen = recipients.length; n < nLen; n++) {
-
-        var pkg = packg.create({
-          type: packg.const.FILES_TYPE,
-          sender: clientID,
-          recipient: recipients[n],
-          files: files,
-          receipt: useReceipt
-        });
-
-        defers.push(sendTransmissionToHost(transmission.create(routeConst.SEND_CLIENT_PACKAGE, clientID, pkg)));
-      }
-
-      return defers;
+      return createTransmissionAndSendToHost(routeConst.DISCONNECT_CLIENT, null);
     }
 
     /**
@@ -721,6 +894,16 @@ var ifhc = (function (window) {
 
     function getUsername() {
       return clientID;
+    }
+
+    /**
+     * Get Clients from Host
+     * Returns a deferred object
+     * @returns {*}
+     */
+
+    function getClientListFromHost() {
+      return createTransmissionAndSendToHost(routeConst.REQUEST_CLIENT_LIST, null);
     }
 
     /**
@@ -742,18 +925,100 @@ var ifhc = (function (window) {
     }
 
     /**
+     * Send attachment to clients
+     * @param clients
+     * @param sendAttachment
+     * @returns {Array}
+     */
+
+    function sendAttachmentToClients(clients, sendAttachment) {
+
+      /**
+       * Collection of defers that will be returned
+       * @type {Array}
+       */
+      var deferList = [];
+      for (var n = 0, nLen = clients.length; n < nLen; n++) {
+
+        /**
+         * Update the attachment's recipient
+         * TODO - need to create a attachment.updateReceipient function...
+         */
+        sendAttachment.recipient = clients[n];
+
+        /**
+         * TODO when implementing use receipt, we need to figure out how to capture the responses and post process them
+         */
+        deferList.push(createTransmissionAndSendToHost(routeConst.SEND_CLIENT_ATTACHMENT, sendAttachment));
+
+      }
+
+      return deferList;
+    }
+
+    /**
+     * Send text message to client
+     * TODO need to implement use receipts, make note that you are dealing with an array of defers...
+     * TODO make use currying and curry with sendAttachmentToClients
+     * @param clients
+     * @param body
+     * @param useReceipt
+     * @returns {*}
+     */
+
+    function sendMessageToClients(clients, body, useReceipt) {
+
+      /**
+       * TODO recipient is null... not sure if thats a good idea
+       */
+      var sendAttachment = clientAttachmentResponse({
+        type: attachment.const.TEXT_MESSAGE_TYPE,
+        recipient: null,
+        body: body,
+        receipt: useReceipt
+      });
+
+      return sendAttachmentToClients(clients, sendAttachment);
+    }
+
+    /**
+     * Send files to a client
+     * TODO need to implement use receipts, make note that you are dealing with an array of defers...
+     * TODO make use currying and curry with sendAttachmentToClients
+     * @param recipients
+     * @param files
+     * @param useReceipt
+     * @returns {*}
+     */
+
+    function sendFilesToClients(recipients, files, useReceipt) {
+
+      /**
+       * TODO recipient is null... not sure if thats a good idea
+       */
+      var sendAttachment = clientAttachmentResponse({
+        type: attachment.const.FILES_TYPE,
+        recipient: null,
+        files: files,
+        receipt: useReceipt
+      });
+
+      return sendAttachmentToClients(recipients, sendAttachment);
+    }
+
+    /**
      * Public API
      */
     return {
-      listen: listenToHost,
+      listen: receiveTransmissionFromHost,
       connect: connectToHost,
       disconnect: disconnectFromHost,
       getUsername: getUsername,
       getClients: getClientListFromHost,
       getRequestLog: getRequestLog,
       getResponseLog: getResponseLog,
-      sendFiles: sendFilesToClient,
-      sendMessage: sendMessage
+      sendMessage: sendMessageToClients,
+      sendFiles: sendFilesToClients
     };
   }
   /**
@@ -772,7 +1037,7 @@ var ifhc = (function (window) {
      * @param event
      */
 
-    function listen(event) {
+    function receiveTransmissionFromClient(event) {
       router.process(event.data);
       console.log(("HOST > Processing a request: %URI%").replace(/%URI%/g, event.data.uri));
     }
@@ -781,212 +1046,20 @@ var ifhc = (function (window) {
      * Public API
      */
     return {
-      listen: listen
+      listen: receiveTransmissionFromClient
     };
 
   }
   /**
-   * API Package Library
-   * TODO this needs major refactoring
-   * @param hash - HASH library
-   * @param packg - Package library
-   * @param formatBytesToUnits - Format Bytes to KB/MB/GB function
-   * @param deferred - Deferred library
-   * @returns {*}
-   */
-
-  function apiPackageLibrary(hash, packg, formatBytesToUnits, deferred) {
-
-    'use strict';
-
-    /**
-     * Process Client List
-     * @param receivedPackage
-     * @returns {*}
-     */
-
-    function processClientListPackage(receivedPackage) {
-      receivedPackage.list = ["ALL"].concat(receivedPackage.list);
-      return deferred.when(receivedPackage);
-    }
-
-    /**
-     * Process Text Message
-     * @param receivedPackage
-     * @returns {*}
-     */
-
-    function processTextMessagePackage(receivedPackage) {
-      receivedPackage.body = ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, receivedPackage.sender).replace(/%MESSAGE%/g, receivedPackage.body);
-      return deferred.when(receivedPackage);
-    }
-
-    /**
-     * Process Files, this actually returns a Text message, as you will need to show a "response" instead
-     * @param receivedPackage
-     * @returns {*}
-     */
-
-    function processFilesPackage(receivedPackage) {
-
-      /**
-       * @type {string}
-       */
-      var responseHTML = "";
-
-      /**
-       * Defer collection used to track all file status
-       * @type {Array}
-       */
-      var defers = [];
-
-      /**
-       * Defer HASH since we aren't using promises to read files, as each file completes reading its respective defer is resolved
-       */
-      var deferHASH = hash.create();
-
-      /**
-       * @type {receivedPackage.files|*}
-       */
-      var files = receivedPackage.files;
-
-      /**
-       * Total files provided
-       * @type {number}
-       */
-      var fileCount = 0;
-
-      /**
-       * Handle file transmission with data url
-       * @param fileInfo
-       */
-
-      function handleFile(fileInfo) {
-
-        /**
-         * Current file
-         * @type {*|file|Sizzle.file|inputType.file|t.file|Bd.file}
-         */
-        var file = fileInfo.file;
-
-        /**
-         * The generated file URL upon receiving
-         */
-        var url = fileInfo.url;
-
-        /**
-         * Increment the file count as we process more files
-         */
-        fileCount++;
-
-        /**
-         * Image file type
-         */
-        if (file.type.indexOf('image/') === 0) {
-          responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/><a href = "' + url + '" target = "new"><img class = "thumbnail" src = ' + url + '></a><br/>';
-        }
-
-        /**
-         * Text file type (e.g. HTML / *.txt / *.md)
-         */
-        else if (file.type.indexOf('text/') === 0) {
-          responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/>';
-        }
-
-        /**
-         * JSON extension file type
-         */
-        else if (file.type === 'application/json') {
-          debugger;
-          responseHTML += '<br/>' + fileCount + '. <a href = "' + url + '" target = "new">' + file.name + '</a> (' + formatBytesToUnits(file.size) + ')<br/>';
-        }
-      }
-
-      /**
-       * Process each file that's been uploaded
-       */
-      for (var n = 0, nLen = files.length; n < nLen; n++) {
-
-        /**
-         * @type {FileReader}
-         */
-        var fileReader = new FileReader();
-
-        /**
-         * Create a defer and store it into a HASH for later resolving
-         */
-        var defer = deferHASH.set(n, deferred.create());
-        defers.push(defer);
-        defer.then(handleFile);
-
-        /**
-         * When a file is completed processing, the respectivce defer needs to be resolved
-         */
-        fileReader.onloadend = (function (deferKey, file) {
-          return function (event) {
-            if (event.target.readyState == FileReader.DONE) {
-              deferHASH.get(deferKey).resolve({
-                file: file,
-                url: event.target.result
-              });
-            }
-          };
-        })(n, files[n]);
-
-        fileReader.readAsDataURL(files[n]);
-
-      }
-
-      /**
-       * Once all the defers are resolved, provide an organized summary of all the files uploaded
-       */
-      return deferred.all(defers).then(function () {
-        return packg.create({
-          type: packg.const.TEXT_MESSAGE_TYPE,
-          sender: receivedPackage.sender,
-          recipient: receivedPackage.recipient,
-          body: ('%CLIENT% > Received files...<br />').replace(/%CLIENT%/g, receivedPackage.recipient) + responseHTML + "<hr/>",
-          useReceipt: receivedPackage.receipt
-        });
-      });
-    }
-
-    /**
-     * Process Package
-     * @param receivedPackage
-     * @returns {*}
-     */
-
-    function processPackage(receivedPackage) {
-
-      /**
-       * Process packages based on type
-       * @type {{}}
-       */
-      var packageHandler = {};
-      packageHandler[packg.const.CLIENT_LIST_TYPE] = processClientListPackage;
-      packageHandler[packg.const.TEXT_MESSAGE_TYPE] = processTextMessagePackage;
-      packageHandler[packg.const.FILES_TYPE] = processFilesPackage;
-
-      return deferred.when(packageHandler[receivedPackage.type](receivedPackage));
-    }
-
-    /**
-     * Append the CORE package library into this API
-     */
-    var publicAPI = packg;
-    publicAPI.process = processPackage;
-
-    /**
-     * Public API
-     */
-    return publicAPI;
-  }
-  /**
    * API Route Constants
-   * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_PACKAGE: string}}
+   * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_ATTACHMENT: string}}
    */
   var apiRouteConstant = {
+
+    /**
+     * Invalid request
+     */
+    INVALID_REQUEST: "invalid request",
 
     /**
      * Client: connect to host
@@ -1006,70 +1079,87 @@ var ifhc = (function (window) {
     /**
      * Client: send a message to a client
      */
-    SEND_CLIENT_PACKAGE: "send client package"
+    SEND_CLIENT_ATTACHMENT: "send client attachment"
   };
   /**
    * API Router Library
+   * Used by the api-host-library to process incoming transmission request as a route, and responds back to request with a server response
+   * TODO -  may want to consider including a promise library that is dependent on the version of the JS Framework used...
    * @param transmission - Transmission library
    * @param server - Server library
-   * @param packg - Package library
+   * @param attachment - Attachment library
    * @param routeConst - Route constant
    * @param routerExt - Custom Router Extension TODO - need to implement this feature
    * @returns {{const: *, process: processTransmission}}
    */
 
-  function apiRouterLibrary(transmission, server, packg, routeConst, routerExt) {
+  function apiRouterLibrary(transmission, server, attachment, routeConst, routerExt) {
 
     'use strict';
 
     /**
-     * Add a client
-     * @param receivedTrans
+     * Transmission Processor
+     * @type {{}}
+     */
+    var transmissionProcessor = {};
+
+    /**
+     * Cookie cutter for text message sent from the server
+     * @param parameters
+     * @returns {*}
      */
 
-    function addClient(receivedTrans) {
-
-      var sendPackage = packg.create({
-        type: packg.const.TEXT_MESSAGE_TYPE,
-        sender: server.const.SERVER_NAME,
-        recipient: receivedTrans.client,
-        body: 'Connected to host',
-        useReceipt: false
-      });
-
-      server.addClient(receivedTrans.client);
-      server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
+    function serverAttachmentResponse(parameters) {
+      parameters.sender = server.const.SERVER_NAME;
+      return attachment.create(parameters);
     }
 
     /**
-     * Remove Client
-     * @param receivedTrans
+     * Connect a client
+     * @param receivedTransmission
      */
 
-    function removeClient(receivedTrans) {
+    function connectClient(receivedTransmission) {
 
-      var sendPackage = packg.create({
-        type: packg.const.TEXT_MESSAGE_TYPE,
-        sender: server.const.SERVER_NAME,
-        recipient: receivedTrans.client,
-        body: 'Disconnected from host',
-        useReceipt: false
+      var sendAttachment = serverAttachmentResponse({
+        type: attachment.const.TEXT_MESSAGE_TYPE,
+        recipient: receivedTransmission.client,
+        body: ('Connected to %SERVER%').replace(/%SERVER%/g, server.const.SERVER_NAME),
+        receipt: false
       });
 
-      server.removeClient(receivedTrans.client);
-      server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
+      server.connectClient(receivedTransmission.client);
+      server.send(receivedTransmission.client, transmission.createResponse(receivedTransmission, sendAttachment));
     }
 
     /**
-     * Create a client list that excludes the client hiimself
-     * @param client
+     * Disconnect a client
+     * @param receivedTransmission
      */
 
-    function createClientList(client) {
-      var list = server.getClientList();
+    function disconnectClient(receivedTransmission) {
+
+      var sendAttachment = serverAttachmentResponse({
+        type: attachment.const.TEXT_MESSAGE_TYPE,
+        recipient: receivedTransmission.client,
+        body: ('Disconnected from %SERVER%').replace(/%SERVER%/g, server.const.SERVER_NAME),
+        receipt: false
+      });
+
+      server.disconnectClient(receivedTransmission.client);
+      server.send(receivedTransmission.client, transmission.createResponse(receivedTransmission, sendAttachment));
+    }
+
+    /**
+     * Create a client list that excludes the request client
+     * @param clientID
+     */
+
+    function createClientList(clientID) {
+      var list = server.getConnectedClients();
       var newList = [];
       for (var n = 0, nLen = list.length; n < nLen; n++) {
-        if (list[n] === client) {
+        if (list[n] === clientID) {
           continue;
         }
         newList.push(list[n]);
@@ -1079,112 +1169,138 @@ var ifhc = (function (window) {
     }
 
     /**
-     * Update client with new client lists
+     * Calls server api to message clients with a refreshed connected client list
+     * (Occurs whenever a new client joins the network)
      */
 
     function updateClientsClientList() {
 
-      var clientList = server.getClientList();
+      var clientList = server.getConnectedClients();
+
       /**
        * Respond back to the client that made the request
        */
       for (var n = 0, nLen = clientList.length; n < nLen; n++) {
-        var sClient = clientList[n];
+        var clientID = clientList[n];
 
-        var sendPackage = packg.create({
-          type: packg.const.CLIENT_LIST_TYPE,
-          list: createClientList(sClient)
+        /**
+         * Create a client list attachment
+         */
+        var sendAttachment = serverAttachmentResponse({
+          type: attachment.const.CLIENT_LIST_TYPE,
+          recipient: clientID,
+          list: createClientList(clientID),
+          receipt: false
         });
 
-        server.send(sClient, transmission.create(routeConst.REQUEST_CLIENT_LIST, sClient, sendPackage));
+        /**
+         * Respond back to client with a transmission response
+         */
+        server.send(clientID, transmission.create(routeConst.REQUEST_CLIENT_LIST, clientID, sendAttachment));
       }
     }
 
     /**
-     * Send a client the list of connect clients
-     * @param receivedTrans
+     * Calls server api to respond back to client's request for a refreshed connected client list
+     * @param receivedTransmission
      */
 
-    function getClientList(receivedTrans) {
+    function getClientList(receivedTransmission) {
 
-      var sendPackage = packg.create({
-        type: packg.const.CLIENT_LIST_TYPE,
-        list: createClientList(receivedTrans.client)
+      /**
+       * Create a client list attachment
+       */
+      var sendAttachment = serverAttachmentResponse({
+        type: attachment.const.CLIENT_LIST_TYPE,
+        recipient: receivedTransmission.client,
+        list: createClientList(receivedTransmission.client),
+        receipt: false
       });
 
       /**
        * Respond back to the client that made the request
        */
-      server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
+      server.send(receivedTransmission.client, transmission.createResponse(receivedTransmission, sendAttachment));
     }
 
     /**
-     * Forward a client a package
-     * @param receivedTrans
+     * Forward a client a Attachment
+     * @param receivedTransmission
      */
 
-    function sendClientPackage(receivedTrans) {
+    function sendClientAttachment(receivedTransmission) {
 
       /**
        * Extract the recipient from the parameters
        */
-      server.send(receivedTrans.package.recipient, transmission.createResponse(receivedTrans, receivedTrans.package));
+      server.send(receivedTransmission.attachment.recipient, transmission.createResponse(receivedTransmission, receivedTransmission.attachment));
     }
 
     /**
-     * Bad route
-     * @param receivedTrans
+     * A bad route / invalid URI
+     * @param receivedTransmission
      */
 
-    function badRoute(receivedTrans) {
+    function handleInvalidRequest(receivedTransmission) {
 
-      var sendPackage = packg.create({
-        type: packg.const.TEXT_MESSAGE_TYPE,
-        sender: server.const.SERVER_NAME,
-        recipient: receivedTrans.client,
-        body: 'you 404\'ed!!',
-        useReceipt: false
+      var sendAttachment = serverAttachmentResponse({
+        type: attachment.const.TEXT_MESSAGE_TYPE,
+        recipient: receivedTransmission.client,
+        body: 'You 404\'ed!!',
+        receipt: false
       });
 
-      server.send(receivedTrans.client, transmission.createResponse(receivedTrans, sendPackage));
+      server.send(receivedTransmission.client, transmission.createResponse(receivedTransmission, sendAttachment));
     }
+
+    /**
+     * Connect a client
+     */
+    transmissionProcessor[routeConst.CONNECT_CLIENT] = function transmissionProcessorConnectClient(receivedTransmission) {
+      connectClient(receivedTransmission);
+      updateClientsClientList();
+    };
+
+    /**
+     * Disconnect a client
+     */
+    transmissionProcessor[routeConst.DISCONNECT_CLIENT] = function transmissionProcessorDisconnectClient(receivedTransmission) {
+      disconnectClient(receivedTransmission);
+      updateClientsClientList();
+    };
+
+    /**
+     * Get client list
+     */
+    transmissionProcessor[routeConst.REQUEST_CLIENT_LIST] = function transmissionProcessorRequestClientList(receivedTransmission) {
+      getClientList(receivedTransmission);
+    };
+
+    /**
+     * Send a transmission to client
+     */
+    transmissionProcessor[routeConst.SEND_CLIENT_ATTACHMENT] = function transmissionProcessorSendClientAttachment(receivedTransmission) {
+      sendClientAttachment(receivedTransmission);
+    };
+
+    /**
+     * Something equivalent to a 404 (lol)
+     */
+    transmissionProcessor[routeConst.INVALID_REQUEST] = handleInvalidRequest;
 
     /**
      * Process an encoded trans
-     * @param receivedTrans
+     * @param receivedTransmission
      * @returns {*}
      */
 
-    function processTransmission(receivedTrans) {
+    function processTransmission(receivedTransmission) {
 
       /**
-       * Connect a client
+       * Handle the request
        */
-      if (receivedTrans.uri === routeConst.CONNECT_CLIENT) {
-        addClient(receivedTrans);
-        updateClientsClientList();
-      }
-
-      /**
-       * Disconnect a client
-       */
-      else if (receivedTrans.uri === routeConst.DISCONNECT_CLIENT) {
-        removeClient(receivedTrans);
-        updateClientsClientList();
-      }
-
-      /**
-       * Get client list
-       */
-      else if (receivedTrans.uri === routeConst.REQUEST_CLIENT_LIST) {
-        getClientList(receivedTrans);
-      }
-
-      /**
-       * Send a transmission to client
-       */
-      else if (receivedTrans.uri === routeConst.SEND_CLIENT_PACKAGE) {
-        sendClientPackage(receivedTrans);
+      if (transmissionProcessor[receivedTransmission.uri]) {
+        return transmissionProcessor[receivedTransmission.uri](receivedTransmission);
       }
 
       /**
@@ -1193,15 +1309,13 @@ var ifhc = (function (window) {
        */
       else if (routerExt) {
         //var oResp = routerExt.call(null, routeConst, transmission, transmission, server, trans);
-        //server.send(oResp.client, oResp.trans);
+        //return server.send(oResp.client, oResp.trans);
       }
 
       /**
        * Something equivalent to a 404 (lol)
        */
-      else {
-        badRoute(trans);
-      }
+      return transmissionProcessor[routeConst.INVALID_REQUEST](receivedTransmission);
     }
 
     /**
@@ -1212,30 +1326,12 @@ var ifhc = (function (window) {
       process: processTransmission
     };
   }
-  /******************************************************************************************************
-   * GENERATED SOURCE ENDS HERE
-   ******************************************************************************************************/
-
-  /******************************************************************************************************
-   * API TEMPLATE FOOTER STARTS HERE
-   ******************************************************************************************************/
-
-  /******************************************************************************************************
-   * Utility Library components starts here
-   ******************************************************************************************************/
   /**
    * Utility Library
    * @type {{formatBytesToUnits: formatBytesToUnits, createFileList: createFileList}}
    */
   var util = utilityLibrary();
 
-  /******************************************************************************************************
-   * Core Library components starts here
-   ******************************************************************************************************/
-
-  /******************************************************************************************************
-   * Core Library components starts here
-   ******************************************************************************************************/
   /**
    * Core API
    * @type {{}}
@@ -1253,15 +1349,15 @@ var ifhc = (function (window) {
   core.hash = hashLibrary(base64Encoder);
 
   /**
-   * Core Package Constant
+   * Core Attachment Constant
    * @type {{}}
    */
-  core.packageConst = packageConstant;
+  core.attachmentConst = attachmentConstant;
 
   /**
-   * Core Package Library
+   * Core Attachment Library
    */
-  core.package = packageLibrary(core.packageConst);
+  core.attachment = attachmentLibrary(core.attachmentConst);
 
   /**
    * Core Server Constant
@@ -1279,14 +1375,6 @@ var ifhc = (function (window) {
    */
   core.transmission = transmissionLibrary(core.hash.createKey);
 
-  /******************************************************************************************************
-   * Core Library components ends here
-   ******************************************************************************************************/
-
-  /******************************************************************************************************
-   * API components starts here
-   ******************************************************************************************************/
-
   /**
    * API constants
    * @type {{}}
@@ -1295,23 +1383,22 @@ var ifhc = (function (window) {
 
   /**
    * API Routes
-   * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_PACKAGE: string}}
+   * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_ATTACHMENT: string}}
    */
   api.const.route = apiRouteConstant;
 
   /**
-   * Package types
-   * TODO could be refactored
-   * @type {packConst|*|*}
+   * Attachment types
+   * @type {attachmentConst|*|*}
    */
-  api.const.package = core.package.const;
+  api.const.attachment = core.attachment.const;
 
   /**
    * API Host Library
    * TODO need to consider exposing router function such that some people may want to write their own router?
    */
   api.host = function apiHost(routerExtension) {
-    var router = apiRouterLibrary(core.transmission, core.server, core.package, api.const.route, routerExtension);
+    var router = apiRouterLibrary(core.transmission, core.server, core.attachment, api.const.route, routerExtension);
     return apiHostLibrary(router);
   };
 
@@ -1327,12 +1414,12 @@ var ifhc = (function (window) {
     }
 
     /**
-     * Define the package library
+     * Define the attachment library
      * TODO need to refactor this clunkiness
      * @type {*}
      */
-    var pkg = apiPackageLibrary(core.hash, core.package, util.formatBytesToUnits, deferred);
-    return apiClientLibrary(core.hash, core.client, core.transmission, api.const.route, pkg, deferred);
+    var attachment = apiAttachmentLibrary(core.hash, core.attachment, util.formatBytesToUnits, deferred);
+    return apiClientLibrary(core.hash, core.client, core.transmission, api.const.route, attachment, deferred);
   };
 
   /**
@@ -1340,17 +1427,9 @@ var ifhc = (function (window) {
    */
   api.util = util;
 
-  /******************************************************************************************************
-   * API components ends here
-   ******************************************************************************************************/
-
-  /******************************************************************************************************
+  /**
    * Public API
-   ******************************************************************************************************/
+   */
   return api;
 
 })(window);
-
-/******************************************************************************************************
- * API TEMPLATE FOOTER ENDS HERE
- ******************************************************************************************************/

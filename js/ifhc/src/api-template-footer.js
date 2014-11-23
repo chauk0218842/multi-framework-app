@@ -1,27 +1,9 @@
-/******************************************************************************************************
- * GENERATED SOURCE ENDS HERE
- ******************************************************************************************************/
-
-/******************************************************************************************************
- * API TEMPLATE FOOTER STARTS HERE
- ******************************************************************************************************/
-
-/******************************************************************************************************
- * Utility Library components starts here
- ******************************************************************************************************/
 /**
  * Utility Library
  * @type {{formatBytesToUnits: formatBytesToUnits, createFileList: createFileList}}
  */
 var util = utilityLibrary();
 
-/******************************************************************************************************
- * Core Library components starts here
- ******************************************************************************************************/
-
-/******************************************************************************************************
- * Core Library components starts here
- ******************************************************************************************************/
 /**
  * Core API
  * @type {{}}
@@ -39,15 +21,15 @@ core.client = clientLibrary(serverConstant);
 core.hash = hashLibrary(base64Encoder);
 
 /**
- * Core Package Constant
+ * Core Attachment Constant
  * @type {{}}
  */
-core.packageConst = packageConstant;
+core.attachmentConst = attachmentConstant;
 
 /**
- * Core Package Library
+ * Core Attachment Library
  */
-core.package = packageLibrary(core.packageConst);
+core.attachment = attachmentLibrary(core.attachmentConst);
 
 /**
  * Core Server Constant
@@ -65,14 +47,6 @@ core.server = serverLibrary(core.serverConst, core.hash);
  */
 core.transmission = transmissionLibrary(core.hash.createKey);
 
-/******************************************************************************************************
- * Core Library components ends here
- ******************************************************************************************************/
-
-/******************************************************************************************************
- * API components starts here
- ******************************************************************************************************/
-
 /**
  * API constants
  * @type {{}}
@@ -81,23 +55,22 @@ api.const = {};
 
 /**
  * API Routes
- * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_PACKAGE: string}}
+ * @type {{CONNECT_CLIENT: string, DISCONNECT_CLIENT: string, REQUEST_CLIENT_LIST: string, SEND_CLIENT_ATTACHMENT: string}}
  */
 api.const.route = apiRouteConstant;
 
 /**
- * Package types
- * TODO could be refactored
- * @type {packConst|*|*}
+ * Attachment types
+ * @type {attachmentConst|*|*}
  */
-api.const.package = core.package.const;
+api.const.attachment = core.attachment.const;
 
 /**
  * API Host Library
  * TODO need to consider exposing router function such that some people may want to write their own router?
  */
 api.host = function apiHost(routerExtension) {
-  var router = apiRouterLibrary(core.transmission, core.server, core.package, api.const.route, routerExtension);
+  var router = apiRouterLibrary(core.transmission, core.server, core.attachment, api.const.route, routerExtension);
   return apiHostLibrary(router);
 };
 
@@ -113,12 +86,12 @@ api.client = function apiClient(deferred) {
   }
 
   /**
-   * Define the package library
+   * Define the attachment library
    * TODO need to refactor this clunkiness
    * @type {*}
    */
-  var pkg = apiPackageLibrary(core.hash, core.package, util.formatBytesToUnits, deferred);
-  return apiClientLibrary(core.hash, core.client, core.transmission, api.const.route, pkg, deferred);
+  var attachment = apiAttachmentLibrary(core.hash, core.attachment, util.formatBytesToUnits, deferred);
+  return apiClientLibrary(core.hash, core.client, core.transmission, api.const.route, attachment, deferred);
 };
 
 /**
@@ -126,17 +99,9 @@ api.client = function apiClient(deferred) {
  */
 api.util = util;
 
-/******************************************************************************************************
- * API components ends here
- ******************************************************************************************************/
-
-/******************************************************************************************************
+/**
  * Public API
- ******************************************************************************************************/
+ */
 return api;
 
 }) (window);
-
-/******************************************************************************************************
- * API TEMPLATE FOOTER ENDS HERE
- ******************************************************************************************************/

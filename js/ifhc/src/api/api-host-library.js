@@ -12,7 +12,7 @@ function apiHostLibrary(router) {
    * Window listener event handler
    * @param event
    */
-  function listen(event) {
+  function receiveTransmissionFromClient (event) {
     router.process(event.data);
     console.log(("HOST > Processing a request: %URI%").replace(/%URI%/g, event.data.uri));
   }
@@ -21,7 +21,7 @@ function apiHostLibrary(router) {
    * Public API
    */
   return {
-    listen: listen
+    listen: receiveTransmissionFromClient
   };
 
 }

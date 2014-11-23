@@ -1,10 +1,11 @@
 /**
  * Server Library
+ * Base server library, responsible for listening to messages from client IFrames
  * @param serverConst - Server constant
- * @param hashLib - HASH library
- * @returns {{const: *, addClient: addClient, removeClient: removeClient, getClientList: getClientList, send: sendTransmission}}
+ * @param hash - HASH library
+ * @returns {{const: *, connectClient: connectClient, disconnectClient: disconnectClient, getConnectedClients: getConnectedClients, send: sendMessageToClient}}
  */
-function serverLibrary(serverConst, hashLib) {
+function serverLibrary(serverConst, hash) {
 
   'use strict';
 
@@ -12,28 +13,31 @@ function serverLibrary(serverConst, hashLib) {
    * List of connected clients
    * @type {Array}
    */
-  var clientList = [];
+  var clientsCollection = [];
 
   /**
    * List of IFrames stored in a HASH
    */
-  var iframeHASH = hashLib.create();
+  var iframeHASH = hash.create();
 
   /**
    * Add a new Client
    * @param clientID
    * @returns {Number}
    */
-  function addClient(clientID) {
-    clientList.push (clientID);
-    iframeHASH.set(clientID, clientList [clientList.length - 1]);
+  function connectClient(clientID) {
+    clientsCollection.push (clientID);
+    iframeHASH.set(clientID, clientsCollection [clientsCollection.length - 1]);
   }
 
   /**
    * Remove client
    * @param clientID
    */
-  function removeClient(clientID) {
+  function disconnectClient(clientID) {
+    /**
+     * TODO need to remove clients from the clientsCollection when they disconnect
+     */
     iframeHASH.remove (clientID);
   }
 
@@ -41,17 +45,17 @@ function serverLibrary(serverConst, hashLib) {
    * Get Client list
    * @returns {Array}
    */
-  function getClientList() {
-    return clientList.sort ();
+  function getConnectedClients() {
+    return clientsCollection.sort ();
   }
 
   /**
-   * Send transmission to client
+   * Send message to client IFrame
    * @param clientID
-   * @param trans
+   * @param message
    */
-  function sendTransmission(clientID, trans) {
-    document.getElementById (clientID).contentWindow.postMessage(trans, serverConst.DOMAIN_NAME);
+  function sendMessageToClient(clientID, message) {
+    document.getElementById (clientID).contentWindow.postMessage(message, serverConst.DOMAIN_NAME);
   }
 
   /**
@@ -59,9 +63,9 @@ function serverLibrary(serverConst, hashLib) {
    */
   return {
     const: serverConst,
-    addClient: addClient,
-    removeClient: removeClient,
-    getClientList: getClientList,
-    send: sendTransmission
+    connectClient: connectClient,
+    disconnectClient: disconnectClient,
+    getConnectedClients: getConnectedClients,
+    send: sendMessageToClient
   };
 }

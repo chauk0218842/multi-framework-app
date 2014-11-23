@@ -22,41 +22,41 @@ function transmissionLibrary(createHASHKey) {
   /**
    * Create a Message
    * @param transID
-   * @param uri
+   * @param uri - TODO change URI to request or something else
    * @param clientID
-   * @param pkg
+   * @param attachment
    * @returns {{id: *, client: *, host: *, urn: *, parameters: *, receipt: *}}
    */
-  function createTransmission(transID, uri, clientID, pkg) {
+  function createTransmission(transID, uri, clientID, attachment) {
     return {
       id: transID,
       uri: uri,
       client: clientID,
-      package: pkg
+      attachment: attachment
     };
   }
 
   /**
    * Create Response - this is for the server to respond back to incoming transmissions from clients,
    * OR when receipts are enabled during a client-to-host-to-client communication - the receiving client will have to "respond" back to
-   * their incoming transmission
-   * @param transmission
-   * @param pkg
+   * their incoming trans
+   * @param trans
+   * @param attachment
    * @returns {{id: *, client: *, host: *, urn: *, parameters: *, receipt: *}}
    */
-  function createResponseTransmission(transmission, pkg) {
-    return createTransmission(transmission.id, transmission.uri, transmission.client, pkg);
+  function createResponseTransmission(trans, attachment) {
+    return createTransmission(trans.id, trans.uri, trans.client, attachment);
   }
 
   /**
    * Generate a Request
    * @param uri
    * @param clientID
-   * @param pkg
+   * @param attachment
    * @returns {{id: (string|*), host: (XML|string|void|*), urn: (XML|string|void|*), parameters: *, receipt: *}}
    */
-  function createNewTransmission(uri, clientID, pkg) {
-    return createTransmission(String (createHASHKey(keyPrefix + (keyCounter++))), uri, clientID, pkg);
+  function createNewTransmission(uri, clientID, attachment) {
+    return createTransmission(String (createHASHKey(keyPrefix + (keyCounter++))), uri, clientID, attachment);
   }
 
   /**

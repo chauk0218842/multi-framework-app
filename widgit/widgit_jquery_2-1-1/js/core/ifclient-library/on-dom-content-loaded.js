@@ -8,7 +8,7 @@ function onDOMContentLoaded(_$) {
 
   var username = "";
   var contacts = "";
-  var filesPackage = null;
+  var filesAttachment = null;
 
   /**
    * Deferred Library
@@ -28,21 +28,21 @@ function onDOMContentLoaded(_$) {
    * @param VM
    * @param clients
    */
-  vmDataHandler [ifhc.const.package.CLIENT_LIST_TYPE] = updateContacts;
+  vmDataHandler [ifhc.const.attachment.CLIENT_LIST_TYPE] = updateContacts;
 
   /**
    * VM Handler for Text Message
    * @param VM
    * @param response
    */
-  vmDataHandler [ifhc.const.package.TEXT_MESSAGE_TYPE] = updateResponse;
+  vmDataHandler [ifhc.const.attachment.TEXT_MESSAGE_TYPE] = updateResponse;
 
   /**
    * VM Handler for File Type
    * @param VM
    * @param response
    */
-  vmDataHandler [ifhc.const.package.FILES_TYPE] = updateResponse;
+  vmDataHandler [ifhc.const.attachment.FILES_TYPE] = updateResponse;
 
   /**
    * Window Message Listener
@@ -58,8 +58,8 @@ function onDOMContentLoaded(_$) {
     /**
      * pass to the appropriate scope handler
      */
-      .then(function (receivedPackage) {
-        return vmDataHandler [receivedPackage.type](receivedPackage);
+      .then(function (receivedAttachment) {
+        return vmDataHandler [receivedAttachment.type](receivedAttachment);
       })
 
     /**
@@ -74,12 +74,12 @@ function onDOMContentLoaded(_$) {
    * Update the contact list received from the host
    * Unlike Angular, the updating of a "select" is easier than Angular in which we don't need to do a lot updating
    * So no need for a promise
-   * @param receivedPackage
+   * @param receivedAttachment
    */
-  function updateContacts(receivedPackage) {
+  function updateContacts(receivedAttachment) {
 
     var $contacts = _$('#contacts');
-    var clients = receivedPackage.list;
+    var clients = receivedAttachment.list;
     contacts = clients;
 
     $contacts.empty();
@@ -97,8 +97,8 @@ function onDOMContentLoaded(_$) {
    * Update the response from the host
    * @param pkg
    */
-  function updateResponse(receivedPackage) {
-    _$("#response").prepend(receivedPackage.body);
+  function updateResponse(receivedAttachment) {
+    _$("#response").prepend(receivedAttachment.body);
   }
 
   /**
@@ -111,8 +111,8 @@ function onDOMContentLoaded(_$) {
     var recipients = recipient === 'ALL' ? contacts.slice(1) : [recipient];
     var message = _$('#message').val();
 
-    if (filesPackage) {
-      ifhcClient.sendFiles(recipients, filesPackage, false);
+    if (filesAttachment) {
+      ifhcClient.sendFiles(recipients, filesAttachment, false);
     }
     else {
       ifhcClient.sendMessage(recipients, message, false);
@@ -126,7 +126,7 @@ function onDOMContentLoaded(_$) {
    */
   function resetForm() {
 
-    filesPackage = null;
+    filesAttachment = null;
     _$("#message").val('< Type a message / drag and drop a file into here >');
 
   }
@@ -144,7 +144,7 @@ function onDOMContentLoaded(_$) {
 
     _$(this).val(ifhc.util.createFileList(files));
 
-    filesPackage = files;
+    filesAttachment = files;
 
   }
 

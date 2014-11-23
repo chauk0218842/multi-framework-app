@@ -1,5 +1,6 @@
 /**
  * HASH Library
+ * Basic HASH library object - useful for tracking objects
  * @param encodeToBase64 - Encode to base64 function
  * @returns {{create: createHASHBucket, createKey: createHASHKey}}
  */
@@ -63,10 +64,11 @@ function hashLibrary (encodeToBase64) {
 
   /**
    * Generate a HASH key
-   * @returns {string}
+   * @param value
+   * @returns {*}
    */
-  function createHASHKey (__sValue) {
-    return encodeToBase64(__sValue);
+  function createHASHKey (value) {
+    return encodeToBase64(value);
   }
 
   /**

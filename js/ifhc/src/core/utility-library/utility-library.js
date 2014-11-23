@@ -1,5 +1,6 @@
 /**
  * Utility Library
+ * Helper library
  * @returns {{formatBytesToUnits: formatBytesToUnits, createFileList: createFileList}}
  */
 function utilityLibrary() {

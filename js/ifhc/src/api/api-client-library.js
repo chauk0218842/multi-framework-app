@@ -1,14 +1,15 @@
 /**
  * API Client Library
- * @param hash - HASH library
- * @param client - Client library
- * @param transmission - Transmission library
- * @param routeConst - Route constant
- * @param packg - Package library
- * @param deferred - Deferred library
- * @returns {{listen: listenToHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendFiles: sendFilesToClient, sendMessage: sendMessage}}
+ * Used to allow IFrame Clients to connect to the Host
+ * @param hash
+ * @param client
+ * @param transmission
+ * @param routeConst
+ * @param attachment
+ * @param deferred
+ * @returns {{listen: receiveTransmissionFromHost, connect: connectToHost, disconnect: disconnectFromHost, getUsername: getUsername, getClients: getClientListFromHost, getRequestLog: getRequestLog, getResponseLog: getResponseLog, sendMessage: sendMessageToClients, sendFiles: sendFilesToClients}}
  */
-function apiClientLibrary (hash, client, transmission, routeConst, packg, deferred) {
+function apiClientLibrary(hash, client, transmission, routeConst, attachment, deferred) {
 
   'use strict';
 
@@ -47,26 +48,37 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
   var responseList = [];
 
   /**
-   * Listen to Host
+   * Cookie cutter for text message sent from the client
+   * @param parameters
+   * @returns {*}
+   */
+  function clientAttachmentResponse(parameters) {
+    parameters.sender = clientID;
+    return attachment.create(parameters);
+  }
+
+  /**
+   * Receive transmission from Host
    * Returns a deferred object
    * @param event
    */
-  function listenToHost(event) {
+  function receiveTransmissionFromHost(event) {
 
     /**
+     * Received transmission
      * @type {*}
      */
-    var trans = client.listen(event);
+    var receivedTransmission = client.listen(event);
 
     /**
      * Find the Defer object that should be resolved
      */
-    var defer = deferHASH.get(trans.id);
+    var defer = deferHASH.get(receivedTransmission.id);
 
     /**
      * Keep track of all transmissions received
      */
-    responseList.push(trans);
+    responseList.push(receivedTransmission);
 
     /**
      * Handle specific requests that require receipts when transmission is made
@@ -75,32 +87,47 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
      * TODO implement receipts for client-to-client messaging
      */
     if (defer) {
-      defer.resolve(trans);
+      defer.resolve(receivedTransmission);
     }
 
     console.log(('%CLIENT% > Received a response from host: %RESPONSE%').replace(/%CLIENT%/g, clientID).replace(/%RESPONSE%/g, event.data.toString()));
 
-    return deferred.when (packg.process (trans.package));
+    return deferred.when(attachment.process(receivedTransmission.attachment));
 
   }
 
   /**
    * Send a message to Host
    * Returns a deferred object
-   * @param trans
+   * @param receivedTransmission
    * @returns {*}
    */
-  function sendTransmissionToHost(trans) {
+  function sendTransmissionToHost(receivedTransmission) {
 
     /**
      * Create a Defer object that should be resolved later on when the listener receives a response
      */
-    var defer = deferHASH.set(trans.id, deferred.create());
-    requestList.push(trans);
-    client.send(trans);
-    console.log(('%CLIENT% > Sent a request to host: "%URI%"').replace(/%CLIENT%/g, clientID).replace(/%URI%/g, trans.uri));
+    var defer = deferHASH.set(receivedTransmission.id, deferred.create());
+    requestList.push(receivedTransmission);
+    client.send(receivedTransmission);
+    console.log(('%CLIENT% > Sent a request to host: "%URI%"').replace(/%CLIENT%/g, clientID).replace(/%URI%/g, receivedTransmission.uri));
 
     return defer;
+  }
+
+  /**
+   * Create a transmission and send it to the host
+   * TODO make this into a real curried function
+   * @param route
+   * @param attachment
+   * @returns {*}
+   */
+  function createTransmissionAndSendToHost(route, attachment) {
+    return sendTransmissionToHost(transmission.create(route, clientID, attachment))
+      .then(function (responseTransmission) {
+        return responseTransmission.attachment;
+      }
+    );
   }
 
   /**
@@ -109,10 +136,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
    * @returns {*}
    */
   function connectToHost() {
-    return sendTransmissionToHost(transmission.create(routeConst.CONNECT_CLIENT, clientID, null))
-      .then(function (transmission) {
-        return transmission.package;
-      });
+    return createTransmissionAndSendToHost(routeConst.CONNECT_CLIENT, null);
   }
 
   /**
@@ -121,84 +145,7 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
    * @returns {*}
    */
   function disconnectFromHost() {
-    return sendTransmissionToHost(transmission.create(routeConst.DISCONNECT_CLIENT, clientID, null))
-      .then(function (transmission) {
-        return transmission.package;
-      });
-  }
-
-  /**
-   * Get Clients from Host
-   * Returns a deferred object
-   * @returns {*}
-   */
-  function getClientListFromHost() {
-    return sendTransmissionToHost(transmission.create(routeConst.REQUEST_CLIENT_LIST, clientID, null))
-      .then(function (transmission) {
-        return transmission.package;
-      });
-  }
-
-  /**
-   * Send text message to client
-   * TODO need to implement use receipts, make note that you are dealing with an array of defers...
-   * @param recipients
-   * @param body
-   * @param useReceipt
-   * @returns {*}
-   */
-  function sendMessage(recipients, body, useReceipt) {
-
-    /**
-     * Collection of defers that will be returned
-     * @type {Array}
-     */
-    var defers = [];
-    for (var n = 0, nLen = recipients.length; n < nLen; n++) {
-
-      var pkg = packg.create({
-        type: packg.const.TEXT_MESSAGE_TYPE,
-        sender: clientID,
-        recipient: recipients [n],
-        body: body,
-        receipt: useReceipt
-      });
-
-      defers.push(sendTransmissionToHost(transmission.create(routeConst.SEND_CLIENT_PACKAGE, clientID, pkg)));
-
-    }
-
-    return defers;
-  }
-
-  /**
-   * Send files to a client
-   * Returns a deferred object
-   * @param recipients
-   * @param files
-   * @param useReceipt
-   * @returns {*}
-   */
-  function sendFilesToClient(recipients, files, useReceipt) {
-
-    /**
-     * @type {Array}
-     */
-    var defers = [];
-    for (var n = 0, nLen = recipients.length; n < nLen; n++) {
-
-      var pkg = packg.create({
-        type: packg.const.FILES_TYPE,
-        sender: clientID,
-        recipient: recipients [n],
-        files: files,
-        receipt: useReceipt
-      });
-
-      defers.push(sendTransmissionToHost(transmission.create(routeConst.SEND_CLIENT_PACKAGE, clientID, pkg)));
-    }
-
-    return defers;
+    return createTransmissionAndSendToHost(routeConst.DISCONNECT_CLIENT, null);
   }
 
   /**
@@ -207,6 +154,15 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
    */
   function getUsername() {
     return clientID;
+  }
+
+  /**
+   * Get Clients from Host
+   * Returns a deferred object
+   * @returns {*}
+   */
+  function getClientListFromHost() {
+    return createTransmissionAndSendToHost(routeConst.REQUEST_CLIENT_LIST, null);
   }
 
   /**
@@ -226,17 +182,96 @@ function apiClientLibrary (hash, client, transmission, routeConst, packg, deferr
   }
 
   /**
+   * Send attachment to clients
+   * @param clients
+   * @param sendAttachment
+   * @returns {Array}
+   */
+  function sendAttachmentToClients(clients, sendAttachment) {
+
+    /**
+     * Collection of defers that will be returned
+     * @type {Array}
+     */
+    var deferList = [];
+    for (var n = 0, nLen = clients.length; n < nLen; n++) {
+
+      /**
+       * Update the attachment's recipient
+       * TODO - need to create a attachment.updateReceipient function...
+       */
+      sendAttachment.recipient = clients [n];
+
+      /**
+       * TODO when implementing use receipt, we need to figure out how to capture the responses and post process them
+       */
+      deferList.push(createTransmissionAndSendToHost(routeConst.SEND_CLIENT_ATTACHMENT, sendAttachment));
+
+    }
+
+    return deferList;
+  }
+
+  /**
+   * Send text message to client
+   * TODO need to implement use receipts, make note that you are dealing with an array of defers...
+   * TODO make use currying and curry with sendAttachmentToClients
+   * @param clients
+   * @param body
+   * @param useReceipt
+   * @returns {*}
+   */
+  function sendMessageToClients(clients, body, useReceipt) {
+
+    /**
+     * TODO recipient is null... not sure if thats a good idea
+     */
+    var sendAttachment = clientAttachmentResponse({
+      type: attachment.const.TEXT_MESSAGE_TYPE,
+      recipient: null,
+      body: body,
+      receipt: useReceipt
+    });
+
+    return sendAttachmentToClients(clients, sendAttachment);
+  }
+
+  /**
+   * Send files to a client
+   * TODO need to implement use receipts, make note that you are dealing with an array of defers...
+   * TODO make use currying and curry with sendAttachmentToClients
+   * @param recipients
+   * @param files
+   * @param useReceipt
+   * @returns {*}
+   */
+  function sendFilesToClients(recipients, files, useReceipt) {
+
+    /**
+     * TODO recipient is null... not sure if thats a good idea
+     */
+    var sendAttachment = clientAttachmentResponse({
+      type: attachment.const.FILES_TYPE,
+      recipient: null,
+      files: files,
+      receipt: useReceipt
+    });
+
+    return sendAttachmentToClients(recipients, sendAttachment);
+  }
+
+  /**
    * Public API
    */
   return {
-    listen: listenToHost,
+    listen: receiveTransmissionFromHost,
     connect: connectToHost,
     disconnect: disconnectFromHost,
     getUsername: getUsername,
     getClients: getClientListFromHost,
     getRequestLog: getRequestLog,
     getResponseLog: getResponseLog,
-    sendFiles: sendFilesToClient,
-    sendMessage: sendMessage
+    sendMessage: sendMessageToClients,
+    sendFiles: sendFilesToClients
   };
 }
