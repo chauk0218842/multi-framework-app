@@ -171,19 +171,7 @@ angular.module('ifclientLibrary')
         VM.resetForm(VM);
       },
 
-      /**
-       * TODO change this to use templateURL
-       */
-      template: '<h3>{{username}} (Powered by Angular 1.3)</h3>' +
-      '<div ng-bind-html = "response" class = "response"></div>' +
-      '<p>' +
-      'Contacts <select ng-model = "recipient">' +
-      '<option ng-repeat = "contact in contacts" value = "{{contact}}">{{contact}}</option></p>' +
-      '</select>' +
-      '<p>' +
-      '<textarea if-file-drop ng-model = "message"></textarea>' +
-      '<br/><button ng-click = "sendMessage ()">Send</button> <button ng-click = "resetForm ()">Reset</button>' +
-      '</p>'
+      templateUrl: 'js/core/ifclient-library/if-chat.html'
     };
 
   });
