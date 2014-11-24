@@ -87,9 +87,9 @@ There are plenty :-(
 	 |    |
 	 |    |-- [utility-library]
 	 |         * Contains all components related to this library
-	 |        |
-	 |        |-- (utility-library.js)
-	 |             * Miscellaneous helper functions
+	 |         |
+	 |         |-- (utility-library.js)
+	 |              * Miscellaneous helper functions
 	 |
 	 |-- [api]
 	 |    * API Libraries
