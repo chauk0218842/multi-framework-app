@@ -39,7 +39,7 @@ There are plenty :-(
 	 * Source Folder
 	 |
 	 |-- [core]
-	 |    * The basic objects/libraries that the 'api' is dependent on
+	 |    * The basic objects/libraries that the "api" is dependent on
 	 |    |
 	 |    |-- [attachment-library]
 	 |    |    * Contains all components related to this library
