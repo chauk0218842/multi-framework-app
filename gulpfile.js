@@ -3,6 +3,13 @@ var gutil = require('gulp-util');
 var uglify = require('gulp-uglify');
 var concat = require('gulp-concat');
 var beautify = require('gulp-beautify');
+var connect = require('gulp-connect');
+var colors = require('colors');
+var watch = require('gulp-watch');
+var sass = require('gulp-sass');
+var minifyCss = require('gulp-minify-css');
+var rename = require('gulp-rename');
+
 
 /**
  * JS Task
@@ -27,6 +34,56 @@ gulp.task('js', function () {
 
 });
 
-gulp.task('default', function () {
-  gulp.run('js');
+
+/**
+ * SASS Task (compile and minify SASS)
+ */
+gulp.task('sass', function(done) {
+  gulp.src('./styles/app.scss')
+    .pipe(sass())
+    .pipe(gulp.dest('./styles/'))
+    .pipe(minifyCss({
+      keepSpecialComments: 0
+    }))
+    .pipe(rename({ extname: '.min.css' }))
+    .pipe(gulp.dest('./styles/'))
+    .pipe(connect.reload())
+    .on('end', done);
+});
+
+
+/**
+ * Dev Task
+ * Starts a server and sets up live re-load
+ */
+gulp.task('dev', function() {
+  // Start a server
+  connect.server({
+    root: '',
+    port: 3000,
+    livereload: true
+  });
+  console.log('[CONNECT] Listening on port 3000'.yellow.inverse);
+
+  // Watch HTML files for changes
+  console.log('[CONNECT] Watching files for live-reload'.blue);
+  watch({ glob: [
+    './index.html',
+    './js/**/*.*',
+    './widgit/**/*.*'
+  ]})
+    .pipe(connect.reload());
+
+  // Watch HTML files for changes
+  console.log('[CONNECT] Watching SASS files'.blue);
+  gulp.watch('./styles/*.scss', ['sass']);
+});
+
+gulp.task('default', [], function() {
+  console.log('**********************************************'.yellow);
+  console.log('  gulp dev'.red,'for a connect server,'.yellow);
+  console.log('  live reload and auto compile sass'.yellow);
+  console.log('  gulp js'.red,'generate a library file,'.yellow);
+  console.log('**********************************************'.yellow);
+  return true;
 });

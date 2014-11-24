@@ -1,0 +1,22 @@
+<h2 class="card-title--angular-1-3">
+    <div id="response" class="response connected pull-right"></div>
+    {{username}}
+    <small>powered by AngularJS 1.3</small>
+</h2>
+
+<div class="message">
+    <img src="/img/sad-whale.jpg">
+</div>
+
+<div ng-bind-html="response" class="response"></div>
+
+<label>Contacts</label>
+<select ng-model="recipient">
+    <option ng-repeat = "contact in contacts" value = "{{contact}}">{{contact}}</option>
+</select>
+
+<textarea ng-model="message"></textarea>
+<br/>
+<p>
+    <button ng-click="sendMessage ()">Send</button> <button ng-click="resetForm()">Reset</button>
+</p>
