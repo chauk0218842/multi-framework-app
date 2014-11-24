@@ -113,7 +113,7 @@ There are plenty :-(
 	 |    |    * URI/Route definitions
 	 |    |
 	 |    |-- (api-router-library.js)
-	 |         * This is a processing library that handles all "Tranmissions" sent to the "IFHC Host"
+	 |         * This is a processing library that handles all "Transmissions" sent to the "IFHC Host"
 	 |         
 	 |-- (api-template-footer.js)
 	 |    * Generated "IFHC" library footer template
