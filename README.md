@@ -91,32 +91,25 @@ There are plenty :-(
 	 |    * API Libraries
 	 |    |
 	 |    |-- (api-attachment-library.js)
-	 |    |    * A "Transmission" encapsulates a data package, "Attachment;" 
-	 |    |    this is a processing library for this data
+	 |    |    * A "Transmission" encapsulates a data package, "Attachment;" this is a processing library for this data
 	 |    |    * Extension of ./core/attachment-library
 	 |    |
 	 |    |-- (api-client-library.js)
-	 |    |    * The "IFHC Client" library (requires a deferred library 
-	 |    |      Angular/JQuery wrapper)
+	 |    |    * The "IFHC Client" library (requires a deferred library Angular/JQuery wrapper)
 	 |    |    * Extension of ./core/client-library
-	 |    |    * "IFHC Clients" communicates with the "IFHC Host" and other 
-	 |    |      "IFHC Clients" through "Transmissions."
-	 |    |    * "IFHC Client-to-Client" communication is couriered via "IFHC 
-	 |    |      Host"
+	 |    |    * "IFHC Clients" communicates with the "IFHC Host" and other "IFHC Clients" through "Transmissions."
+	 |    |    * "IFHC Client-to-Client" communication is couriered via "IFHC Host"
 	 |    |
 	 |    |-- (api-host-library.js)
-	 |    |    * The "IFHC Host" library (allows for an optional router 
-	 |    |      extension)
+	 |    |    * The "IFHC Host" library (allows for an optional router extension)
 	 |    |    * Extension of ./core/server-library
-	 |    |     * The host is single point of contact for all "Transmissions" 
-	 |    |      sent by client(s)
+	 |    |    * The host is single point of contact for all "Transmissions" sent by client(s)
 	 |    |    
 	 |    |-- (api-route-constant.js)
 	 |    |    * URI/Route definitions
 	 |    |
 	 |    |-- (api-router-library.js)
-	 |        * This is a processing library that handles all "Tranmissions" 
-	 |          sent to the "IFHC Host"
+	 |        * This is a processing library that handles all "Tranmissions" sent to the "IFHC Host"
 	 |         
 	 |-- (api-template-footer.js)
 	 |    * Generated "IFHC" library footer template
