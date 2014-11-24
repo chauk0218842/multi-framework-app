@@ -49,9 +49,9 @@ There are plenty :-(
 	 |    |    |    
 	 |    |    |-- (attachment-library.js)
 	 |    |        * Through a transmission protocol, a client can communicate with the host
-	 |    |       * Direct communication between clients is prohibited; to establish this form of communication, a client must communicate with the host first, and the host will forward the message to the recipient client
-	 |    |       * To keep the transmission protocol organized, an optional attachment field is used to store any "messages" that is to be consumed by the recipient
-	 |    |       * Attachment types include - text based messages, list/collections (array type object), and files
+	 |    |        * Direct communication between clients is prohibited; to establish this form of communication, a client must communicate with the host first, and the host will forward the message to the recipient client
+	 |    |        * To keep the transmission protocol organized, an optional attachment field is used to store any "messages" that is to be consumed by the recipient
+	 |    |        * Attachment types include - text based messages, list/collections (array type object), and files
 	 |    |
 	 |    |-- [client-library]
 	 |    |    * Contains all components related to this library
