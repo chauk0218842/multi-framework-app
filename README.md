@@ -36,7 +36,7 @@ There are plenty :-(
 	 |        * Compiled and minified IFHC library file
 	 |    
 	 |-- [src]
-	 * Source Folder
+	 |    * Source Folder
 	 |
 	 |-- [core]
 	 |    * The basic objects/libraries that the "api" is dependent on
@@ -48,23 +48,23 @@ There are plenty :-(
 	 |    |    |    * Data package type definitions
 	 |    |    |    
 	 |    |    |-- (attachment-library.js)
-	 |    |        * Through a transmission protocol, a client can communicate with the host
-	 |    |        * Direct communication between clients is prohibited; to establish this form of communication, a client must communicate with the host first, and the host will forward the message to the recipient client
-	 |    |        * To keep the transmission protocol organized, an optional attachment field is used to store any "messages" that is to be consumed by the recipient
-	 |    |        * Attachment types include - text based messages, list/collections (array type object), and files
+	 |    |         * Through a transmission protocol, a client can communicate with the host
+	 |    |         * Direct communication between clients is prohibited; to establish this form of communication, a client must communicate with the host first, and the host will forward the message to the recipient client
+	 |    |         * To keep the transmission protocol organized, an optional attachment field is used to store any "messages" that is to be consumed by the recipient
+	 |    |         * Attachment types include - text based messages, list/collections (array type object), and files
 	 |    |
 	 |    |-- [client-library]
 	 |    |    * Contains all components related to this library
 	 |    |    |
 	 |    |    |-- (client-library.js)
-	 |    |        * Base "Client" functionality library
-	 |    |        * Functionality for IFrame client to "postMessage" to parent / browser window
+	 |    |         * Base "Client" functionality library
+	 |    |         * Functionality for IFrame client to "postMessage" to parent / browser window
 	 |    |
 	 |    |-- [hash-library]
 	 |    |    * Contains all components related to this library
 	 |    |    |
 	 |    |    |-- (hash-library.js)
-	 |    |        * HASH bucket library
+	 |    |         * HASH bucket library
 	 |    |
 	 |    |-- [server-library]
 	 |    |    * Contains all components related to this library
@@ -73,23 +73,23 @@ There are plenty :-(
 	 |    |    |    * Server constant definitions
 	 |    |    |
 	 |    |    |-- (server-library.js)
-	 |    |        * Base "Server" functionality library: connecting/disconnecting a client etc.
-	 |    |        * Keeps track of all connected clients
-	 |    |        * Functionality to "postMessage" to any IFrame client
+	 |    |         * Base "Server" functionality library: connecting/disconnecting a client etc.
+	 |    |         * Keeps track of all connected clients
+	 |    |         * Functionality to "postMessage" to any IFrame client
 	 |    |
 	 |    |-- [transmission-library]
 	 |    |    * Contains all components related to this library
 	 |    |    |
 	 |    |    |-- (transmission-library.js)
-	 |    |        * Base "Transmission" object library
-	 |    |        * Creates the "Transmission" object
-	 |    |        * A communication protocol between host and client
+	 |    |         * Base "Transmission" object library
+	 |    |         * Creates the "Transmission" object
+	 |    |         * A communication protocol between host and client
 	 |    |
 	 |    |-- [utility-library]
-	 |        * Contains all components related to this library
+	 |         * Contains all components related to this library
 	 |        |
 	 |        |-- (utility-library.js)
-	 |        * Miscellaneous helper functions
+	 |             * Miscellaneous helper functions
 	 |
 	 |-- [api]
 	 |    * API Libraries
@@ -113,10 +113,10 @@ There are plenty :-(
 	 |    |    * URI/Route definitions
 	 |    |
 	 |    |-- (api-router-library.js)
-	 |        * This is a processing library that handles all "Tranmissions" sent to the "IFHC Host"
+	 |         * This is a processing library that handles all "Tranmissions" sent to the "IFHC Host"
 	 |         
 	 |-- (api-template-footer.js)
 	 |    * Generated "IFHC" library footer template
 	 |
 	 |-- (api-template-header.js)
-	     * Generated "IFHC" library header template
+	      * Generated "IFHC" library header template
