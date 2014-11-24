@@ -30,7 +30,8 @@ gulp.task('js', function () {
   gulp.src('./js/ifhc/dist/ifhc.js')
     .pipe(uglify())
     .pipe(concat('ifhc.min.js'))
-    .pipe(gulp.dest('./js/ifhc/dist'));
+    .pipe(gulp.dest('./js/ifhc/dist'))
+    .pipe(connect.reload());
 
 });
 
@@ -38,7 +39,7 @@ gulp.task('js', function () {
 /**
  * SASS Task (compile and minify SASS)
  */
-gulp.task('sass', function(done) {
+gulp.task('sass', function() {
   gulp.src('./styles/app.scss')
     .pipe(sass())
     .pipe(gulp.dest('./styles/'))
@@ -47,8 +48,7 @@ gulp.task('sass', function(done) {
     }))
     .pipe(rename({ extname: '.min.css' }))
     .pipe(gulp.dest('./styles/'))
-    .pipe(connect.reload())
-    .on('end', done);
+    .pipe(connect.reload());
 });
 
 
@@ -77,6 +77,10 @@ gulp.task('dev', function() {
   // Watch HTML files for changes
   console.log('[CONNECT] Watching SASS files'.blue);
   gulp.watch('./styles/*.scss', ['sass']);
+
+  // Watch lib files to build distb
+  console.log('[CONNECT] Watching ifhc files'.blue);
+  gulp.watch('./js/ifhc/src/**/**.*', ['js']);
 });
 
 gulp.task('default', [], function() {

@@ -2,7 +2,7 @@
  * @description
  * ifhc Library
  * The library that allows different Single Page Applications (SPAs) to be able to reside in harmony on a single browser window via
- * I-F-R-A-M-E-S!!!.
+ * I--F--R--A--M--E--S!!!.
  */
 var ifhc = (function (window) {
 
@@ -57,45 +57,6 @@ var ifhc = (function (window) {
    * @type {Function}
    */
   var base64Encoder = window.btoa;
-  /**
-   * Client Library
-   * This is the base client library, responsible for sending "messages" to the host/server window
-   * @param serverConst - Server constant
-   * @returns {{send: sendMessageToHost, listen: listenToServer}}
-   * @constructor
-   */
-
-  function clientLibrary(serverConst) {
-
-    'use strict';
-
-    /**
-     * Send a request to server
-     * @param message
-     */
-
-    function sendMessageToHost(message) {
-      parent.postMessage(message, serverConst.DOMAIN_NAME);
-    }
-
-    /**
-     * Listen to request responded back from Server
-     * @param event
-     * @returns {*}
-     */
-
-    function listenToServer(event) {
-      return event.data;
-    }
-
-    /**
-     * Public API
-     */
-    return {
-      send: sendMessageToHost,
-      listen: listenToServer
-    };
-  }
   /**
    * Package Constants
    * @type {{}}
@@ -294,6 +255,45 @@ var ifhc = (function (window) {
     return {
       create: createHASHBucket,
       createKey: createHASHKey
+    };
+  }
+  /**
+   * Client Library
+   * This is the base client library, responsible for sending "messages" to the host/server window
+   * @param serverConst - Server constant
+   * @returns {{send: sendMessageToHost, listen: listenToServer}}
+   * @constructor
+   */
+
+  function clientLibrary(serverConst) {
+
+    'use strict';
+
+    /**
+     * Send a request to server
+     * @param message
+     */
+
+    function sendMessageToHost(message) {
+      parent.postMessage(message, serverConst.DOMAIN_NAME);
+    }
+
+    /**
+     * Listen to request responded back from Server
+     * @param event
+     * @returns {*}
+     */
+
+    function listenToServer(event) {
+      return event.data;
+    }
+
+    /**
+     * Public API
+     */
+    return {
+      send: sendMessageToHost,
+      listen: listenToServer
     };
   }
   /**
@@ -571,7 +571,7 @@ var ifhc = (function (window) {
      */
 
     function processTextMessageAttachment(receivedAttachment) {
-      receivedAttachment.body = ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, receivedAttachment.sender).replace(/%MESSAGE%/g, receivedAttachment.body);
+      receivedAttachment.body = '<p>' + ('%CLIENT% > %MESSAGE%').replace(/%CLIENT%/g, receivedAttachment.sender).replace(/%MESSAGE%/g, receivedAttachment.body) + '</p>';
       return deferred.when(receivedAttachment);
     }
 
@@ -582,7 +582,10 @@ var ifhc = (function (window) {
      * @returns {string}
      */
     responseFileHTMLFormatter["image"] = function (index, fileInfo) {
-      return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/><a href = "' + fileInfo.url + '" target = "new"><img class = "thumbnail" src = ' + fileInfo.url + '></a><br/>';
+      // return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/><a href = "' + fileInfo.url + '" target = "new"><img class = "thumbnail" src = ' + fileInfo.url + '></a><br/>';
+      // Returning just the image
+      // CSS handles the sizing and positioning
+      return '<img src="' + fileInfo.url + '"/>';
     };
 
     /**
@@ -592,7 +595,7 @@ var ifhc = (function (window) {
      * @returns {string}
      */
     responseFileHTMLFormatter["text"] = function (index, fileInfo) {
-      return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/>';
+      return '<p><a href="' + fileInfo.url + '" target="_blank">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<p/>';
     };
 
     /**
@@ -602,7 +605,7 @@ var ifhc = (function (window) {
      * @returns {string}
      */
     responseFileHTMLFormatter["json"] = function (index, fileInfo) {
-      return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/>';
+      return '<p><a href="' + fileInfo.url + '" target="_blank">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<p/>';
     };
 
     /**
@@ -690,7 +693,7 @@ var ifhc = (function (window) {
           type: attachment.const.TEXT_MESSAGE_TYPE,
           sender: receivedAttachment.sender,
           recipient: receivedAttachment.recipient,
-          body: ('%CLIENT% > Sent files...<br />').replace(/%CLIENT%/g, receivedAttachment.sender) + responseHTML + "<hr/>",
+          body: responseHTML,
           useReceipt: receivedAttachment.receipt
         });
       });

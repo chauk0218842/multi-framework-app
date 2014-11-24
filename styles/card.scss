@@ -1,0 +1,103 @@
+// ----------------------
+// Card
+// ----------------------
+.card-frame {
+  display: block;
+  position: relative;
+  width: 75%;
+  margin: 5px auto;
+  border-radius: 2px;
+  border: none;
+  outline: none;
+  z-index: 1;
+  @include box-shadow-helper(1);
+  transition: all ease-in-out 300ms;
+
+  &:hover {
+    @include box-shadow-helper(3);
+    width: 80%;
+  }
+}
+.card-container {
+  position: relative;
+  clear: both;
+  overflow: overlay;
+  width: 100%;
+  background-color: #FAFAFA;
+}
+
+// Card Types
+.card-title--jquery {
+  background-color: $blue;
+  padding: $base;
+  color: #fff;
+
+  small { color: $dark-blue; }
+}
+.card-title--angular-1-3 {
+  background-color: $deep-purple;
+  padding: $base;
+  color: #fff;
+
+  small { color: $deep-light-purple; }
+}
+.card-title--angular-1-2 {
+  background-color: $purple;
+  padding: $base;
+  color: #fff;
+
+  small { color: $light-purple; }
+}
+
+// Message
+.message {
+  height: 300px;
+  overflow: hidden;
+  background-color: #F5F5F5;
+  border-bottom: 1px solid #E0E0E0;
+
+  img {
+    width: 100%;
+    @extend %vertical-align;
+  }
+
+  p {
+    margin: 0;
+    padding: $base;
+    width: 100%;
+    font-weight: 400;
+    font-size: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    @extend %vertical-align;
+  }
+}
+
+// Main Body
+.card-body {
+  padding: $base $base 0 $base;
+}
+
+.response {
+  display: inline;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #FF5252;
+  border: 1px solid #D50000;
+  line-height: 20px;
+  text-align: center;
+  font-size: 10px;
+
+  &.connected {
+    background-color: $green;
+    color: #2E7D32;
+    border: 1px solid #69F0AE;
+  }
+}
+
+.card-footer {
+  padding: 0.25*$base $base;
+  border-top: 1px solid #E0E0E0;
+}

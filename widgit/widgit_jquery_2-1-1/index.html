@@ -14,21 +14,23 @@
 <body class="card-container">
 
     <h2 class="card-title--jquery">
-        <div class="response connected pull-right"></div>
+        <div id="response-counter" class="response connected pull-right">-1</div>
         <span id="clientName"></span>
         <small>powered by jQuery 2.1.1</small>
     </h2>
 
-    <div class="message">
-        <img src="/img/sad-whale.jpg">
+    <div id="response" class="message"></div>
+
+    <div class="card-body">
+        <label>Contacts</label>
+        <select id="contacts" name="contacts"></select>
+        <textarea id="message" name="message"></textarea>
     </div>
 
-    <p>Contacts <select id="contacts" name = "contacts"></select></p>
-    <p>
-        Message
-        <br/><textarea id = "message" name = "message" class = "message"></textarea>
-        <button id="send">Send</button> <button id="reset">Reset</button>
-    </p>
+    <div class="card-footer">
+        <button id="reset">Reset</button>
+        <button class="send" id="send">Send</button>
+    </div>
 
     <!-- JQuery JS libraries -->
     <script src="bower_components/jquery/dist/jquery.js"></script>

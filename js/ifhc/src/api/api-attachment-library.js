@@ -41,7 +41,7 @@ function apiAttachmentLibrary(hash, attachment, formatBytesToUnits, deferred) {
    * @returns {*}
    */
   function processTextMessageAttachment(receivedAttachment) {
-    receivedAttachment.body = ('%CLIENT% > %MESSAGE%<hr/>').replace(/%CLIENT%/g, receivedAttachment.sender).replace(/%MESSAGE%/g, receivedAttachment.body);
+    receivedAttachment.body = '<p>' + ('%CLIENT% > %MESSAGE%').replace(/%CLIENT%/g, receivedAttachment.sender).replace(/%MESSAGE%/g, receivedAttachment.body) + '</p>';
     return deferred.when(receivedAttachment);
   }
 
@@ -52,7 +52,11 @@ function apiAttachmentLibrary(hash, attachment, formatBytesToUnits, deferred) {
    * @returns {string}
    */
   responseFileHTMLFormatter ["image"] = function (index, fileInfo) {
-    return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/><a href = "' + fileInfo.url + '" target = "new"><img class = "thumbnail" src = ' + fileInfo.url + '></a><br/>';
+    // return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/><a href = "' + fileInfo.url + '" target = "new"><img class = "thumbnail" src = ' + fileInfo.url + '></a><br/>';
+
+    // Returning just the image
+    // CSS handles the sizing and positioning
+    return '<img src="' + fileInfo.url + '"/>';
   };
 
   /**
@@ -62,7 +66,7 @@ function apiAttachmentLibrary(hash, attachment, formatBytesToUnits, deferred) {
    * @returns {string}
    */
   responseFileHTMLFormatter ["text"] = function (index, fileInfo) {
-    return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/>';
+    return '<p><a href="' + fileInfo.url + '" target="_blank">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<p/>';
   };
 
   /**
@@ -72,7 +76,7 @@ function apiAttachmentLibrary(hash, attachment, formatBytesToUnits, deferred) {
    * @returns {string}
    */
   responseFileHTMLFormatter ["json"] = function (index, fileInfo) {
-    return '<br/>' + index + '. <a href = "' + fileInfo.url + '" target = "new">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<br/>';
+    return '<p><a href="' + fileInfo.url + '" target="_blank">' + fileInfo.file.name + '</a> (' + formatBytesToUnits(fileInfo.file.size) + ')<p/>';
   };
 
   /**
@@ -156,7 +160,7 @@ function apiAttachmentLibrary(hash, attachment, formatBytesToUnits, deferred) {
         type: attachment.const.TEXT_MESSAGE_TYPE,
         sender: receivedAttachment.sender,
         recipient: receivedAttachment.recipient,
-        body: ('%CLIENT% > Sent files...<br />').replace(/%CLIENT%/g, receivedAttachment.sender) + responseHTML + "<hr/>",
+        body: responseHTML,
         useReceipt: receivedAttachment.receipt
       });
     });
