@@ -58,6 +58,10 @@ angular.module('ifclientLibrary')
      * @param receivedAttachment
      */
     vmDataHandler [ifhc.const.attachment.TEXT_MESSAGE_TYPE] = function (VM, receivedAttachment) {
+      // If this is the initial connection message display
+      // then display the whale image
+      receivedAttachment.body = receivedAttachment.body === '<p>Window > Connected to Window</p>' ? '<img src="/img/sad-whale.jpg">' : receivedAttachment.body;
+
       updateResponse(VM, receivedAttachment);
     };
 
@@ -116,7 +120,8 @@ angular.module('ifclientLibrary')
      * @param receivedAttachment
      */
     function updateResponse(VM, receivedAttachment) {
-      VM.response = $sce.trustAsHtml(receivedAttachment.body + VM.response);
+      VM.response = $sce.trustAsHtml(receivedAttachment.body);
+      VM.responseCounter++;
     }
 
     /**
@@ -142,7 +147,7 @@ angular.module('ifclientLibrary')
      * @param VM
      */
     function resetForm(VM) {
-      VM.message = '< Type a message / drag and drop a file into here >';
+      VM.message = 'Type a message or drag and drop a file here';
     }
 
     return {
@@ -151,6 +156,7 @@ angular.module('ifclientLibrary')
         var VM = $scope;
         VM.username = ifhcClient.getUsername();
         VM.response = '';
+        VM.responseCounter = -1;
         VM.contacts = '';
         VM.recipient = '';
         VM.message = '';

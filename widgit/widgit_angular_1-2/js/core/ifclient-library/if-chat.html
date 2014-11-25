@@ -1,22 +1,27 @@
 <h2 class="card-title--angular-1-2">
-    <div id="response" class="response connected pull-right"></div>
+    <div id="response"
+        class="response pull-right"
+        ng-class="{ connected: responseCounter >= 0 }"
+    >{{responseCounter}}</div>
+
     {{username}}
     <small>powered by AngularJS 1.2</small>
 </h2>
 
-<div class="message">
-    <img src="/img/sad-whale.jpg">
+<div class="message" ng-bind-html="response"></div>
+
+<div class="card-body">
+
+    <label>Contacts</label>
+
+    <select ng-model="recipient">
+        <option ng-repeat = "contact in contacts" value = "{{contact}}">{{contact}}</option>
+    </select>
+
+    <textarea if-file-drop ng-model="message"></textarea>
 </div>
 
-<div ng-bind-html = "response" class = "response"></div>
-
-<label>Contacts</label>
-<select ng-model = "recipient">
-    <option ng-repeat = "contact in contacts" value = "{{contact}}">{{contact}}</option>
-</select>
-
-<textarea ng-model = "message"></textarea>
-<br/>
-<p>
-    <button ng-click = "sendMessage ()">Send</button> <button ng-click = "resetForm ()">Reset</button>
-</p>
+<div class="card-footer">
+    <button ng-click="resetForm()">Reset</button>
+    <button class="send" ng-click="sendMessage ()">Send</button>
+</div>

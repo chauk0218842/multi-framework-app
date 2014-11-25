@@ -98,7 +98,14 @@ function onDOMContentLoaded(_$) {
    * @param pkg
    */
   function updateResponse(receivedAttachment) {
-    _$("#response").prepend(receivedAttachment.body);
+
+    // If this is the initial connection message display
+    // then display the whale image
+    receivedAttachment.body = receivedAttachment.body === '<p>Window > Connected to Window</p>' ? '<img src="/img/sad-whale.jpg">' : receivedAttachment.body;
+
+    _$("#response").html(receivedAttachment.body);
+    var counter = parseInt(_$("#response-counter").html()) + 1;
+    _$("#response-counter").html(counter++);
   }
 
   /**
@@ -127,7 +134,7 @@ function onDOMContentLoaded(_$) {
   function resetForm() {
 
     filesAttachment = null;
-    _$("#message").val('< Type a message / drag and drop a file into here >');
+    _$("#message").val('Type a message / drag and drop a file into here');
 
   }
 
