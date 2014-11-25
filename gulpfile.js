@@ -56,7 +56,7 @@ gulp.task('sass', function() {
  * Dev Task
  * Starts a server and sets up live re-load
  */
-gulp.task('dev', function() {
+gulp.task('dev', ['sass'], function() {
   // Start a server
   connect.server({
     root: '',
