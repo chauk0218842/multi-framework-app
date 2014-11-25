@@ -121,7 +121,6 @@ angular.module('ifclientLibrary')
      */
     function updateResponse(VM, receivedAttachment) {
       VM.response = $sce.trustAsHtml(receivedAttachment.body);
-      console.log('####', receivedAttachment.body);
       VM.responseCounter++;
     }
 

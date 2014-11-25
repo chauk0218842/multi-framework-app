@@ -5,7 +5,8 @@ label {
 }
 
 textarea,
-select {
+select,
+input[type="text"] {
   border: 1px solid #ccc;
   padding: 6px 4px;
   outline: none;
