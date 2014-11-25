@@ -12,6 +12,9 @@ $deep-purple: #673AB7;
 $deep-light-purple: #B39DDB;
 $purple: #9C27B0;
 $light-purple: #CE93D8;
+$break-pt-tablet: 768px;
+$break-pt-mobile: 530px;
+$break-pt-tiny: 320px;
 
 
 // ----------------------
@@ -60,6 +63,11 @@ a {
   width: 75%;
   min-height: 100%;
   overflow-y: scroll;
+
+  @media (max-width: $break-pt-mobile) {
+    left: 0;
+    width: 100%;
+  }
 }
 
 // Hero
@@ -92,7 +100,7 @@ header {
 .new-widget {
   position: fixed;
   top: 30%;
-  right: 5%;
+  right: 6.25%;
   border: none;
   outline: none;
   padding: 0;
@@ -109,9 +117,11 @@ header {
   text-align: center;
   line-height: 56px;
   @include box-shadow-helper(1);
-  -webkit-transform: translate3d(-28px, -28px, 0);
-      -ms-transform: translate3d(-28px, -28px, 0);
-          transform: translate3d(-28px, -28px, 0);
+  z-index: 1;
+  transition: all ease-in-out 400ms;
+  -webkit-transform: translate3d(28px, -28px, 0);
+      -ms-transform: translate3d(28px, -28px, 0);
+          transform: translate3d(28px, -28px, 0);
 
   &:hover {
     @include box-shadow-helper(2);
@@ -120,6 +130,18 @@ header {
   &:active {
     @include box-shadow-helper(3);
     background-color: darken(#FFEB3B, 10%);
+  }
+
+  @media (max-width: $break-pt-tablet) {
+    right: 10.9375%;
+  }
+  @media (max-width: $break-pt-mobile) {
+    top: inherit;
+    bottom: 0;
+    right: 42px;
+    -webkit-transform: translate3d(28px, -14px, 0);
+        -ms-transform: translate3d(28px, -14px, 0);
+            transform: translate3d(28px, -14px, 0);
   }
 }
 

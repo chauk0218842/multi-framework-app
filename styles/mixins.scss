@@ -12,6 +12,12 @@
   }
 }
 
+%truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 %vertical-align {
   position: relative;
   top: 50%;
