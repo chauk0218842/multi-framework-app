@@ -15,9 +15,10 @@ For DEMO purposes, we have currently have three different IFrame clients based o
 3. [JQuery 2.1.1](http://www.jquery.com/)
 
 ##How to Use##
-1. The host application is located in the root folder **index.html**
-2. Add client IFrames by clicking the "+"
-3. Messages can be sent to different clients via the recipient list
+1. In the terminal/command line via npm (download from https://www.npmjs.org/, if you do not have it installed on your computer): `npm install`
+2. After that is done, enter: 'gulp dev'
+3. A server should be initiated, via a browser visit `http://localhost:3000/`
+4. Text and file messages can be sent to different clients via the recipient list (.JSON / .txt / .html / .jpg/gif/most image files are supported)
 
 ##To-Do's##
 There are plenty :-(
