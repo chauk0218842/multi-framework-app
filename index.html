@@ -17,10 +17,11 @@
     <!-- Hero -->
     <header></header>
 
-    <button class="new-widget">+</button>
+    <!-- New widget button -->
+    <button class="new-widget" onclick="toggleModal()">+</button>
 
     <!-- Content Container -->
-    <div class="content-container">
+    <div class="content-container" id="iframe-container">
         <iframe id="Giraffe"
             class="card-frame"
             scrolling="no"
@@ -39,10 +40,45 @@
             src="widgit/widgit_angular_1-3/index.html?id=Shark"></iframe>
     </div>
 
+    <!-- New widget modal -->
+    <div class="modal" id="new-widget-modal">
+        <!-- Overlay -->
+        <div class="overlay" onclick="toggleModal()"></div>
+        <!-- Modal Content -->
+        <div class="modal__contents modal--transition">
+
+            <a class="modal__close" href="#" onclick="toggleModal()">&times;</a>
+
+            <label>Widget Type</label>
+            <select id="widget-source">
+                <option
+                    value="widgit/widgit_angular_1-3/index.html?">
+                        widgit_jquery_2-1-1
+                </option>
+                <option
+                    value="widgit/widgit_angular_1-3/index.html?">
+                        widgit_angular_1-2
+                </option>
+                <option
+                    value="widgit/widgit_angular_1-3/index.html?">
+                        widgit_angular_1-3
+                </option>
+            </select>
+            <br/>
+            <label>Widget ID</label>
+            <input id="widget-id" type="text">
+
+            <div class="modal__footer">
+                <button class="send" onclick="addNewWidget()">Add</button>
+            </div>
+        </div>
+    </div>
+
     <!-- App library -->
     <script src="js/ifhc/dist/ifhc.js"></script>
     <script src="js/core/ifhost-library/on-dom-content-loaded.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/new-widget.js"></script>
     <script type="text/javascript">
         setTimeout(function calcHeight() {
             var iframes = document.getElementsByTagName('iframe');
